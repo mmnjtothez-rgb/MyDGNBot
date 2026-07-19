@@ -3,12 +3,14 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
 }
+
 android {
     namespace = "com.mydgnbot"
     compileSdk = 35
 
     defaultConfig {
         applicationId = "com.mydgnbot"
+
         minSdk = 26
         targetSdk = 35
 
@@ -16,18 +18,23 @@ android {
         versionName = "0.1"
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
     }
 
     buildFeatures {
         compose = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
     }
 }
 
