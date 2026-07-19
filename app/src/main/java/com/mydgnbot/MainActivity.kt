@@ -3,9 +3,15 @@ package com.mydgnbot
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 
 class MainActivity : ComponentActivity() {
 
@@ -13,19 +19,38 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            MyDGNApp()
+        }
+    }
+}
 
-            MaterialTheme {
+@Composable
+fun MyDGNApp() {
 
-                Surface {
+    MaterialTheme {
 
-                    Text(
-                        text = "Hello MyDGN 👋\n\nVersion 0.1\n\nPipeline Working ✔"
-                    )
+        Surface(
+            modifier = Modifier.fillMaxSize()
+        ) {
 
-                }
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
 
+                Text(
+                    text = "Hello MyDGN 👋"
+                )
+
+                Text(
+                    text = "Version 0.1"
+                )
+
+                Text(
+                    text = "Pipeline Working ✔"
+                )
             }
-
         }
     }
 }
