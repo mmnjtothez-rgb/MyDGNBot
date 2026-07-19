@@ -3,7 +3,7 @@ package com.mydgnbot
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.mydgnbot.ui.screens.HomeScreen
+import com.mydgnbot.ui.navigation.AppNavigation
 
 class MainActivity : ComponentActivity() {
 
@@ -11,7 +11,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            HomeScreen()
+            AppNavigation()
         }
     }
 }
