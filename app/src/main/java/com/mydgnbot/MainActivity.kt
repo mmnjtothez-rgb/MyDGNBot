@@ -3,7 +3,7 @@ package com.mydgnbot
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.mydgnbot.ui.navigation.AppNavigation
+import com.mydgnbot.ui.MyDGNApp
 
 class MainActivity : ComponentActivity() {
 
@@ -11,7 +11,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            AppNavigation()
+
+            MyDGNApp()
+
         }
     }
 }
