@@ -23,7 +23,11 @@ class SettingsViewModel(
     fun saveSettings(
         apiUser: String,
         secretKey: String,
-        platform: String
+        platform: String,
+        minimumPrice: String,
+        maximumPrice: String,
+        playerType: String,
+        pollInterval: String
     ) {
 
         viewModelScope.launch {
@@ -31,7 +35,11 @@ class SettingsViewModel(
             repository.saveSettings(
                 apiUser = apiUser,
                 secretKey = secretKey,
-                platform = platform
+                platform = platform,
+                minimumPrice = minimumPrice,
+                maximumPrice = maximumPrice,
+                playerType = playerType,
+                pollInterval = pollInterval
             )
 
         }
