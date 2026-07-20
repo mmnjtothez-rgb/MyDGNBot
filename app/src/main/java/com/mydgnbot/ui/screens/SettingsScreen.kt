@@ -17,6 +17,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,12 +26,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.mydgnbot.ui.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    viewModel: SettingsViewModel
 ) {
+
+    val settings by viewModel.settings.collectAsState()
 
     var apiUser by remember {
         mutableStateOf("")
@@ -42,6 +48,21 @@ fun SettingsScreen(
     var platform by remember {
         mutableStateOf("Console")
     }
+
+
+    LaunchedEffect(settings) {
+
+        apiUser =
+            settings["api_user"] ?: ""
+
+        secretKey =
+            settings["secret_key"] ?: ""
+
+        platform =
+            settings["platform"] ?: "Console"
+
+    }
+
 
     Scaffold(
 
@@ -83,20 +104,14 @@ fun SettingsScreen(
         ) {
 
             Card(
-
                 modifier = Modifier.fillMaxWidth()
-
             ) {
 
                 Column(
-
                     modifier = Modifier.padding(20.dp)
-
                 ) {
 
-                    Text(
-                        text = "API Configuration"
-                    )
+                    Text("API Configuration")
 
                     Spacer(
                         modifier = Modifier.height(16.dp)
@@ -152,36 +167,25 @@ fun SettingsScreen(
 
 
             Card(
-
                 modifier = Modifier.fillMaxWidth()
-
             ) {
 
                 Column(
-
                     modifier = Modifier.padding(20.dp)
-
                 ) {
 
-                    Text(
-                        text = "Bot Configuration"
-                    )
-
+                    Text("Bot Configuration")
 
                     Spacer(
                         modifier = Modifier.height(12.dp)
                     )
 
 
-                    Text(
-                        text = "Platform"
-                    )
+                    Text("Platform")
 
 
                     Row(
-
                         verticalAlignment = Alignment.CenterVertically
-
                     ) {
 
                         RadioButton(
@@ -200,9 +204,7 @@ fun SettingsScreen(
 
 
                     Row(
-
                         verticalAlignment = Alignment.CenterVertically
-
                     ) {
 
                         RadioButton(
@@ -231,7 +233,15 @@ fun SettingsScreen(
 
             Button(
 
-                onClick = {},
+                onClick = {
+
+                    viewModel.saveSettings(
+                        apiUser = apiUser,
+                        secretKey = secretKey,
+                        platform = platform
+                    )
+
+                },
 
                 modifier = Modifier.fillMaxWidth()
 
