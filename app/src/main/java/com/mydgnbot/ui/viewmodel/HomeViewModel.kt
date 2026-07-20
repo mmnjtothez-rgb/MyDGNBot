@@ -1,17 +1,21 @@
 package com.mydgnbot.ui.viewmodel
 
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mydgnbot.data.repository.PlayerRepository
 import com.mydgnbot.data.mapper.ApiPlayerMapper.toPlayer
+import com.mydgnbot.data.repository.PlayerRepository
+import com.mydgnbot.data.repository.SettingsRepository
 import com.mydgnbot.domain.model.Player
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 
 class HomeViewModel(
-    private val repository: PlayerRepository
+    private val playerRepository: PlayerRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
 
@@ -33,21 +37,7 @@ class HomeViewModel(
 
 
 
-    fun fetchPlayer(
-
-        user: String,
-
-        secretKey: String,
-
-        platform: String,
-
-        playerType: Int,
-
-        minimumPrice: Int,
-
-        maximumPrice: Int
-
-    ) {
+    fun fetchPlayer() {
 
 
         viewModelScope.launch {
@@ -57,22 +47,46 @@ class HomeViewModel(
                 "Searching..."
 
 
+            val settings =
+                settingsRepository.settings.first()
+
+
 
             val result =
 
-                repository.fetchPlayers(
+                playerRepository.fetchPlayers(
 
-                    user = user,
+                    user =
+                        settings["api_user"]
+                            ?: "",
 
-                    secretKey = secretKey,
 
-                    platform = platform,
+                    secretKey =
+                        settings["secret_key"]
+                            ?: "",
 
-                    playerType = playerType,
 
-                    minimumPrice = minimumPrice,
+                    platform =
+                        settings["platform"]
+                            ?: "Console",
 
-                    maximumPrice = maximumPrice
+
+                    playerType =
+                        settings["player_type"]
+                            ?.toIntOrNull()
+                            ?: 2,
+
+
+                    minimumPrice =
+                        settings["minimum_price"]
+                            ?.toIntOrNull()
+                            ?: 4000,
+
+
+                    maximumPrice =
+                        settings["maximum_price"]
+                            ?.toIntOrNull()
+                            ?: 300000
 
                 )
 
