@@ -16,6 +16,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,13 +40,10 @@ fun SettingsScreen(
     val settings by viewModel.settings.collectAsState()
 
     var apiUser by remember { mutableStateOf("") }
-
     var secretKey by remember { mutableStateOf("") }
-
     var platform by remember { mutableStateOf("Console") }
 
     var minimumPrice by remember { mutableStateOf("4000") }
-
     var maximumPrice by remember { mutableStateOf("300000") }
 
     var playerType by remember { mutableStateOf("2") }
@@ -53,16 +51,17 @@ fun SettingsScreen(
     var pollInterval by remember { mutableStateOf("10") }
 
 
+    val showIntervalWarning =
+        pollInterval.toIntOrNull()?.let { it < 10 } == true
+
+
     LaunchedEffect(settings) {
 
         apiUser = settings["api_user"] ?: ""
-
         secretKey = settings["secret_key"] ?: ""
-
         platform = settings["platform"] ?: "Console"
 
         minimumPrice = settings["minimum_price"] ?: "4000"
-
         maximumPrice = settings["maximum_price"] ?: "300000"
 
         playerType = settings["player_type"] ?: "2"
@@ -113,28 +112,21 @@ fun SettingsScreen(
 
             Text("API Configuration")
 
-
             Spacer(
                 modifier = Modifier.height(8.dp)
             )
 
 
             OutlinedTextField(
-
                 value = apiUser,
-
                 onValueChange = {
                     apiUser = it
                 },
-
                 label = {
                     Text("API Username")
                 },
-
                 singleLine = true,
-
                 modifier = Modifier.fillMaxWidth()
-
             )
 
 
@@ -144,21 +136,15 @@ fun SettingsScreen(
 
 
             OutlinedTextField(
-
                 value = secretKey,
-
                 onValueChange = {
                     secretKey = it
                 },
-
                 label = {
                     Text("Secret Key")
                 },
-
                 singleLine = true,
-
                 modifier = Modifier.fillMaxWidth()
-
             )
 
 
@@ -170,11 +156,6 @@ fun SettingsScreen(
             Text("Bot Configuration")
 
 
-            Spacer(
-                modifier = Modifier.height(4.dp)
-            )
-
-
             Text("Platform")
 
 
@@ -183,26 +164,20 @@ fun SettingsScreen(
             ) {
 
                 RadioButton(
-
                     selected = platform == "Console",
-
                     onClick = {
                         platform = "Console"
                     }
-
                 )
 
                 Text("Console")
 
 
                 RadioButton(
-
                     selected = platform == "PC",
-
                     onClick = {
                         platform = "PC"
                     }
-
                 )
 
                 Text("PC")
@@ -218,26 +193,20 @@ fun SettingsScreen(
             ) {
 
                 RadioButton(
-
                     selected = playerType == "1",
-
                     onClick = {
                         playerType = "1"
                     }
-
                 )
 
                 Text("Safe")
 
 
                 RadioButton(
-
                     selected = playerType == "2",
-
                     onClick = {
                         playerType = "2"
                     }
-
                 )
 
                 Text("Quicksell")
@@ -251,25 +220,18 @@ fun SettingsScreen(
 
 
             OutlinedTextField(
-
                 value = minimumPrice,
-
                 onValueChange = {
                     minimumPrice = it
                 },
-
                 label = {
                     Text("Minimum Buy Price")
                 },
-
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
                 ),
-
                 singleLine = true,
-
                 modifier = Modifier.fillMaxWidth()
-
             )
 
 
@@ -279,25 +241,18 @@ fun SettingsScreen(
 
 
             OutlinedTextField(
-
                 value = maximumPrice,
-
                 onValueChange = {
                     maximumPrice = it
                 },
-
                 label = {
                     Text("Maximum Buy Price")
                 },
-
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
                 ),
-
                 singleLine = true,
-
                 modifier = Modifier.fillMaxWidth()
-
             )
 
 
@@ -307,26 +262,33 @@ fun SettingsScreen(
 
 
             OutlinedTextField(
-
                 value = pollInterval,
-
                 onValueChange = {
                     pollInterval = it
                 },
-
                 label = {
                     Text("Search Interval")
                 },
-
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
                 ),
-
                 singleLine = true,
-
                 modifier = Modifier.fillMaxWidth()
-
             )
+
+
+            if (showIntervalWarning) {
+
+                Spacer(
+                    modifier = Modifier.height(6.dp)
+                )
+
+                Text(
+                    text = "⚠️ Recommended minimum is 10 seconds. Lower intervals may cause excessive requests and may risk account restrictions.",
+                    style = MaterialTheme.typography.bodySmall
+                )
+
+            }
 
 
             Spacer(
@@ -339,21 +301,13 @@ fun SettingsScreen(
                 onClick = {
 
                     viewModel.saveSettings(
-
                         apiUser = apiUser,
-
                         secretKey = secretKey,
-
                         platform = platform,
-
                         minimumPrice = minimumPrice,
-
                         maximumPrice = maximumPrice,
-
                         playerType = playerType,
-
                         pollInterval = pollInterval
-
                     )
 
                 },
