@@ -9,6 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import com.mydgnbot.data.AppContainer
 import com.mydgnbot.ui.screens.HomeScreen
 import com.mydgnbot.ui.screens.SettingsScreen
+import com.mydgnbot.ui.viewmodel.HomeViewModel
+import com.mydgnbot.ui.viewmodel.HomeViewModelFactory
 import com.mydgnbot.ui.viewmodel.SettingsViewModel
 import com.mydgnbot.ui.viewmodel.SettingsViewModelFactory
 
@@ -17,8 +19,8 @@ sealed class Screen(val route: String) {
     data object Home : Screen("home")
 
     data object Settings : Screen("settings")
-}
 
+}
 
 @Composable
 fun AppNavigation() {
@@ -29,7 +31,6 @@ fun AppNavigation() {
 
     val appContainer = AppContainer(context)
 
-
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
@@ -37,17 +38,22 @@ fun AppNavigation() {
 
         composable(Screen.Home.route) {
 
+            val homeViewModel: HomeViewModel = viewModel(
+                factory = HomeViewModelFactory(
+                    appContainer.playerRepository
+                )
+            )
+
             HomeScreen(
                 onSettingsClick = {
                     navController.navigate(Screen.Settings.route)
-                }
+                },
+                viewModel = homeViewModel
             )
 
         }
 
-
         composable(Screen.Settings.route) {
-
 
             val settingsViewModel: SettingsViewModel = viewModel(
                 factory = SettingsViewModelFactory(
@@ -55,15 +61,15 @@ fun AppNavigation() {
                 )
             )
 
-
             SettingsScreen(
                 onBackClick = {
                     navController.popBackStack()
                 },
-
                 viewModel = settingsViewModel
             )
 
         }
+
     }
+
 }
