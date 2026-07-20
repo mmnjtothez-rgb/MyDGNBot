@@ -39,10 +39,11 @@ fun AppNavigation() {
         composable(Screen.Home.route) {
 
             val homeViewModel: HomeViewModel = viewModel(
-                factory = HomeViewModelFactory(
-                    appContainer.playerRepository
-                )
-            )
+    factory = HomeViewModelFactory(
+        appContainer.playerRepository,
+        appContainer.settingsRepository
+    )
+)
 
             HomeScreen(
                 onSettingsClick = {
