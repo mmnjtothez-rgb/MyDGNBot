@@ -1,6 +1,5 @@
 package com.mydgnbot.data.repository
 
-
 import com.mydgnbot.data.api.ApiClient
 import com.mydgnbot.data.api.ApiPlayer
 import com.mydgnbot.data.security.Md5Hasher
@@ -8,13 +7,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 
-
 class PlayerRepository {
 
 
     private val api =
         ApiClient.api
-
 
 
     suspend fun fetchPlayers(
@@ -43,49 +40,35 @@ class PlayerRepository {
 
 
                 val apiPlatform =
+                    when (platform.lowercase()) {
 
-                    when (
-                        platform.lowercase()
-                    ) {
+                        "console" -> "cons"
 
-                        "console" ->
-                            "cons"
+                        "pc" -> "pc"
 
-                        "pc" ->
-                            "pc"
-
-                        else ->
-                            platform.lowercase()
+                        else -> platform.lowercase()
 
                     }
 
 
-
                 val timestamp =
-                    System.currentTimeMillis()
-                        / 1000
-
+                    System.currentTimeMillis() / 1000
 
 
                 val hashInput =
-
                     apiPlatform +
                             user +
                             timestamp +
                             secretKey
 
 
-
                 val hash =
-
                     Md5Hasher.generate(
                         hashInput
                     )
 
 
-
                 val player =
-
                     api.getPlayers(
 
                         user = user,
@@ -107,16 +90,12 @@ class PlayerRepository {
                     )
 
 
-
-                listOf(
-                    player
-                )
+                listOf(player)
 
 
             } catch (
                 exception: Exception
             ) {
-
 
                 emptyList()
 
