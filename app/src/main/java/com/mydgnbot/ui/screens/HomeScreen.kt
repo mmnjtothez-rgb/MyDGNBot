@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -27,23 +28,31 @@ fun HomeScreen(
     viewModel: HomeViewModel
 ) {
 
+
     val status by viewModel.status.collectAsState()
 
     val player by viewModel.player.collectAsState()
+
+
 
     Scaffold(
 
         topBar = {
 
             TopAppBar(
+
                 title = {
+
                     Text("MyDGNBot")
+
                 }
+
             )
 
         }
 
     ) { padding ->
+
 
         Column(
 
@@ -56,6 +65,7 @@ fun HomeScreen(
 
         ) {
 
+
             Card(
 
                 modifier = Modifier
@@ -63,32 +73,89 @@ fun HomeScreen(
 
             ) {
 
+
                 Column(
 
                     modifier = Modifier.padding(20.dp)
 
                 ) {
 
+
                     Text(
                         text = "Status: $status"
                     )
+
 
                     Spacer(
                         modifier = Modifier.height(8.dp)
                     )
 
+
                     Text(
-                        text = player?.playerName
-                            ?: "Waiting for player..."
+
+                        text =
+                            player?.playerName
+                                ?: "Waiting for player..."
+
                     )
+
+
+                    if (player != null) {
+
+
+                        Spacer(
+                            modifier = Modifier.height(6.dp)
+                        )
+
+
+                        Text(
+                            text =
+                                "Rating: ${player?.rating}"
+                        )
+
+
+                        Text(
+                            text =
+                                "Buy Now: ${player?.buyNowPrice}"
+                        )
+
+                    }
 
                 }
 
             }
 
+
+
             Spacer(
                 modifier = Modifier.height(24.dp)
             )
+
+
+
+            Button(
+
+                onClick = {
+
+                    viewModel.fetchPlayer()
+
+                },
+
+                modifier = Modifier.fillMaxWidth()
+
+            ) {
+
+                Text("Find Player")
+
+            }
+
+
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+
 
             Button(
 
