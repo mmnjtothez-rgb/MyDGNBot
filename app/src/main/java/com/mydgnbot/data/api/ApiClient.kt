@@ -10,7 +10,7 @@ object ApiClient {
 
 
     private const val BASE_URL =
-        "https://www.mydgn.com/"
+        "https://api.mydgn.com/"
 
 
     private val loggingInterceptor =
