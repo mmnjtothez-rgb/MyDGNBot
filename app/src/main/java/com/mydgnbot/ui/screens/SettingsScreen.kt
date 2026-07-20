@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardOptions
 import com.mydgnbot.ui.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,33 +41,16 @@ fun SettingsScreen(
 
     val settings by viewModel.settings.collectAsState()
 
-    var apiUser by remember {
-        mutableStateOf("")
-    }
+    var apiUser by remember { mutableStateOf("") }
+    var secretKey by remember { mutableStateOf("") }
+    var platform by remember { mutableStateOf("Console") }
 
-    var secretKey by remember {
-        mutableStateOf("")
-    }
+    var minimumPrice by remember { mutableStateOf("4000") }
+    var maximumPrice by remember { mutableStateOf("300000") }
 
-    var platform by remember {
-        mutableStateOf("Console")
-    }
+    var playerType by remember { mutableStateOf("2") }
 
-    var minimumPrice by remember {
-        mutableStateOf("4000")
-    }
-
-    var maximumPrice by remember {
-        mutableStateOf("300000")
-    }
-
-    var playerType by remember {
-        mutableStateOf("2")
-    }
-
-    var pollInterval by remember {
-        mutableStateOf("10")
-    }
+    var pollInterval by remember { mutableStateOf("10") }
 
 
     LaunchedEffect(settings) {
@@ -129,19 +114,14 @@ fun SettingsScreen(
 
 
             Card(
-
                 modifier = Modifier.fillMaxWidth()
-
             ) {
 
                 Column(
-
                     modifier = Modifier.padding(16.dp)
-
                 ) {
 
                     Text("API Configuration")
-
 
                     Spacer(
                         modifier = Modifier.height(12.dp)
@@ -166,4 +146,250 @@ fun SettingsScreen(
 
 
                     Spacer(
-                        modifier =
+                        modifier = Modifier.height(12.dp)
+                    )
+
+
+                    OutlinedTextField(
+
+                        value = secretKey,
+
+                        onValueChange = {
+                            secretKey = it
+                        },
+
+                        label = {
+                            Text("Secret Key")
+                        },
+
+                        modifier = Modifier.fillMaxWidth()
+
+                    )
+
+                }
+
+            }
+
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+
+                    Text("Bot Configuration")
+
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+
+                    Text("Platform")
+
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        RadioButton(
+                            selected = platform == "Console",
+                            onClick = {
+                                platform = "Console"
+                            }
+                        )
+
+                        Text("Console")
+
+                    }
+
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        RadioButton(
+                            selected = platform == "PC",
+                            onClick = {
+                                platform = "PC"
+                            }
+                        )
+
+                        Text("PC")
+
+                    }
+
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+
+                    Text("Player Method")
+
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        RadioButton(
+                            selected = playerType == "1",
+                            onClick = {
+                                playerType = "1"
+                            }
+                        )
+
+                        Text("Safe Method")
+
+                    }
+
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        RadioButton(
+                            selected = playerType == "2",
+                            onClick = {
+                                playerType = "2"
+                            }
+                        )
+
+                        Text("Quicksell Method")
+
+                    }
+
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+
+
+                    OutlinedTextField(
+
+                        value = minimumPrice,
+
+                        onValueChange = {
+                            minimumPrice = it
+                        },
+
+                        label = {
+                            Text("Minimum Buy Price")
+                        },
+
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        ),
+
+                        modifier = Modifier.fillMaxWidth()
+
+                    )
+
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+
+                    OutlinedTextField(
+
+                        value = maximumPrice,
+
+                        onValueChange = {
+                            maximumPrice = it
+                        },
+
+                        label = {
+                            Text("Maximum Buy Price")
+                        },
+
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        ),
+
+                        modifier = Modifier.fillMaxWidth()
+
+                    )
+
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+
+                    OutlinedTextField(
+
+                        value = pollInterval,
+
+                        onValueChange = {
+                            pollInterval = it
+                        },
+
+                        label = {
+                            Text("Search Interval (seconds)")
+                        },
+
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        ),
+
+                        modifier = Modifier.fillMaxWidth()
+
+                    )
+
+                }
+
+            }
+
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+
+            Button(
+
+                onClick = {
+
+                    viewModel.saveSettings(
+
+                        apiUser = apiUser,
+
+                        secretKey = secretKey,
+
+                        platform = platform,
+
+                        minimumPrice = minimumPrice,
+
+                        maximumPrice = maximumPrice,
+
+                        playerType = playerType,
+
+                        pollInterval = pollInterval
+
+                    )
+
+                },
+
+                modifier = Modifier.fillMaxWidth()
+
+            ) {
+
+                Text("Save")
+
+            }
+
+        }
+
+    }
+}
