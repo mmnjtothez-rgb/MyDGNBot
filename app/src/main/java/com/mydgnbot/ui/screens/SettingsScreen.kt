@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -27,8 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.foundation.text.KeyboardOptions
 import com.mydgnbot.ui.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,10 +39,13 @@ fun SettingsScreen(
     val settings by viewModel.settings.collectAsState()
 
     var apiUser by remember { mutableStateOf("") }
+
     var secretKey by remember { mutableStateOf("") }
+
     var platform by remember { mutableStateOf("Console") }
 
     var minimumPrice by remember { mutableStateOf("4000") }
+
     var maximumPrice by remember { mutableStateOf("300000") }
 
     var playerType by remember { mutableStateOf("2") }
@@ -86,9 +87,7 @@ fun SettingsScreen(
                     Button(
                         onClick = onBackClick
                     ) {
-
                         Text("Back")
-
                     }
 
                 }
@@ -105,69 +104,62 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(horizontal = 12.dp),
 
             verticalArrangement = Arrangement.Top
 
         ) {
 
 
-            Card(
+            Text("API Configuration")
+
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+
+            OutlinedTextField(
+
+                value = apiUser,
+
+                onValueChange = {
+                    apiUser = it
+                },
+
+                label = {
+                    Text("API Username")
+                },
+
+                singleLine = true,
+
                 modifier = Modifier.fillMaxWidth()
-            ) {
 
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-
-                    Text("API Configuration")
-
-                    Spacer(
-                        modifier = Modifier.height(12.dp)
-                    )
+            )
 
 
-                    OutlinedTextField(
-
-                        value = apiUser,
-
-                        onValueChange = {
-                            apiUser = it
-                        },
-
-                        label = {
-                            Text("API Username")
-                        },
-
-                        modifier = Modifier.fillMaxWidth()
-
-                    )
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
 
 
-                    Spacer(
-                        modifier = Modifier.height(12.dp)
-                    )
+            OutlinedTextField(
 
+                value = secretKey,
 
-                    OutlinedTextField(
+                onValueChange = {
+                    secretKey = it
+                },
 
-                        value = secretKey,
+                label = {
+                    Text("Secret Key")
+                },
 
-                        onValueChange = {
-                            secretKey = it
-                        },
+                singleLine = true,
 
-                        label = {
-                            Text("Secret Key")
-                        },
+                modifier = Modifier.fillMaxWidth()
 
-                        modifier = Modifier.fillMaxWidth()
-
-                    )
-
-                }
-
-            }
+            )
 
 
             Spacer(
@@ -175,184 +167,170 @@ fun SettingsScreen(
             )
 
 
-            Card(
-                modifier = Modifier.fillMaxWidth()
+            Text("Bot Configuration")
+
+
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+
+            Text("Platform")
+
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
 
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
+                RadioButton(
 
-                    Text("Bot Configuration")
+                    selected = platform == "Console",
 
-
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
-
-
-                    Text("Platform")
-
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        RadioButton(
-                            selected = platform == "Console",
-                            onClick = {
-                                platform = "Console"
-                            }
-                        )
-
-                        Text("Console")
-
+                    onClick = {
+                        platform = "Console"
                     }
 
+                )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                Text("Console")
 
-                        RadioButton(
-                            selected = platform == "PC",
-                            onClick = {
-                                platform = "PC"
-                            }
-                        )
 
-                        Text("PC")
+                RadioButton(
 
+                    selected = platform == "PC",
+
+                    onClick = {
+                        platform = "PC"
                     }
 
+                )
 
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
+                Text("PC")
 
-
-                    Text("Player Method")
+            }
 
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+            Text("Player Method")
 
-                        RadioButton(
-                            selected = playerType == "1",
-                            onClick = {
-                                playerType = "1"
-                            }
-                        )
 
-                        Text("Safe Method")
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
+                RadioButton(
+
+                    selected = playerType == "1",
+
+                    onClick = {
+                        playerType = "1"
                     }
 
+                )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                Text("Safe")
 
-                        RadioButton(
-                            selected = playerType == "2",
-                            onClick = {
-                                playerType = "2"
-                            }
-                        )
 
-                        Text("Quicksell Method")
+                RadioButton(
 
+                    selected = playerType == "2",
+
+                    onClick = {
+                        playerType = "2"
                     }
 
+                )
 
-                    Spacer(
-                        modifier = Modifier.height(12.dp)
-                    )
-
-
-                    OutlinedTextField(
-
-                        value = minimumPrice,
-
-                        onValueChange = {
-                            minimumPrice = it
-                        },
-
-                        label = {
-                            Text("Minimum Buy Price")
-                        },
-
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Next
-                        ),
-
-                        modifier = Modifier.fillMaxWidth()
-
-                    )
-
-
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
-
-
-                    OutlinedTextField(
-
-                        value = maximumPrice,
-
-                        onValueChange = {
-                            maximumPrice = it
-                        },
-
-                        label = {
-                            Text("Maximum Buy Price")
-                        },
-
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Next
-                        ),
-
-                        modifier = Modifier.fillMaxWidth()
-
-                    )
-
-
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
-
-
-                    OutlinedTextField(
-
-                        value = pollInterval,
-
-                        onValueChange = {
-                            pollInterval = it
-                        },
-
-                        label = {
-                            Text("Search Interval (seconds)")
-                        },
-
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Done
-                        ),
-
-                        modifier = Modifier.fillMaxWidth()
-
-                    )
-
-                }
+                Text("Quicksell")
 
             }
 
 
             Spacer(
-                modifier = Modifier.height(12.dp)
+                modifier = Modifier.height(8.dp)
+            )
+
+
+            OutlinedTextField(
+
+                value = minimumPrice,
+
+                onValueChange = {
+                    minimumPrice = it
+                },
+
+                label = {
+                    Text("Minimum Buy Price")
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+
+                singleLine = true,
+
+                modifier = Modifier.fillMaxWidth()
+
+            )
+
+
+            Spacer(
+                modifier = Modifier.height(6.dp)
+            )
+
+
+            OutlinedTextField(
+
+                value = maximumPrice,
+
+                onValueChange = {
+                    maximumPrice = it
+                },
+
+                label = {
+                    Text("Maximum Buy Price")
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+
+                singleLine = true,
+
+                modifier = Modifier.fillMaxWidth()
+
+            )
+
+
+            Spacer(
+                modifier = Modifier.height(6.dp)
+            )
+
+
+            OutlinedTextField(
+
+                value = pollInterval,
+
+                onValueChange = {
+                    pollInterval = it
+                },
+
+                label = {
+                    Text("Search Interval")
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+
+                singleLine = true,
+
+                modifier = Modifier.fillMaxWidth()
+
+            )
+
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
             )
 
 
