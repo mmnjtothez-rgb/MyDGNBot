@@ -6,6 +6,7 @@ plugins {
 
 android {
     namespace = "com.mydgnbot"
+
     compileSdk = 35
 
     defaultConfig {
@@ -32,9 +33,13 @@ android {
     }
 
     buildTypes {
+
         release {
+
             isMinifyEnabled = false
+
         }
+
     }
 }
 
@@ -64,5 +69,9 @@ dependencies {
 
     implementation(
         "androidx.navigation:navigation-compose:2.8.4"
+    )
+
+    implementation(
+        "androidx.datastore:datastore-preferences:1.1.1"
     )
 }
