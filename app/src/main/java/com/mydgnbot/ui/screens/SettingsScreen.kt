@@ -37,29 +37,36 @@ fun SettingsScreen(
 
     val settings by viewModel.settings.collectAsState()
 
-    var apiUser by remember {
-        mutableStateOf("")
-    }
+    var apiUser by remember { mutableStateOf("") }
 
-    var secretKey by remember {
-        mutableStateOf("")
-    }
+    var secretKey by remember { mutableStateOf("") }
 
-    var platform by remember {
-        mutableStateOf("Console")
-    }
+    var platform by remember { mutableStateOf("Console") }
+
+    var minimumPrice by remember { mutableStateOf("4000") }
+
+    var maximumPrice by remember { mutableStateOf("300000") }
+
+    var playerType by remember { mutableStateOf("2") }
+
+    var pollInterval by remember { mutableStateOf("10") }
 
 
     LaunchedEffect(settings) {
 
-        apiUser =
-            settings["api_user"] ?: ""
+        apiUser = settings["api_user"] ?: ""
 
-        secretKey =
-            settings["secret_key"] ?: ""
+        secretKey = settings["secret_key"] ?: ""
 
-        platform =
-            settings["platform"] ?: "Console"
+        platform = settings["platform"] ?: "Console"
+
+        minimumPrice = settings["minimum_price"] ?: "4000"
+
+        maximumPrice = settings["maximum_price"] ?: "300000"
+
+        playerType = settings["player_type"] ?: "2"
+
+        pollInterval = settings["poll_interval"] ?: "10"
 
     }
 
@@ -79,9 +86,7 @@ fun SettingsScreen(
                     Button(
                         onClick = onBackClick
                     ) {
-
                         Text("Back")
-
                     }
 
                 }
@@ -103,6 +108,7 @@ fun SettingsScreen(
 
         ) {
 
+
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -119,19 +125,14 @@ fun SettingsScreen(
 
 
                     OutlinedTextField(
-
                         value = apiUser,
-
                         onValueChange = {
                             apiUser = it
                         },
-
                         label = {
                             Text("API Username")
                         },
-
                         modifier = Modifier.fillMaxWidth()
-
                     )
 
 
@@ -141,19 +142,14 @@ fun SettingsScreen(
 
 
                     OutlinedTextField(
-
                         value = secretKey,
-
                         onValueChange = {
                             secretKey = it
                         },
-
                         label = {
                             Text("Secret Key")
                         },
-
                         modifier = Modifier.fillMaxWidth()
-
                     )
 
                 }
@@ -189,13 +185,10 @@ fun SettingsScreen(
                     ) {
 
                         RadioButton(
-
                             selected = platform == "Console",
-
                             onClick = {
                                 platform = "Console"
                             }
-
                         )
 
                         Text("Console")
@@ -208,18 +201,83 @@ fun SettingsScreen(
                     ) {
 
                         RadioButton(
-
                             selected = platform == "PC",
-
                             onClick = {
                                 platform = "PC"
                             }
-
                         )
 
                         Text("PC")
 
                     }
+
+
+                    Spacer(
+                        modifier = Modifier.height(16.dp)
+                    )
+
+
+                    OutlinedTextField(
+                        value = minimumPrice,
+                        onValueChange = {
+                            minimumPrice = it
+                        },
+                        label = {
+                            Text("Minimum Buy Price")
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+
+
+                    OutlinedTextField(
+                        value = maximumPrice,
+                        onValueChange = {
+                            maximumPrice = it
+                        },
+                        label = {
+                            Text("Maximum Buy Price")
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+
+
+                    OutlinedTextField(
+                        value = playerType,
+                        onValueChange = {
+                            playerType = it
+                        },
+                        label = {
+                            Text("Player Type")
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+
+
+                    OutlinedTextField(
+                        value = pollInterval,
+                        onValueChange = {
+                            pollInterval = it
+                        },
+                        label = {
+                            Text("Poll Interval (seconds)")
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
                 }
 
@@ -238,7 +296,11 @@ fun SettingsScreen(
                     viewModel.saveSettings(
                         apiUser = apiUser,
                         secretKey = secretKey,
-                        platform = platform
+                        platform = platform,
+                        minimumPrice = minimumPrice,
+                        maximumPrice = maximumPrice,
+                        playerType = playerType,
+                        pollInterval = pollInterval
                     )
 
                 },
