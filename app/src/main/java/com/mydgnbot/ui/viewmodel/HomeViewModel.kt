@@ -3,7 +3,7 @@ package com.mydgnbot.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mydgnbot.data.repository.PlayerRepository
-import com.mydgnbot.data.mapper.toPlayer
+import com.mydgnbot.data.mapper.ApiPlayerMapper.toPlayer
 import com.mydgnbot.domain.model.Player
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
