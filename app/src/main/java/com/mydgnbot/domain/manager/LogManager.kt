@@ -12,12 +12,11 @@ class LogManager {
     private var nextId = 0L
 
 
-
     private val maxLogs = 20
 
 
 
-    fun addLog(
+    fun add(
 
         currentLogs: List<LogEntry>,
 
@@ -41,33 +40,22 @@ class LogManager {
 
 
 
-        val entry =
+        val entry = LogEntry(
 
-            LogEntry(
+            id = ++nextId,
 
-                id =
+            message = message,
 
-                    ++nextId,
+            timestamp =
+                SimpleDateFormat(
 
-                message =
+                    "HH:mm:ss",
 
-                    message,
+                    Locale.getDefault()
 
-                timestamp =
+                ).format(Date())
 
-                    SimpleDateFormat(
-
-                        "HH:mm:ss",
-
-                        Locale.getDefault()
-
-                    ).format(
-
-                        Date()
-
-                    )
-
-            )
+        )
 
 
 
