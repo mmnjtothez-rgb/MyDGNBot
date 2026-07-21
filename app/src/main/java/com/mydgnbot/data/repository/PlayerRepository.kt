@@ -43,31 +43,19 @@ class PlayerRepository {
 
 
                 val apiPlatform =
-                    when (platform.lowercase()) {
-
-                        "console" -> "cons"
-
-                        "pc" -> "pc"
-
-                        else -> platform.lowercase()
-
-                    }
+                    normalizePlatform(platform)
 
 
                 val timestamp =
                     System.currentTimeMillis() / 1000
 
 
-                val hashInput =
-                    apiPlatform +
-                            user +
-                            timestamp +
-                            secretKey
-
-
                 val hash =
                     Md5Hasher.generate(
-                        hashInput
+                        apiPlatform +
+                                user +
+                                timestamp +
+                                secretKey
                     )
 
 
@@ -110,7 +98,6 @@ class PlayerRepository {
 
 
 
-
     suspend fun updateOrderStatus(
 
         user: String,
@@ -123,7 +110,7 @@ class PlayerRepository {
 
         status: String,
 
-        emailHash: String = "",
+        eaEmail: String = "",
 
         code: Int? = null
 
@@ -139,39 +126,40 @@ class PlayerRepository {
 
 
                 val apiPlatform =
-
-                    when (platform.lowercase()) {
-
-                        "console" -> "cons"
-
-                        "pc" -> "pc"
-
-                        else -> platform.lowercase()
-
-                    }
-
+                    normalizePlatform(platform)
 
 
                 val timestamp =
-
                     System.currentTimeMillis() / 1000
 
 
-
-                val hashInput =
-
-                    apiPlatform +
-                            user +
-                            timestamp +
-                            secretKey
-
-
-
                 val hash =
-
                     Md5Hasher.generate(
-                        hashInput
+
+                        apiPlatform +
+                                user +
+                                timestamp +
+                                secretKey
+
                     )
+
+
+                val emailHash =
+
+                    if (
+                        status == "bought" &&
+                        eaEmail.isNotBlank()
+                    ) {
+
+                        Md5Hasher.generate(
+                            eaEmail
+                        )
+
+                    } else {
+
+                        ""
+
+                    }
 
 
 
@@ -208,9 +196,7 @@ class PlayerRepository {
                 exception: Exception
             ) {
 
-
                 null
-
 
             }
 
@@ -219,5 +205,28 @@ class PlayerRepository {
 
     }
 
+
+
+    private fun normalizePlatform(
+        platform: String
+    ): String {
+
+
+        return when (
+            platform.lowercase()
+        ) {
+
+            "console" ->
+                "cons"
+
+            "pc" ->
+                "pc"
+
+            else ->
+                platform.lowercase()
+
+        }
+
+    }
 
 }
