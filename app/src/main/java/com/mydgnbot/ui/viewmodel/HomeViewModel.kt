@@ -6,6 +6,7 @@ import com.mydgnbot.data.mapper.ApiPlayerMapper.toPlayer
 import com.mydgnbot.data.network.ConnectivityObserver
 import com.mydgnbot.data.repository.PlayerRepository
 import com.mydgnbot.data.repository.SettingsRepository
+import com.mydgnbot.domain.model.LogEntry
 import com.mydgnbot.domain.model.Player
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,6 +17,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class HomeViewModel(
@@ -53,6 +57,14 @@ class HomeViewModel(
 
 
 
+    private val _logs =
+        MutableStateFlow<List<LogEntry>>(emptyList())
+
+    val logs: StateFlow<List<LogEntry>> =
+        _logs
+
+
+
     private var searchJob: Job? = null
 
 
@@ -77,46 +89,99 @@ class HomeViewModel(
 
 
 
+    private fun addLog(
+        message: String
+    ) {
+
+        val time =
+            SimpleDateFormat(
+                "HH:mm:ss",
+                Locale.getDefault()
+            ).format(Date())
+
+
+        val entry =
+            LogEntry(
+
+                id =
+                    System.currentTimeMillis(),
+
+                message =
+                    message,
+
+                timestamp =
+                    time
+
+            )
+
+
+        _logs.value =
+            listOf(entry) + _logs.value.take(19)
+
+    }
+
+
+
     fun startBot() {
 
         if (_isRunning.value) return
 
+
         _isRunning.value = true
 
-        searchJob = viewModelScope.launch {
+        addLog(
+            "Bot started"
+        )
 
-            while (isActive && _isRunning.value) {
 
-                fetchPlayer()
+        searchJob =
+            viewModelScope.launch {
 
-                if (_player.value != null) {
 
-                    stopBot()
+                while (
+                    isActive &&
+                    _isRunning.value
+                ) {
 
-                    break
+
+                    fetchPlayer()
+
+
+                    if (_player.value != null) {
+
+                        stopBot()
+
+                        break
+
+                    }
+
+
+                    val currentSettings =
+                        settings.first()
+
+
+                    val intervalSeconds =
+                        currentSettings["poll_interval"]
+                            ?.toLongOrNull()
+                            ?: 10L
+
+
+                    _status.value =
+                        "Waiting..."
+
+
+                    addLog(
+                        "Waiting ${intervalSeconds}s"
+                    )
+
+
+                    delay(
+                        intervalSeconds * 1000
+                    )
 
                 }
 
-
-                val currentSettings =
-                    settings.first()
-
-
-                val intervalSeconds =
-                    currentSettings["poll_interval"]
-                        ?.toLongOrNull()
-                        ?: 10L
-
-
-                _status.value =
-                    "Waiting..."
-
-
-                delay(intervalSeconds * 1000)
-
             }
-
-        }
 
     }
 
@@ -130,7 +195,13 @@ class HomeViewModel(
 
         _isRunning.value = false
 
-        _status.value = "Ready"
+        _status.value =
+            "Ready"
+
+
+        addLog(
+            "Bot stopped"
+        )
 
     }
 
@@ -140,6 +211,11 @@ class HomeViewModel(
 
         _status.value =
             "Searching..."
+
+
+        addLog(
+            "Searching..."
+        )
 
 
         val currentSettings =
@@ -183,20 +259,34 @@ class HomeViewModel(
             result.firstOrNull()
 
 
+
         if (apiPlayer != null) {
 
             _player.value =
                 apiPlayer.toPlayer()
 
+
             _status.value =
                 "Player found"
+
+
+            addLog(
+                "Player found"
+            )
+
 
         } else {
 
             _player.value = null
 
+
             _status.value =
                 "No player found"
+
+
+            addLog(
+                "No player found"
+            )
 
         }
 
@@ -207,6 +297,7 @@ class HomeViewModel(
     fun markBought() {
 
         viewModelScope.launch {
+
 
             val currentPlayer =
                 _player.value
@@ -223,8 +314,15 @@ class HomeViewModel(
                 settings.first()
 
 
+
             _status.value =
                 "Sending bought..."
+
+
+            addLog(
+                "Sending bought"
+            )
+
 
 
             val response =
@@ -255,10 +353,17 @@ class HomeViewModel(
                 )
 
 
+
             if (response?.code == 200) {
+
 
                 _status.value =
                     "Bought ✓"
+
+
+                addLog(
+                    "Bought success"
+                )
 
 
                 _player.value = null
@@ -276,9 +381,15 @@ class HomeViewModel(
 
             } else {
 
+
                 _status.value =
                     response?.status
                         ?: "Bought failed"
+
+
+                addLog(
+                    "Bought failed"
+                )
 
             }
 
@@ -291,6 +402,7 @@ class HomeViewModel(
     fun cancelPlayer() {
 
         viewModelScope.launch {
+
 
             val currentPlayer =
                 _player.value
@@ -307,8 +419,15 @@ class HomeViewModel(
                 settings.first()
 
 
+
             _status.value =
                 "Sending cancel..."
+
+
+            addLog(
+                "Sending cancel"
+            )
+
 
 
             val response =
@@ -338,10 +457,17 @@ class HomeViewModel(
                 )
 
 
+
             if (response?.code == 200) {
+
 
                 _status.value =
                     "Cancelled ✓"
+
+
+                addLog(
+                    "Cancel success"
+                )
 
 
                 _player.value = null
@@ -359,9 +485,15 @@ class HomeViewModel(
 
             } else {
 
+
                 _status.value =
                     response?.status
                         ?: "Cancel failed"
+
+
+                addLog(
+                    "Cancel failed"
+                )
 
             }
 
