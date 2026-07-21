@@ -16,6 +16,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -67,7 +71,14 @@ fun SettingsScreen(
     val scrollState =
         rememberScrollState()
 
+val snackbarHostState =
+    remember {
+        SnackbarHostState()
+    }
 
+
+val coroutineScope =
+    rememberCoroutineScope()
 
     val showIntervalWarning =
         pollInterval.toIntOrNull()?.let {
@@ -108,7 +119,15 @@ fun SettingsScreen(
 
     Scaffold(
 
-        topBar = {
+    snackbarHost = {
+
+        SnackbarHost(
+            hostState = snackbarHostState
+        )
+
+    },
+
+    topBar = {
 
             TopAppBar(
 
@@ -465,7 +484,13 @@ fun SettingsScreen(
                         playerType = playerType,
 
                         pollInterval = pollInterval
+coroutineScope.launch {
 
+    snackbarHostState.showSnackbar(
+        "Settings saved ✓"
+    )
+
+}
                     )
 
                 },
