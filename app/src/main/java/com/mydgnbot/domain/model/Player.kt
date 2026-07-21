@@ -46,5 +46,5 @@ data class Player(
 
     get() =
 
-        "https://cdn3.futbin.com/content/fifa26/img/players/${baseId}.png"
+        "https://cdn3.futbin.com/content/fifa26/img/players/${assetId}.png"
 }
