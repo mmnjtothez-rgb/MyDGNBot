@@ -67,6 +67,8 @@ class HomeViewModel(
 
     private var searchJob: Job? = null
 
+private var logIdCounter = 0L
+
 
 
     val settings =
@@ -104,7 +106,7 @@ class HomeViewModel(
             LogEntry(
 
                 id =
-                    System.currentTimeMillis(),
+    ++logIdCounter,
 
                 message =
                     message,
@@ -116,7 +118,7 @@ class HomeViewModel(
 
 
         _logs.value =
-            listOf(entry) + _logs.value.take(19)
+    (_logs.value + entry).takeLast(20)
 
     }
 
