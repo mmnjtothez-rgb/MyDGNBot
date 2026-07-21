@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,6 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.viewmodel.SettingsViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -40,7 +43,9 @@ fun SettingsScreen(
 
 ) {
 
+
     val settings by viewModel.settings.collectAsState()
+
 
     var apiUser by remember { mutableStateOf("") }
 
@@ -59,8 +64,16 @@ fun SettingsScreen(
     var pollInterval by remember { mutableStateOf("10") }
 
 
+    val scrollState =
+        rememberScrollState()
+
+
+
     val showIntervalWarning =
-        pollInterval.toIntOrNull()?.let { it < 10 } == true
+        pollInterval.toIntOrNull()?.let {
+            it < 10
+        } == true
+
 
 
     LaunchedEffect(settings) {
@@ -92,6 +105,7 @@ fun SettingsScreen(
     }
 
 
+
     Scaffold(
 
         topBar = {
@@ -99,9 +113,7 @@ fun SettingsScreen(
             TopAppBar(
 
                 title = {
-
                     Text("Settings")
-
                 },
 
                 navigationIcon = {
@@ -122,22 +134,37 @@ fun SettingsScreen(
 
     ) { padding ->
 
+
         Column(
 
             modifier = Modifier
+
                 .fillMaxSize()
+
                 .padding(padding)
-                .padding(horizontal = 12.dp),
+
+                .padding(horizontal = 12.dp)
+
+                .verticalScroll(scrollState),
+
 
             verticalArrangement = Arrangement.Top
 
         ) {
 
-            Text("API Configuration")
 
             Spacer(
                 modifier = Modifier.height(8.dp)
             )
+
+
+            Text("API Configuration")
+
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
 
 
             OutlinedTextField(
@@ -164,6 +191,7 @@ fun SettingsScreen(
             )
 
 
+
             OutlinedTextField(
 
                 value = secretKey,
@@ -188,6 +216,7 @@ fun SettingsScreen(
             )
 
 
+
             OutlinedTextField(
 
                 value = eaEmail,
@@ -208,11 +237,18 @@ fun SettingsScreen(
 
 
             Spacer(
-                modifier = Modifier.height(12.dp)
+                modifier = Modifier.height(16.dp)
             )
 
 
+
             Text("Bot Configuration")
+
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
 
 
             Text("Platform")
@@ -235,6 +271,7 @@ fun SettingsScreen(
                 Text("Console")
 
 
+
                 RadioButton(
 
                     selected = platform == "PC",
@@ -250,12 +287,15 @@ fun SettingsScreen(
             }
 
 
+
             Text("Player Method")
+
 
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
 
                 RadioButton(
 
@@ -267,7 +307,9 @@ fun SettingsScreen(
 
                 )
 
+
                 Text("Safe")
+
 
 
                 RadioButton(
@@ -280,14 +322,17 @@ fun SettingsScreen(
 
                 )
 
+
                 Text("Quick Sell")
 
             }
 
 
+
             Spacer(
                 modifier = Modifier.height(8.dp)
             )
+
 
 
             OutlinedTextField(
@@ -313,9 +358,11 @@ fun SettingsScreen(
             )
 
 
+
             Spacer(
                 modifier = Modifier.height(6.dp)
             )
+
 
 
             OutlinedTextField(
@@ -341,9 +388,11 @@ fun SettingsScreen(
             )
 
 
+
             Spacer(
                 modifier = Modifier.height(6.dp)
             )
+
 
 
             OutlinedTextField(
@@ -369,11 +418,13 @@ fun SettingsScreen(
             )
 
 
+
             if (showIntervalWarning) {
 
                 Spacer(
                     modifier = Modifier.height(6.dp)
                 )
+
 
                 Text(
 
@@ -386,9 +437,11 @@ fun SettingsScreen(
             }
 
 
+
             Spacer(
-                modifier = Modifier.height(10.dp)
+                modifier = Modifier.height(16.dp)
             )
+
 
 
             Button(
@@ -424,6 +477,12 @@ fun SettingsScreen(
                 Text("Save")
 
             }
+
+
+            Spacer(
+                modifier = Modifier.height(24.dp)
+            )
+
 
         }
 
