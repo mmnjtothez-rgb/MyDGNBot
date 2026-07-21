@@ -34,44 +34,31 @@ fun HomeScreen(
 
 ) {
 
-
     val player by viewModel.player.collectAsState()
-
-    val status by viewModel.status.collectAsState()
 
     val settings by viewModel.settings.collectAsState()
 
     val isOnline by viewModel.isOnline.collectAsState()
 
+    val isRunning by viewModel.isRunning.collectAsState()
+
 
 
     val platform =
-
-        settings["platform"]
-            ?: "Console"
+        settings["platform"] ?: "Console"
 
 
 
     val method =
-
-        if (
-            settings["player_type"] == "1"
-        ) {
-
+        if (settings["player_type"] == "1")
             "Safe"
-
-        } else {
-
+        else
             "Quick Sell"
-
-        }
 
 
 
     val interval =
-
-        settings["poll_interval"]
-            ?: "10"
+        settings["poll_interval"] ?: "10"
 
 
 
@@ -93,26 +80,19 @@ fun HomeScreen(
 
     ) { padding ->
 
-
         Column(
 
             modifier = Modifier
-
                 .fillMaxSize()
-
                 .padding(padding)
-
                 .padding(16.dp)
-
                 .verticalScroll(
                     rememberScrollState()
                 ),
 
-
             verticalArrangement = Arrangement.Top
 
         ) {
-
 
             HomeHeader(
 
@@ -126,85 +106,61 @@ fun HomeScreen(
 
             )
 
-
-
             Spacer(
-
                 modifier = Modifier.height(16.dp)
-
             )
-
-
 
             PlayerCard(
-
                 player = player
-
             )
-
-
 
             Spacer(
-
                 modifier = Modifier.height(16.dp)
-
             )
-
-
 
             ActionButtons(
 
                 state =
 
-                    if (player != null)
+                    when {
 
-                        BotActionState.PLAYER_FOUND
+                        player != null ->
+                            BotActionState.PLAYER_FOUND
 
+                        isRunning ->
+                            BotActionState.SEARCHING
 
-                    else if (status == "Searching...")
+                        else ->
+                            BotActionState.IDLE
 
-                        BotActionState.SEARCHING
-
-
-                    else
-
-                        BotActionState.IDLE,
-
-
+                    },
 
                 onStartClick = {
 
-                    viewModel.fetchPlayer()
+                    viewModel.startBot()
 
                 },
-
 
                 onStopClick = {
 
+                    viewModel.stopBot()
 
                 },
-
 
                 onBoughtClick = {
 
-
                 },
-
 
                 onCancelClick = {
 
-
                 },
-
 
                 onSettingsClick = onSettingsClick
 
             )
 
-
         }
 
     }
-
 
 }
