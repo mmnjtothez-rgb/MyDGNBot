@@ -44,8 +44,7 @@ data class Player(
      */
     val imageUrl: String
 
-        get() =
+    get() =
 
-            "https://game-assets.fut.gg/${resourceId}.png"
-
+        "https://players.whatsgaming.net/storage/cards/${resourceId}.png"
 }
