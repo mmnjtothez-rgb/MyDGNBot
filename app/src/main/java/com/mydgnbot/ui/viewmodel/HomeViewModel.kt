@@ -8,11 +8,13 @@ import com.mydgnbot.data.repository.PlayerRepository
 import com.mydgnbot.data.repository.SettingsRepository
 import com.mydgnbot.domain.model.Player
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
@@ -64,13 +66,54 @@ class HomeViewModel(
 
 
 
-    val isOnline: StateFlow<Boolean> =
+    val isOnline =
         connectivityObserver.isOnline
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = false
             )
+
+
+
+    fun startBot() {
+
+        if (_isRunning.value) return
+
+        _isRunning.value = true
+
+        searchJob = viewModelScope.launch {
+
+            while (isActive && _isRunning.value) {
+
+                fetchPlayer()
+
+                if (_player.value != null) {
+
+                    stopBot()
+
+                    break
+
+                }
+
+                val currentSettings =
+                    settings.first()
+
+                val intervalSeconds =
+                    currentSettings["poll_interval"]
+                        ?.toLongOrNull()
+                        ?: 10L
+
+                _status.value =
+                    "Waiting..."
+
+                delay(intervalSeconds * 1000)
+
+            }
+
+        }
+
+    }
 
 
 
@@ -88,64 +131,62 @@ class HomeViewModel(
 
 
 
-    fun fetchPlayer() {
+    suspend fun fetchPlayer() {
 
-        viewModelScope.launch {
+        _status.value = "Searching..."
 
-            _status.value = "Searching..."
+        val currentSettings =
+            settings.first()
 
-            val currentSettings =
-                settings.first()
+        val result =
+            playerRepository.fetchPlayers(
 
-            val result =
-                playerRepository.fetchPlayers(
+                user =
+                    currentSettings["api_user"]
+                        ?: "",
 
-                    user =
-                        currentSettings["api_user"]
-                            ?: "",
+                secretKey =
+                    currentSettings["secret_key"]
+                        ?: "",
 
-                    secretKey =
-                        currentSettings["secret_key"]
-                            ?: "",
+                platform =
+                    currentSettings["platform"]
+                        ?: "Console",
 
-                    platform =
-                        currentSettings["platform"]
-                            ?: "Console",
+                playerType =
+                    currentSettings["player_type"]
+                        ?.toIntOrNull()
+                        ?: 2,
 
-                    playerType =
-                        currentSettings["player_type"]
-                            ?.toIntOrNull()
-                            ?: 2,
+                minimumPrice =
+                    currentSettings["minimum_price"]
+                        ?.toIntOrNull()
+                        ?: 4000,
 
-                    minimumPrice =
-                        currentSettings["minimum_price"]
-                            ?.toIntOrNull()
-                            ?: 4000,
+                maximumPrice =
+                    currentSettings["maximum_price"]
+                        ?.toIntOrNull()
+                        ?: 300000
 
-                    maximumPrice =
-                        currentSettings["maximum_price"]
-                            ?.toIntOrNull()
-                            ?: 300000
+            )
 
-                )
+        val apiPlayer =
+            result.firstOrNull()
 
-            val apiPlayer =
-                result.firstOrNull()
+        if (apiPlayer != null) {
 
-            if (apiPlayer != null) {
+            _player.value =
+                apiPlayer.toPlayer()
 
-                _player.value =
-                    apiPlayer.toPlayer()
+            _status.value =
+                "Player found"
 
-                _status.value =
-                    "Player found"
+        } else {
 
-            } else {
+            _player.value = null
 
-                _status.value =
-                    "No player found"
-
-            }
+            _status.value =
+                "No player found"
 
         }
 
