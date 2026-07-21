@@ -23,6 +23,9 @@ class SettingsDataStore(
         val SECRET_KEY =
             stringPreferencesKey("secret_key")
 
+        val EA_EMAIL =
+            stringPreferencesKey("ea_email")
+
         val PLATFORM =
             stringPreferencesKey("platform")
 
@@ -37,6 +40,7 @@ class SettingsDataStore(
 
         val POLL_INTERVAL =
             stringPreferencesKey("poll_interval")
+
     }
 
 
@@ -52,6 +56,10 @@ class SettingsDataStore(
 
                 "secret_key" to (
                     preferences[Keys.SECRET_KEY] ?: ""
+                ),
+
+                "ea_email" to (
+                    preferences[Keys.EA_EMAIL] ?: ""
                 ),
 
                 "platform" to (
@@ -80,31 +88,53 @@ class SettingsDataStore(
 
 
     suspend fun saveSettings(
+
         apiUser: String,
+
         secretKey: String,
+
+        eaEmail: String,
+
         platform: String,
+
         minimumPrice: String,
+
         maximumPrice: String,
+
         playerType: String,
+
         pollInterval: String
+
     ) {
 
         context.dataStore.edit { preferences ->
 
-            preferences[Keys.API_USER] = apiUser
+            preferences[Keys.API_USER] =
+                apiUser
 
-            preferences[Keys.SECRET_KEY] = secretKey
+            preferences[Keys.SECRET_KEY] =
+                secretKey
 
-            preferences[Keys.PLATFORM] = platform
+            preferences[Keys.EA_EMAIL] =
+                eaEmail
 
-            preferences[Keys.MINIMUM_PRICE] = minimumPrice
+            preferences[Keys.PLATFORM] =
+                platform
 
-            preferences[Keys.MAXIMUM_PRICE] = maximumPrice
+            preferences[Keys.MINIMUM_PRICE] =
+                minimumPrice
 
-            preferences[Keys.PLAYER_TYPE] = playerType
+            preferences[Keys.MAXIMUM_PRICE] =
+                maximumPrice
 
-            preferences[Keys.POLL_INTERVAL] = pollInterval
+            preferences[Keys.PLAYER_TYPE] =
+                playerType
+
+            preferences[Keys.POLL_INTERVAL] =
+                pollInterval
 
         }
+
     }
+
 }
