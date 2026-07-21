@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,6 +24,7 @@ import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
 
@@ -36,109 +41,127 @@ fun HomeScreen(
 
 
 
-    Column(
+    Scaffold(
 
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(
-                rememberScrollState()
-            ),
+        topBar = {
 
-        verticalArrangement = Arrangement.Top
+            TopAppBar(
 
-    ) {
+                title = {
 
+                    Text("MyDGNBot")
 
-        HomeHeader(
+                }
 
-            platform = "PC",
+            )
 
-            method = "Quick Sell",
+        }
 
-            interval = "10",
-
-            connected = true
-
-        )
+    ) { padding ->
 
 
+        Column(
 
-        Spacer(
+            modifier = Modifier
 
-            modifier = Modifier.height(16.dp)
+                .fillMaxSize()
 
-        )
+                .padding(padding)
 
+                .padding(16.dp)
 
+                .verticalScroll(
+                    rememberScrollState()
+                ),
 
-        PlayerCard(
+            verticalArrangement = Arrangement.Top
 
-            player = player
-
-        )
-
-
-
-        Spacer(
-
-            modifier = Modifier.height(16.dp)
-
-        )
+        ) {
 
 
+            HomeHeader(
 
-        ActionButtons(
+                platform = "PC",
 
-            state =
+                method = "Quick Sell",
 
-                if (player != null)
+                interval = "10",
 
-                    BotActionState.PLAYER_FOUND
+                connected = true
 
-                else if (status == "Searching...")
-
-                    BotActionState.SEARCHING
-
-                else
-
-                    BotActionState.IDLE,
+            )
 
 
-            onStartClick = {
 
-                viewModel.fetchPlayer()
+            Spacer(
 
-            },
+                modifier = Modifier.height(16.dp)
 
-
-            onStopClick = {
-
-                // Bot stop logic will be added next
-
-            },
+            )
 
 
-            onBoughtClick = {
 
-                // Status API update will be added next
+            PlayerCard(
 
-            },
+                player = player
 
-
-            onCancelClick = {
-
-                // Status API update will be added next
-
-            },
+            )
 
 
-            onSettingsClick = onSettingsClick
 
-        )
+            Spacer(
 
+                modifier = Modifier.height(16.dp)
+
+            )
+
+
+
+            ActionButtons(
+
+                state =
+
+                    if (player != null)
+
+                        BotActionState.PLAYER_FOUND
+
+                    else if (status == "Searching...")
+
+                        BotActionState.SEARCHING
+
+                    else
+
+                        BotActionState.IDLE,
+
+
+                onStartClick = {
+
+                    viewModel.fetchPlayer()
+
+                },
+
+
+                onStopClick = {
+
+                },
+
+
+                onBoughtClick = {
+
+                },
+
+
+                onCancelClick = {
+
+                },
+
+
+                onSettingsClick = onSettingsClick
+
+            )
+
+        }
 
     }
-
 
 }
