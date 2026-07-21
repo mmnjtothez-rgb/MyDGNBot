@@ -136,7 +136,6 @@ class HomeViewModel(
 
 
 
-
     suspend fun fetchPlayer() {
 
         _status.value =
@@ -189,10 +188,8 @@ class HomeViewModel(
             _player.value =
                 apiPlayer.toPlayer()
 
-
             _status.value =
                 "Player found"
-
 
         } else {
 
@@ -204,7 +201,6 @@ class HomeViewModel(
         }
 
     }
-
 
 
 
@@ -256,14 +252,14 @@ class HomeViewModel(
                     "bought",
 
 
-                emailHash =
-                    ""
+                eaEmail =
+                    currentSettings["ea_email"]
+                        ?: ""
 
             )
 
 
             _player.value = null
-
 
             _status.value =
                 "Ready"
@@ -274,7 +270,6 @@ class HomeViewModel(
         }
 
     }
-
 
 
 
@@ -326,10 +321,6 @@ class HomeViewModel(
                     "cancel",
 
 
-                emailHash =
-                    "",
-
-
                 code =
                     551
 
@@ -337,7 +328,6 @@ class HomeViewModel(
 
 
             _player.value = null
-
 
             _status.value =
                 "Ready"
