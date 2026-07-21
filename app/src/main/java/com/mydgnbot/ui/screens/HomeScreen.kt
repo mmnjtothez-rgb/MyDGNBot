@@ -4,173 +4,141 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.mydgnbot.ui.components.ActionButtons
+import com.mydgnbot.ui.components.BotActionState
+import com.mydgnbot.ui.components.HomeHeader
+import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+
     onSettingsClick: () -> Unit,
+
     viewModel: HomeViewModel
+
 ) {
 
 
-    val status by viewModel.status.collectAsState()
-
     val player by viewModel.player.collectAsState()
 
+    val status by viewModel.status.collectAsState()
 
 
-    Scaffold(
 
-        topBar = {
+    Column(
 
-            TopAppBar(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(
+                rememberScrollState()
+            ),
 
-                title = {
+        verticalArrangement = Arrangement.Top
 
-                    Text("MyDGNBot")
+    ) {
 
-                }
 
-            )
+        HomeHeader(
 
-        }
+            platform = "PC",
 
-    ) { padding ->
+            method = "Quick Sell",
 
+            interval = "10",
 
-        Column(
+            connected = true
 
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(20.dp),
+        )
 
-            verticalArrangement = Arrangement.Center
 
-        ) {
 
+        Spacer(
 
-            Card(
+            modifier = Modifier.height(16.dp)
 
-                modifier = Modifier
-                    .fillMaxWidth()
+        )
 
-            ) {
 
 
-                Column(
+        PlayerCard(
 
-                    modifier = Modifier.padding(20.dp)
+            player = player
 
-                ) {
+        )
 
 
-                    Text(
-                        text = "Status: $status"
-                    )
 
+        Spacer(
 
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
+            modifier = Modifier.height(16.dp)
 
+        )
 
-                    Text(
 
-                        text =
-                            player?.playerName
-                                ?: "Waiting for player..."
 
-                    )
+        ActionButtons(
 
+            state =
 
-                    if (player != null) {
+                if (player != null)
 
+                    BotActionState.PLAYER_FOUND
 
-                        Spacer(
-                            modifier = Modifier.height(6.dp)
-                        )
+                else if (status == "Searching...")
 
+                    BotActionState.SEARCHING
 
-                        Text(
-                            text =
-                                "Rating: ${player?.rating}"
-                        )
+                else
 
+                    BotActionState.IDLE,
 
-                        Text(
-                            text =
-                                "Buy Now: ${player?.buyNowPrice}"
-                        )
 
-                    }
+            onStartClick = {
 
-                }
+                viewModel.fetchPlayer()
 
-            }
+            },
 
 
+            onStopClick = {
 
-            Spacer(
-                modifier = Modifier.height(24.dp)
-            )
+                // Bot stop logic will be added next
 
+            },
 
 
-            Button(
+            onBoughtClick = {
 
-                onClick = {
+                // Status API update will be added next
 
-                    viewModel.fetchPlayer()
+            },
 
-                },
 
-                modifier = Modifier.fillMaxWidth()
+            onCancelClick = {
 
-            ) {
+                // Status API update will be added next
 
-                Text("Find Player")
+            },
 
-            }
 
+            onSettingsClick = onSettingsClick
 
+        )
 
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
-
-
-
-            Button(
-
-                onClick = onSettingsClick,
-
-                modifier = Modifier.fillMaxWidth()
-
-            ) {
-
-                Text("Settings")
-
-            }
-
-        }
 
     }
+
 
 }
