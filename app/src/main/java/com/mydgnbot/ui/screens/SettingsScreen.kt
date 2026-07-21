@@ -160,4 +160,273 @@ fun SettingsScreen(
 
 
             Spacer(
-                modifier = Modifier
+                modifier = Modifier.height(8.dp)
+            )
+
+
+            OutlinedTextField(
+
+                value = secretKey,
+
+                onValueChange = {
+                    secretKey = it
+                },
+
+                label = {
+                    Text("Secret Key")
+                },
+
+                singleLine = true,
+
+                modifier = Modifier.fillMaxWidth()
+
+            )
+
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+
+            OutlinedTextField(
+
+                value = eaEmail,
+
+                onValueChange = {
+                    eaEmail = it
+                },
+
+                label = {
+                    Text("EA Account Email")
+                },
+
+                singleLine = true,
+
+                modifier = Modifier.fillMaxWidth()
+
+            )
+
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+
+            Text("Bot Configuration")
+
+
+            Text("Platform")
+
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                RadioButton(
+
+                    selected = platform == "Console",
+
+                    onClick = {
+                        platform = "Console"
+                    }
+
+                )
+
+                Text("Console")
+
+
+                RadioButton(
+
+                    selected = platform == "PC",
+
+                    onClick = {
+                        platform = "PC"
+                    }
+
+                )
+
+                Text("PC")
+
+            }
+
+
+            Text("Player Method")
+
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                RadioButton(
+
+                    selected = playerType == "1",
+
+                    onClick = {
+                        playerType = "1"
+                    }
+
+                )
+
+                Text("Safe")
+
+
+                RadioButton(
+
+                    selected = playerType == "2",
+
+                    onClick = {
+                        playerType = "2"
+                    }
+
+                )
+
+                Text("Quick Sell")
+
+            }
+
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+
+            OutlinedTextField(
+
+                value = minimumPrice,
+
+                onValueChange = {
+                    minimumPrice = it
+                },
+
+                label = {
+                    Text("Minimum Buy Price")
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+
+                singleLine = true,
+
+                modifier = Modifier.fillMaxWidth()
+
+            )
+
+
+            Spacer(
+                modifier = Modifier.height(6.dp)
+            )
+
+
+            OutlinedTextField(
+
+                value = maximumPrice,
+
+                onValueChange = {
+                    maximumPrice = it
+                },
+
+                label = {
+                    Text("Maximum Buy Price")
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+
+                singleLine = true,
+
+                modifier = Modifier.fillMaxWidth()
+
+            )
+
+
+            Spacer(
+                modifier = Modifier.height(6.dp)
+            )
+
+
+            OutlinedTextField(
+
+                value = pollInterval,
+
+                onValueChange = {
+                    pollInterval = it
+                },
+
+                label = {
+                    Text("Search Interval")
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+
+                singleLine = true,
+
+                modifier = Modifier.fillMaxWidth()
+
+            )
+
+
+            if (showIntervalWarning) {
+
+                Spacer(
+                    modifier = Modifier.height(6.dp)
+                )
+
+                Text(
+
+                    text = "⚠️ Recommended minimum is 10 seconds. Lower intervals may cause excessive requests and may risk account restrictions.",
+
+                    style = MaterialTheme.typography.bodySmall
+
+                )
+
+            }
+
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
+
+
+            Button(
+
+                onClick = {
+
+                    viewModel.saveSettings(
+
+                        apiUser = apiUser,
+
+                        secretKey = secretKey,
+
+                        eaEmail = eaEmail,
+
+                        platform = platform,
+
+                        minimumPrice = minimumPrice,
+
+                        maximumPrice = maximumPrice,
+
+                        playerType = playerType,
+
+                        pollInterval = pollInterval
+
+                    )
+
+                },
+
+                modifier = Modifier.fillMaxWidth()
+
+            ) {
+
+                Text("Save")
+
+            }
+
+        }
+
+    }
+
+}
