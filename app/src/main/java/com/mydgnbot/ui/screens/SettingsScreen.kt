@@ -465,46 +465,45 @@ val coroutineScope =
 
             Button(
 
-                onClick = {
+    onClick = {
 
-                    viewModel.saveSettings(
+        viewModel.saveSettings(
 
-    apiUser = apiUser,
+            apiUser = apiUser,
 
-    secretKey = secretKey,
+            secretKey = secretKey,
 
-    eaEmail = eaEmail,
+            eaEmail = eaEmail,
 
-    platform = platform,
+            platform = platform,
 
-    minimumPrice = minimumPrice,
+            minimumPrice = minimumPrice,
 
-    maximumPrice = maximumPrice,
+            maximumPrice = maximumPrice,
 
-    playerType = playerType,
+            playerType = playerType,
 
-    pollInterval = pollInterval
+            pollInterval = pollInterval
 
-)
+        )
 
-coroutineScope.launch {
+        coroutineScope.launch {
 
-    snackbarHostState.showSnackbar(
-        "Settings saved ✓"
-    )
+            snackbarHostState.showSnackbar(
+                "Settings saved ✓"
+            )
+
+        }
+
+    },
+
+    modifier = Modifier.fillMaxWidth()
+
+) {
+
+    Text("Save")
 
 }
-                    )
-
-                },
-
-                modifier = Modifier.fillMaxWidth()
-
-            ) {
-
-                Text("Save")
-
-            }
 
 
             Spacer(
