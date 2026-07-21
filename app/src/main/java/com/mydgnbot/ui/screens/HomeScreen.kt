@@ -18,10 +18,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.components.ActionButtons
+import com.mydgnbot.ui.components.ActivityLogCard
 import com.mydgnbot.ui.components.BotActionState
 import com.mydgnbot.ui.components.HomeHeader
 import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,6 +35,7 @@ fun HomeScreen(
 
 ) {
 
+
     val player by viewModel.player.collectAsState()
 
     val settings by viewModel.settings.collectAsState()
@@ -41,23 +44,33 @@ fun HomeScreen(
 
     val isRunning by viewModel.isRunning.collectAsState()
 
+    val logs by viewModel.logs.collectAsState()
+
+
 
     val platform =
         settings["platform"]
             ?: "Console"
 
 
+
     val method =
         if (settings["player_type"] == "1") {
+
             "Safe"
+
         } else {
+
             "Quick Sell"
+
         }
+
 
 
     val interval =
         settings["poll_interval"]
             ?: "10"
+
 
 
     Scaffold(
@@ -78,19 +91,27 @@ fun HomeScreen(
 
     ) { padding ->
 
+
         Column(
 
             modifier = Modifier
+
                 .fillMaxSize()
+
                 .padding(padding)
+
                 .padding(16.dp)
+
                 .verticalScroll(
                     rememberScrollState()
                 ),
 
-            verticalArrangement = Arrangement.Top
+
+            verticalArrangement =
+                Arrangement.Top
 
         ) {
+
 
             HomeHeader(
 
@@ -105,9 +126,13 @@ fun HomeScreen(
             )
 
 
+
             Spacer(
+
                 modifier = Modifier.height(16.dp)
+
             )
+
 
 
             PlayerCard(
@@ -117,25 +142,38 @@ fun HomeScreen(
             )
 
 
+
             Spacer(
+
                 modifier = Modifier.height(16.dp)
+
             )
+
 
 
             ActionButtons(
 
                 state = when {
 
+
                     player != null ->
+
                         BotActionState.PLAYER_FOUND
 
+
+
                     isRunning ->
+
                         BotActionState.SEARCHING
 
+
+
                     else ->
+
                         BotActionState.IDLE
 
                 },
+
 
                 onStartClick = {
 
@@ -143,11 +181,13 @@ fun HomeScreen(
 
                 },
 
+
                 onStopClick = {
 
                     viewModel.stopBot()
 
                 },
+
 
                 onBoughtClick = {
 
@@ -155,13 +195,31 @@ fun HomeScreen(
 
                 },
 
+
                 onCancelClick = {
 
                     viewModel.cancelPlayer()
 
                 },
 
+
                 onSettingsClick = onSettingsClick
+
+            )
+
+
+
+            Spacer(
+
+                modifier = Modifier.height(16.dp)
+
+            )
+
+
+
+            ActivityLogCard(
+
+                logs = logs
 
             )
 
