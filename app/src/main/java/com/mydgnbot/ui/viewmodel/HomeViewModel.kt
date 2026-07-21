@@ -10,6 +10,8 @@ import com.mydgnbot.domain.model.Player
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch
 
 
@@ -37,6 +39,16 @@ class HomeViewModel(
 
 
 
+    val settings =
+        settingsRepository.settings
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyMap()
+            )
+
+
+
     fun fetchPlayer() {
 
 
@@ -47,8 +59,9 @@ class HomeViewModel(
                 "Searching..."
 
 
-            val settings =
-                settingsRepository.settings.first()
+
+            val currentSettings =
+                settings.first()
 
 
 
@@ -57,34 +70,34 @@ class HomeViewModel(
                 playerRepository.fetchPlayers(
 
                     user =
-                        settings["api_user"]
+                        currentSettings["api_user"]
                             ?: "",
 
 
                     secretKey =
-                        settings["secret_key"]
+                        currentSettings["secret_key"]
                             ?: "",
 
 
                     platform =
-                        settings["platform"]
+                        currentSettings["platform"]
                             ?: "Console",
 
 
                     playerType =
-                        settings["player_type"]
+                        currentSettings["player_type"]
                             ?.toIntOrNull()
                             ?: 2,
 
 
                     minimumPrice =
-                        settings["minimum_price"]
+                        currentSettings["minimum_price"]
                             ?.toIntOrNull()
                             ?: 4000,
 
 
                     maximumPrice =
-                        settings["maximum_price"]
+                        currentSettings["maximum_price"]
                             ?.toIntOrNull()
                             ?: 300000
 
