@@ -41,6 +41,8 @@ fun HomeScreen(
 
     val settings by viewModel.settings.collectAsState()
 
+    val isOnline by viewModel.isOnline.collectAsState()
+
 
 
     val platform =
@@ -120,7 +122,7 @@ fun HomeScreen(
 
                 interval = interval,
 
-                connected = true
+                connected = isOnline
 
             )
 
@@ -201,7 +203,6 @@ fun HomeScreen(
 
 
         }
-
 
     }
 
