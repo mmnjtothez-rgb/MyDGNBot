@@ -469,21 +469,24 @@ val coroutineScope =
 
                     viewModel.saveSettings(
 
-                        apiUser = apiUser,
+    apiUser = apiUser,
 
-                        secretKey = secretKey,
+    secretKey = secretKey,
 
-                        eaEmail = eaEmail,
+    eaEmail = eaEmail,
 
-                        platform = platform,
+    platform = platform,
 
-                        minimumPrice = minimumPrice,
+    minimumPrice = minimumPrice,
 
-                        maximumPrice = maximumPrice,
+    maximumPrice = maximumPrice,
 
-                        playerType = playerType,
+    playerType = playerType,
 
-                        pollInterval = pollInterval
+    pollInterval = pollInterval
+
+)
+
 coroutineScope.launch {
 
     snackbarHostState.showSnackbar(
