@@ -14,6 +14,7 @@ import com.mydgnbot.ui.viewmodel.HomeViewModelFactory
 import com.mydgnbot.ui.viewmodel.SettingsViewModel
 import com.mydgnbot.ui.viewmodel.SettingsViewModelFactory
 
+
 sealed class Screen(val route: String) {
 
     data object Home : Screen("home")
@@ -22,55 +23,110 @@ sealed class Screen(val route: String) {
 
 }
 
+
+
 @Composable
 fun AppNavigation() {
 
+
     val navController = rememberNavController()
+
 
     val context = LocalContext.current
 
+
     val appContainer = AppContainer(context)
 
+
+
     NavHost(
+
         navController = navController,
+
         startDestination = Screen.Home.route
+
     ) {
+
+
 
         composable(Screen.Home.route) {
 
-            val homeViewModel: HomeViewModel = viewModel(
-    factory = HomeViewModelFactory(
-        appContainer.playerRepository,
-        appContainer.settingsRepository
-    )
-)
 
-            HomeScreen(
-                onSettingsClick = {
-                    navController.navigate(Screen.Settings.route)
-                },
-                viewModel = homeViewModel
+            val homeViewModel: HomeViewModel = viewModel(
+
+                factory = HomeViewModelFactory(
+
+                    playerRepository =
+                        appContainer.playerRepository,
+
+
+                    settingsRepository =
+                        appContainer.settingsRepository,
+
+
+                    connectivityObserver =
+                        appContainer.connectivityObserver
+
+                )
+
             )
 
+
+
+            HomeScreen(
+
+                onSettingsClick = {
+
+                    navController.navigate(
+                        Screen.Settings.route
+                    )
+
+                },
+
+                viewModel = homeViewModel
+
+            )
+
+
         }
+
+
+
+
 
         composable(Screen.Settings.route) {
 
+
+
             val settingsViewModel: SettingsViewModel = viewModel(
+
                 factory = SettingsViewModelFactory(
+
                     appContainer.settingsRepository
+
                 )
+
             )
 
+
+
             SettingsScreen(
+
                 onBackClick = {
+
                     navController.popBackStack()
+
                 },
+
                 viewModel = settingsViewModel
+
             )
+
 
         }
 
+
     }
+
 
 }
