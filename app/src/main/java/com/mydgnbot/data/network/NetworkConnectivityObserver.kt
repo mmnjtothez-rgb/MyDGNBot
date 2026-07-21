@@ -3,9 +3,9 @@ package com.mydgnbot.data.network
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
 
 
 class NetworkConnectivityObserver(
@@ -72,11 +72,7 @@ class NetworkConnectivityObserver(
                         network: android.net.Network
                     ) {
 
-                        launch {
-
-                            checkConnection()
-
-                        }
+                        checkConnection()
 
                     }
 
@@ -86,13 +82,10 @@ class NetworkConnectivityObserver(
                         network: android.net.Network
                     ) {
 
-                        launch {
-
-                            checkConnection()
-
-                        }
+                        checkConnection()
 
                     }
+
 
                 }
 
