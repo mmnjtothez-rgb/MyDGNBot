@@ -39,6 +39,38 @@ fun HomeScreen(
 
     val status by viewModel.status.collectAsState()
 
+    val settings by viewModel.settings.collectAsState()
+
+
+
+    val platform =
+
+        settings["platform"]
+            ?: "Console"
+
+
+
+    val method =
+
+        if (
+            settings["player_type"] == "1"
+        ) {
+
+            "Safe"
+
+        } else {
+
+            "Quick Sell"
+
+        }
+
+
+
+    val interval =
+
+        settings["poll_interval"]
+            ?: "10"
+
 
 
     Scaffold(
@@ -74,6 +106,7 @@ fun HomeScreen(
                     rememberScrollState()
                 ),
 
+
             verticalArrangement = Arrangement.Top
 
         ) {
@@ -81,11 +114,11 @@ fun HomeScreen(
 
             HomeHeader(
 
-                platform = "PC",
+                platform = platform,
 
-                method = "Quick Sell",
+                method = method,
 
-                interval = "10",
+                interval = interval,
 
                 connected = true
 
@@ -125,13 +158,16 @@ fun HomeScreen(
 
                         BotActionState.PLAYER_FOUND
 
+
                     else if (status == "Searching...")
 
                         BotActionState.SEARCHING
 
+
                     else
 
                         BotActionState.IDLE,
+
 
 
                 onStartClick = {
@@ -143,15 +179,18 @@ fun HomeScreen(
 
                 onStopClick = {
 
+
                 },
 
 
                 onBoughtClick = {
 
+
                 },
 
 
                 onCancelClick = {
+
 
                 },
 
@@ -160,8 +199,11 @@ fun HomeScreen(
 
             )
 
+
         }
 
+
     }
+
 
 }
