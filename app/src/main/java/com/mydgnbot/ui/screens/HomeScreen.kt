@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.MaterialTheme
 import com.mydgnbot.ui.components.ActionButtons
 import com.mydgnbot.ui.components.ActivityLogCard
 import com.mydgnbot.ui.components.BotActionState
@@ -39,7 +40,7 @@ fun HomeScreen(
     val player by viewModel.player.collectAsState()
 
     val settings by viewModel.settings.collectAsState()
-
+    val status by viewModel.status.collectAsState()
     val isOnline by viewModel.isOnline.collectAsState()
 
     val isRunning by viewModel.isRunning.collectAsState()
@@ -125,7 +126,18 @@ fun HomeScreen(
 
             )
 
+Spacer(
+    modifier = Modifier.height(12.dp)
+)
 
+
+Text(
+
+    text = "Status: $status",
+
+    style = MaterialTheme.typography.bodyMedium
+
+)
 
             Spacer(
 
