@@ -12,36 +12,59 @@ class SettingsViewModel(
 ) : ViewModel() {
 
 
-    val settings = repository.settings
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyMap()
-        )
+    val settings =
+        repository.settings
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyMap()
+            )
 
 
     fun saveSettings(
+
         apiUser: String,
+
         secretKey: String,
+
+        eaEmail: String,
+
         platform: String,
+
         minimumPrice: String,
+
         maximumPrice: String,
+
         playerType: String,
+
         pollInterval: String
+
     ) {
 
         viewModelScope.launch {
 
             repository.saveSettings(
+
                 apiUser = apiUser,
+
                 secretKey = secretKey,
+
+                eaEmail = eaEmail,
+
                 platform = platform,
+
                 minimumPrice = minimumPrice,
+
                 maximumPrice = maximumPrice,
+
                 playerType = playerType,
+
                 pollInterval = pollInterval
+
             )
 
         }
+
     }
+
 }
