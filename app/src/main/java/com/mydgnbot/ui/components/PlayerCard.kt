@@ -1,25 +1,34 @@
 package com.mydgnbot.ui.components
 
-import androidx.compose.foundation.Image
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mydgnbot.domain.model.Player
+import kotlinx.coroutines.delay
 
 
 @Composable
@@ -28,6 +37,11 @@ fun PlayerCard(
     player: Player?
 
 ) {
+
+
+    val context =
+        LocalContext.current
+
 
 
     Card(
@@ -54,17 +68,13 @@ fun PlayerCard(
 
             if (player == null) {
 
-
                 Text(
-
                     text =
                         "Waiting for player...",
 
                     style =
                         MaterialTheme.typography.bodyLarge
-
                 )
-
 
                 return@Column
 
@@ -72,7 +82,35 @@ fun PlayerCard(
 
 
 
-            // FC style header
+            val remainingTime =
+                remember(player.marketExpiry) {
+
+                    mutableLongStateOf(
+                        player.marketExpiry -
+                                (System.currentTimeMillis() / 1000)
+                    )
+
+                }
+
+
+
+            LaunchedEffect(player.marketExpiry) {
+
+                while (
+                    remainingTime.longValue > 0
+                ) {
+
+                    delay(1000)
+
+                    remainingTime.longValue =
+                        player.marketExpiry -
+                                (System.currentTimeMillis() / 1000)
+
+                }
+
+            }
+
+
 
             Row(
 
@@ -104,10 +142,8 @@ fun PlayerCard(
 
 
                 Spacer(
-
                     modifier =
                         Modifier.size(16.dp)
-
                 )
 
 
@@ -126,16 +162,6 @@ fun PlayerCard(
                     )
 
 
-
-                    Spacer(
-
-                        modifier =
-                            Modifier.height(4.dp)
-
-                    )
-
-
-
                     Text(
 
                         text =
@@ -145,7 +171,6 @@ fun PlayerCard(
                             MaterialTheme.typography.titleMedium
 
                     )
-
 
 
                     Text(
@@ -164,15 +189,11 @@ fun PlayerCard(
 
 
             Spacer(
-
                 modifier =
                     Modifier.height(12.dp)
-
             )
 
 
-
-            // Prices
 
             Row(
 
@@ -187,18 +208,15 @@ fun PlayerCard(
 
                 Column {
 
-
                     Text(
                         text =
                             "Starting Bid"
                     )
 
-
                     Text(
                         text =
                             "${player.startPrice}"
                     )
-
 
                 }
 
@@ -206,18 +224,15 @@ fun PlayerCard(
 
                 Column {
 
-
                     Text(
                         text =
                             "Buy Now"
                     )
 
-
                     Text(
                         text =
                             "${player.buyNowPrice}"
                     )
-
 
                 }
 
@@ -226,10 +241,31 @@ fun PlayerCard(
 
 
 
-            Spacer(
+            Text(
+
+                text =
+                    "Futbin Price: ${player.cardValue}",
 
                 modifier =
-                    Modifier.height(8.dp)
+                    Modifier.clickable {
+
+                        val url =
+                            "https://www.futbin.com/player/${player.baseId}"
+
+
+                        context.startActivity(
+
+                            Intent(
+
+                                Intent.ACTION_VIEW,
+
+                                Uri.parse(url)
+
+                            )
+
+                        )
+
+                    }
 
             )
 
@@ -238,24 +274,7 @@ fun PlayerCard(
             Text(
 
                 text =
-                    "MyDGN Value: ${player.cardValue}"
-
-            )
-
-
-            Text(
-
-                text =
-                    "Payment: $${player.payment}"
-
-            )
-
-
-
-            Spacer(
-
-                modifier =
-                    Modifier.height(8.dp)
+                    "You Earn: $${player.payment}"
 
             )
 
@@ -269,6 +288,7 @@ fun PlayerCard(
             )
 
 
+
             Text(
 
                 text =
@@ -277,19 +297,15 @@ fun PlayerCard(
             )
 
 
+
             Text(
 
                 text =
-                    "Market Expiry: ${player.marketExpiry}"
-
-            )
-
-
-
-            Spacer(
-
-                modifier =
-                    Modifier.height(8.dp)
+                    "Expires in: ${
+                        formatCountdown(
+                            remainingTime.longValue
+                        )
+                    }"
 
             )
 
@@ -314,12 +330,82 @@ fun PlayerCard(
             Text(
 
                 text =
-                    "Status: ${player.status}"
+                    "Order: ${
+                        readableStatus(
+                            player.status
+                        )
+                    }"
 
             )
 
 
         }
+
+    }
+
+}
+
+
+
+private fun formatCountdown(
+
+    seconds: Long
+
+): String {
+
+
+    if (seconds <= 0) {
+
+        return "Expired"
+
+    }
+
+
+    val minutes =
+        seconds / 60
+
+
+    val remainingSeconds =
+        seconds % 60
+
+
+
+    return String.format(
+
+        "%02d:%02d",
+
+        minutes,
+
+        remainingSeconds
+
+    )
+
+}
+
+
+
+private fun readableStatus(
+
+    status: String
+
+): String {
+
+
+    return when (
+        status.lowercase()
+    ) {
+
+        "buy" ->
+            "Waiting for purchase"
+
+        "bought" ->
+            "Completed"
+
+        "cancel" ->
+            "Cancelled"
+
+        else ->
+            status
 
     }
 
