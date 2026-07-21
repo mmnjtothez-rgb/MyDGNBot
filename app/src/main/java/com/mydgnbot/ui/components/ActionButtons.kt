@@ -8,6 +8,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
 
 enum class BotActionState {
@@ -49,7 +50,7 @@ fun ActionButtons(
 
                 modifier = Modifier.fillMaxWidth(),
 
-                horizontalArrangement = Arrangement.spacedBy(8f)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
 
             ) {
 
@@ -115,7 +116,7 @@ fun ActionButtons(
 
                 modifier = Modifier.fillMaxWidth(),
 
-                horizontalArrangement = Arrangement.spacedBy(8f)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
 
             ) {
 
