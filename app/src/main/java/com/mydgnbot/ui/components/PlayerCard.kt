@@ -250,7 +250,7 @@ fun PlayerCard(
                     Modifier.clickable {
 
                         val url =
-                            "https://www.futbin.com/player/${player.assetId}"
+                            "https://www.futbin.com/26/player/${player.assetId}"
 
 
                         context.startActivity(
