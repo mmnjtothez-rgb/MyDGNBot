@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+
 class HomeViewModel(
 
     private val playerRepository: PlayerRepository,
@@ -96,16 +97,20 @@ class HomeViewModel(
 
                 }
 
+
                 val currentSettings =
                     settings.first()
+
 
                 val intervalSeconds =
                     currentSettings["poll_interval"]
                         ?.toLongOrNull()
                         ?: 10L
 
+
                 _status.value =
                     "Waiting..."
+
 
                 delay(intervalSeconds * 1000)
 
@@ -131,12 +136,16 @@ class HomeViewModel(
 
 
 
+
     suspend fun fetchPlayer() {
 
-        _status.value = "Searching..."
+        _status.value =
+            "Searching..."
+
 
         val currentSettings =
             settings.first()
+
 
         val result =
             playerRepository.fetchPlayers(
@@ -170,16 +179,20 @@ class HomeViewModel(
 
             )
 
+
         val apiPlayer =
             result.firstOrNull()
+
 
         if (apiPlayer != null) {
 
             _player.value =
                 apiPlayer.toPlayer()
 
+
             _status.value =
                 "Player found"
+
 
         } else {
 
@@ -187,6 +200,150 @@ class HomeViewModel(
 
             _status.value =
                 "No player found"
+
+        }
+
+    }
+
+
+
+
+    fun markBought() {
+
+        viewModelScope.launch {
+
+            val currentPlayer =
+                _player.value
+                    ?: return@launch
+
+
+            val transactionId =
+                currentPlayer.transactionId
+                    .toIntOrNull()
+                    ?: return@launch
+
+
+            val currentSettings =
+                settings.first()
+
+
+            _status.value =
+                "Sending bought..."
+
+
+            playerRepository.updateOrderStatus(
+
+                user =
+                    currentSettings["api_user"]
+                        ?: "",
+
+
+                secretKey =
+                    currentSettings["secret_key"]
+                        ?: "",
+
+
+                platform =
+                    currentSettings["platform"]
+                        ?: "Console",
+
+
+                transactionId =
+                    transactionId,
+
+
+                status =
+                    "bought",
+
+
+                emailHash =
+                    ""
+
+            )
+
+
+            _player.value = null
+
+
+            _status.value =
+                "Ready"
+
+
+            startBot()
+
+        }
+
+    }
+
+
+
+
+    fun cancelPlayer() {
+
+        viewModelScope.launch {
+
+            val currentPlayer =
+                _player.value
+                    ?: return@launch
+
+
+            val transactionId =
+                currentPlayer.transactionId
+                    .toIntOrNull()
+                    ?: return@launch
+
+
+            val currentSettings =
+                settings.first()
+
+
+            _status.value =
+                "Sending cancel..."
+
+
+            playerRepository.updateOrderStatus(
+
+                user =
+                    currentSettings["api_user"]
+                        ?: "",
+
+
+                secretKey =
+                    currentSettings["secret_key"]
+                        ?: "",
+
+
+                platform =
+                    currentSettings["platform"]
+                        ?: "Console",
+
+
+                transactionId =
+                    transactionId,
+
+
+                status =
+                    "cancel",
+
+
+                emailHash =
+                    "",
+
+
+                code =
+                    551
+
+            )
+
+
+            _player.value = null
+
+
+            _status.value =
+                "Ready"
+
+
+            startBot()
 
         }
 
