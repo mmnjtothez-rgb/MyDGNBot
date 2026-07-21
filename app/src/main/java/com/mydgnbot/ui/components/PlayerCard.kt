@@ -1,5 +1,6 @@
 package com.mydgnbot.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,7 +35,10 @@ fun PlayerCard(
         Column(
 
             modifier = Modifier
-                .padding(16.dp)
+                .padding(16.dp),
+
+            verticalArrangement =
+                Arrangement.spacedBy(6.dp)
 
         ) {
 
@@ -46,7 +50,8 @@ fun PlayerCard(
 
                     text = "Waiting for player...",
 
-                    style = MaterialTheme.typography.bodyLarge
+                    style =
+                        MaterialTheme.typography.bodyLarge
 
                 )
 
@@ -61,15 +66,8 @@ fun PlayerCard(
 
                 text = player.playerName,
 
-                style = MaterialTheme.typography.titleLarge
-
-            )
-
-
-
-            Spacer(
-
-                modifier = Modifier.height(8.dp)
+                style =
+                    MaterialTheme.typography.headlineSmall
 
             )
 
@@ -77,7 +75,10 @@ fun PlayerCard(
 
             Text(
 
-                text = "Rating: ${player.rating}"
+                text = "Rating ${player.rating}",
+
+                style =
+                    MaterialTheme.typography.titleMedium
 
             )
 
@@ -93,61 +94,50 @@ fun PlayerCard(
 
             Spacer(
 
-                modifier = Modifier.height(8.dp)
+                modifier =
+                    Modifier.height(12.dp)
 
             )
 
 
 
-            Row {
+            Row(
 
-                Column(
+                modifier =
+                    Modifier.fillMaxWidth(),
 
-                    modifier = Modifier.weight(1f)
+                horizontalArrangement =
+                    Arrangement.SpaceBetween
 
-                ) {
+            ) {
 
 
-                    Text(
-
-                        text = "Start Price"
-
-                    )
-
+                Column {
 
                     Text(
-
-                        text = player.startPrice.toString()
-
+                        text = "Starting Bid"
                     )
 
+                    Text(
+                        text = "${player.startPrice}"
+                    )
 
                 }
 
 
 
-                Column(
-
-                    modifier = Modifier.weight(1f)
-
-                ) {
-
+                Column {
 
                     Text(
-
                         text = "Buy Now"
-
                     )
-
 
                     Text(
-
-                        text = player.buyNowPrice.toString()
-
+                        text = "${player.buyNowPrice}"
                     )
 
-
                 }
+
 
             }
 
@@ -155,55 +145,83 @@ fun PlayerCard(
 
             Spacer(
 
-                modifier = Modifier.height(8.dp)
+                modifier =
+                    Modifier.height(12.dp)
 
             )
 
 
 
             Text(
+                text =
+                    "MyDGN Value: ${player.cardValue}"
+            )
 
-                text = "Card Value: ${player.cardValue}"
+
+            Text(
+                text =
+                    "Payment: $${player.payment}"
+            )
+
+
+
+            Spacer(
+
+                modifier =
+                    Modifier.height(8.dp)
 
             )
 
 
 
             Text(
+                text =
+                    "Chemistry Style: ${player.chemistryStyle}"
+            )
 
-                text = "Payment: $${player.payment}"
+
+            Text(
+                text =
+                    "Owners: ${player.owners}"
+            )
+
+
+            Text(
+                text =
+                    "Market Expiry: ${player.marketExpiry}"
+            )
+
+
+
+            Spacer(
+
+                modifier =
+                    Modifier.height(8.dp)
 
             )
 
 
 
             Text(
-
-                text = "Chemistry Style: ${player.chemistryStyle}"
-
+                text =
+                    "Transaction ID: ${player.transactionId}"
             )
 
 
-
             Text(
-
-                text = "Owners: ${player.owners}"
-
+                text =
+                    "Trade ID: ${player.tradeId}"
             )
 
 
-
             Text(
-
-                text = "Market Time: ${player.marketExpiry}"
-
+                text =
+                    "Status: ${player.status}"
             )
 
 
         }
 
-
     }
-
 
 }
