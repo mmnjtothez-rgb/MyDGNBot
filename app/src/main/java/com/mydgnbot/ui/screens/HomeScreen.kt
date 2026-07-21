@@ -23,7 +23,6 @@ import com.mydgnbot.ui.components.HomeHeader
 import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -43,23 +42,22 @@ fun HomeScreen(
     val isRunning by viewModel.isRunning.collectAsState()
 
 
-
     val platform =
-        settings["platform"] ?: "Console"
-
+        settings["platform"]
+            ?: "Console"
 
 
     val method =
-        if (settings["player_type"] == "1")
+        if (settings["player_type"] == "1") {
             "Safe"
-        else
+        } else {
             "Quick Sell"
-
+        }
 
 
     val interval =
-        settings["poll_interval"] ?: "10"
-
+        settings["poll_interval"]
+            ?: "10"
 
 
     Scaffold(
@@ -106,34 +104,38 @@ fun HomeScreen(
 
             )
 
+
             Spacer(
                 modifier = Modifier.height(16.dp)
             )
+
 
             PlayerCard(
+
                 player = player
+
             )
+
 
             Spacer(
                 modifier = Modifier.height(16.dp)
             )
+
 
             ActionButtons(
 
-                state =
+                state = when {
 
-                    when {
+                    player != null ->
+                        BotActionState.PLAYER_FOUND
 
-                        player != null ->
-                            BotActionState.PLAYER_FOUND
+                    isRunning ->
+                        BotActionState.SEARCHING
 
-                        isRunning ->
-                            BotActionState.SEARCHING
+                    else ->
+                        BotActionState.IDLE
 
-                        else ->
-                            BotActionState.IDLE
-
-                    },
+                },
 
                 onStartClick = {
 
@@ -149,9 +151,13 @@ fun HomeScreen(
 
                 onBoughtClick = {
 
+                    viewModel.markBought()
+
                 },
 
                 onCancelClick = {
+
+                    viewModel.cancelPlayer()
 
                 },
 
