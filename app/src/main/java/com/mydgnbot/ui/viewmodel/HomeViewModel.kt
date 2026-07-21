@@ -227,45 +227,60 @@ class HomeViewModel(
                 "Sending bought..."
 
 
-            playerRepository.updateOrderStatus(
+            val response =
+                playerRepository.updateOrderStatus(
 
-                user =
-                    currentSettings["api_user"]
-                        ?: "",
+                    user =
+                        currentSettings["api_user"]
+                            ?: "",
 
+                    secretKey =
+                        currentSettings["secret_key"]
+                            ?: "",
 
-                secretKey =
-                    currentSettings["secret_key"]
-                        ?: "",
+                    platform =
+                        currentSettings["platform"]
+                            ?: "Console",
 
+                    transactionId =
+                        transactionId,
 
-                platform =
-                    currentSettings["platform"]
-                        ?: "Console",
+                    status =
+                        "bought",
 
+                    eaEmail =
+                        currentSettings["ea_email"]
+                            ?: ""
 
-                transactionId =
-                    transactionId,
-
-
-                status =
-                    "bought",
-
-
-                eaEmail =
-                    currentSettings["ea_email"]
-                        ?: ""
-
-            )
+                )
 
 
-            _player.value = null
+            if (response?.code == 200) {
 
-            _status.value =
-                "Ready"
+                _status.value =
+                    "Bought ✓"
 
 
-            startBot()
+                _player.value = null
+
+
+                delay(1000)
+
+
+                _status.value =
+                    "Ready"
+
+
+                startBot()
+
+
+            } else {
+
+                _status.value =
+                    response?.status
+                        ?: "Bought failed"
+
+            }
 
         }
 
@@ -296,44 +311,59 @@ class HomeViewModel(
                 "Sending cancel..."
 
 
-            playerRepository.updateOrderStatus(
+            val response =
+                playerRepository.updateOrderStatus(
 
-                user =
-                    currentSettings["api_user"]
-                        ?: "",
+                    user =
+                        currentSettings["api_user"]
+                            ?: "",
 
+                    secretKey =
+                        currentSettings["secret_key"]
+                            ?: "",
 
-                secretKey =
-                    currentSettings["secret_key"]
-                        ?: "",
+                    platform =
+                        currentSettings["platform"]
+                            ?: "Console",
 
+                    transactionId =
+                        transactionId,
 
-                platform =
-                    currentSettings["platform"]
-                        ?: "Console",
+                    status =
+                        "cancel",
 
+                    code =
+                        551
 
-                transactionId =
-                    transactionId,
-
-
-                status =
-                    "cancel",
-
-
-                code =
-                    551
-
-            )
+                )
 
 
-            _player.value = null
+            if (response?.code == 200) {
 
-            _status.value =
-                "Ready"
+                _status.value =
+                    "Cancelled ✓"
 
 
-            startBot()
+                _player.value = null
+
+
+                delay(1000)
+
+
+                _status.value =
+                    "Ready"
+
+
+                startBot()
+
+
+            } else {
+
+                _status.value =
+                    response?.status
+                        ?: "Cancel failed"
+
+            }
 
         }
 
