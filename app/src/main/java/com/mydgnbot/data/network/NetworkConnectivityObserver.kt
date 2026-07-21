@@ -49,7 +49,11 @@ class NetworkConnectivityObserver(
 
                     capabilities?.hasCapability(
                         NetworkCapabilities.NET_CAPABILITY_INTERNET
-                    ) == true
+                    ) == true &&
+
+                    capabilities.hasCapability(
+                        NetworkCapabilities.NET_CAPABILITY_VALIDATED
+                    )
 
 
 
@@ -78,11 +82,27 @@ class NetworkConnectivityObserver(
 
 
 
-                    override fun onLost(
-                        network: android.net.Network
+                    override fun onCapabilitiesChanged(
+
+                        network: android.net.Network,
+
+                        networkCapabilities: NetworkCapabilities
+
                     ) {
 
                         checkConnection()
+
+                    }
+
+
+
+                    override fun onLost(
+
+                        network: android.net.Network
+
+                    ) {
+
+                        trySend(false)
 
                     }
 
@@ -92,7 +112,9 @@ class NetworkConnectivityObserver(
 
 
             connectivityManager.registerDefaultNetworkCallback(
+
                 callback
+
             )
 
 
@@ -101,7 +123,9 @@ class NetworkConnectivityObserver(
 
 
                 connectivityManager.unregisterNetworkCallback(
+
                     callback
+
                 )
 
 
