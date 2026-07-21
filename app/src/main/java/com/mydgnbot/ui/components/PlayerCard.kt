@@ -1,18 +1,24 @@
 package com.mydgnbot.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.mydgnbot.domain.model.Player
 
 
@@ -26,19 +32,22 @@ fun PlayerCard(
 
     Card(
 
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier =
+            Modifier.fillMaxWidth(),
+
+        shape =
+            RoundedCornerShape(20.dp)
 
     ) {
 
 
         Column(
 
-            modifier = Modifier
-                .padding(16.dp),
+            modifier =
+                Modifier.padding(16.dp),
 
             verticalArrangement =
-                Arrangement.spacedBy(6.dp)
+                Arrangement.spacedBy(8.dp)
 
         ) {
 
@@ -48,7 +57,8 @@ fun PlayerCard(
 
                 Text(
 
-                    text = "Waiting for player...",
+                    text =
+                        "Waiting for player...",
 
                     style =
                         MaterialTheme.typography.bodyLarge
@@ -62,33 +72,94 @@ fun PlayerCard(
 
 
 
-            Text(
+            // FC style header
 
-                text = player.playerName,
+            Row(
 
-                style =
-                    MaterialTheme.typography.headlineSmall
+                modifier =
+                    Modifier.fillMaxWidth(),
 
-            )
+                verticalAlignment =
+                    Alignment.CenterVertically
 
-
-
-            Text(
-
-                text = "Rating ${player.rating}",
-
-                style =
-                    MaterialTheme.typography.titleMedium
-
-            )
+            ) {
 
 
+                AsyncImage(
 
-            Text(
+                    model =
+                        player.imageUrl,
 
-                text = "Platform: ${player.platform}"
+                    contentDescription =
+                        player.playerName,
 
-            )
+                    modifier =
+                        Modifier.size(110.dp),
+
+                    contentScale =
+                        ContentScale.Fit
+
+                )
+
+
+
+                Spacer(
+
+                    modifier =
+                        Modifier.size(16.dp)
+
+                )
+
+
+
+                Column {
+
+
+                    Text(
+
+                        text =
+                            player.playerName,
+
+                        style =
+                            MaterialTheme.typography.headlineSmall
+
+                    )
+
+
+
+                    Spacer(
+
+                        modifier =
+                            Modifier.height(4.dp)
+
+                    )
+
+
+
+                    Text(
+
+                        text =
+                            "Rating ${player.rating}",
+
+                        style =
+                            MaterialTheme.typography.titleMedium
+
+                    )
+
+
+
+                    Text(
+
+                        text =
+                            "Platform: ${player.platform}"
+
+                    )
+
+
+                }
+
+
+            }
 
 
 
@@ -100,6 +171,8 @@ fun PlayerCard(
             )
 
 
+
+            // Prices
 
             Row(
 
@@ -114,13 +187,18 @@ fun PlayerCard(
 
                 Column {
 
-                    Text(
-                        text = "Starting Bid"
-                    )
 
                     Text(
-                        text = "${player.startPrice}"
+                        text =
+                            "Starting Bid"
                     )
+
+
+                    Text(
+                        text =
+                            "${player.startPrice}"
+                    )
+
 
                 }
 
@@ -128,13 +206,18 @@ fun PlayerCard(
 
                 Column {
 
-                    Text(
-                        text = "Buy Now"
-                    )
 
                     Text(
-                        text = "${player.buyNowPrice}"
+                        text =
+                            "Buy Now"
                     )
+
+
+                    Text(
+                        text =
+                            "${player.buyNowPrice}"
+                    )
+
 
                 }
 
@@ -146,21 +229,25 @@ fun PlayerCard(
             Spacer(
 
                 modifier =
-                    Modifier.height(12.dp)
+                    Modifier.height(8.dp)
 
             )
 
 
 
             Text(
+
                 text =
                     "MyDGN Value: ${player.cardValue}"
+
             )
 
 
             Text(
+
                 text =
                     "Payment: $${player.payment}"
+
             )
 
 
@@ -175,20 +262,26 @@ fun PlayerCard(
 
 
             Text(
+
                 text =
                     "Chemistry Style: ${player.chemistryStyle}"
+
             )
 
 
             Text(
+
                 text =
                     "Owners: ${player.owners}"
+
             )
 
 
             Text(
+
                 text =
                     "Market Expiry: ${player.marketExpiry}"
+
             )
 
 
@@ -203,20 +296,26 @@ fun PlayerCard(
 
 
             Text(
+
                 text =
                     "Transaction ID: ${player.transactionId}"
+
             )
 
 
             Text(
+
                 text =
                     "Trade ID: ${player.tradeId}"
+
             )
 
 
             Text(
+
                 text =
                     "Status: ${player.status}"
+
             )
 
 
