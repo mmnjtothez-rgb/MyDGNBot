@@ -5,13 +5,13 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-
 object ApiClient {
 
-
-    private const val BASE_URL =
+    private const val MYDGN_BASE_URL =
         "https://api.mydgn.com/"
 
+    private const val FUTGG_BASE_URL =
+        "https://www.fut.gg/"
 
     private val loggingInterceptor =
 
@@ -21,7 +21,6 @@ object ApiClient {
                 HttpLoggingInterceptor.Level.BODY
 
         }
-
 
     private val client =
 
@@ -34,12 +33,11 @@ object ApiClient {
             .build()
 
 
-
-    val api: MyDgnApiService =
+    private val myDgnRetrofit =
 
         Retrofit.Builder()
 
-            .baseUrl(BASE_URL)
+            .baseUrl(MYDGN_BASE_URL)
 
             .client(client)
 
@@ -49,8 +47,33 @@ object ApiClient {
 
             .build()
 
-            .create(
-                MyDgnApiService::class.java
+
+    private val futGgRetrofit =
+
+        Retrofit.Builder()
+
+            .baseUrl(FUTGG_BASE_URL)
+
+            .client(client)
+
+            .addConverterFactory(
+                GsonConverterFactory.create()
             )
+
+            .build()
+
+
+    val api: MyDgnApiService =
+
+        myDgnRetrofit.create(
+            MyDgnApiService::class.java
+        )
+
+
+    val futGgApi: FutGgApiService =
+
+        futGgRetrofit.create(
+            FutGgApiService::class.java
+        )
 
 }
