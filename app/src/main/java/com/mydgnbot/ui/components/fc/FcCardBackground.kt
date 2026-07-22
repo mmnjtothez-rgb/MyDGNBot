@@ -2,9 +2,9 @@ package com.mydgnbot.ui.components.fc
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import androidx.compose.ui.platform.LocalContext
 
 
 @Composable
@@ -16,18 +16,21 @@ fun FcCardBackground(
 
 ) {
 
+
     AsyncImage(
 
         model = ImageRequest.Builder(
             LocalContext.current
         )
             .data(
-                "https://cdn.futwiz.com/assets/img/fc26/items/$cardId.png"
+                FutAssets.cardBackground(cardId)
             )
             .crossfade(true)
             .build(),
 
-        contentDescription = "FC Card",
+
+        contentDescription = "FC Card Background",
+
 
         modifier = modifier
 
