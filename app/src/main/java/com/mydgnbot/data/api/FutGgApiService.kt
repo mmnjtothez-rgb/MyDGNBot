@@ -11,6 +11,6 @@ interface FutGgApiService {
         @Path("baseId")
         baseId: String
 
-    ): List<FutGgPlayer>
+    ): FutGgResponse
 
 }
