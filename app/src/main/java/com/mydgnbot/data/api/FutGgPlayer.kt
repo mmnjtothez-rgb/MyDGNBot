@@ -10,11 +10,35 @@ data class FutGgPlayer(
     @SerializedName("basePlayerEaId")
     val basePlayerEaId: Long,
 
+    @SerializedName("slug")
+    val slug: String,
+
+    @SerializedName("searchableName")
+    val searchableName: String,
+
     @SerializedName("overall")
     val overall: Int,
 
-    @SerializedName("rarityGroupName")
-    val rarityGroupName: String?,
+    @SerializedName("nationEaId")
+    val nationEaId: Int,
+
+    @SerializedName("leagueEaId")
+    val leagueEaId: Int,
+
+    @SerializedName("clubEaId")
+    val clubEaId: Int,
+
+    @SerializedName("rarityEaId")
+    val rarityEaId: Int,
+
+    @SerializedName("position")
+    val position: Int,
+
+    @SerializedName("skillMoves")
+    val skillMoves: Int,
+
+    @SerializedName("weakFoot")
+    val weakFoot: Int,
 
     @SerializedName("imageUrl")
     val imageUrl: String?,
@@ -22,16 +46,7 @@ data class FutGgPlayer(
     @SerializedName("compactImageUrl")
     val compactImageUrl: String?,
 
-    @SerializedName("clubEaId")
-    val clubEaId: Int?,
-
-    @SerializedName("nationEaId")
-    val nationEaId: Int?,
-
-    @SerializedName("leagueEaId")
-    val leagueEaId: Int?,
-
-    @SerializedName("position")
-    val position: Int?
+    @SerializedName("rarityGroupName")
+    val rarityGroupName: String?
 
 )
