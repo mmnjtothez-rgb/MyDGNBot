@@ -111,8 +111,8 @@ fun PlayerCard(
 
                     modifier = Modifier
                         .size(
-                            width = 150.dp,
-                            height = 170.dp
+                            width = 190.dp,
+                            height = 210.dp
                         )
                         .align(Alignment.Center),
 
