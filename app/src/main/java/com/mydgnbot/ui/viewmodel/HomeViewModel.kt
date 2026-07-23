@@ -261,41 +261,56 @@ suspend fun fetchPlayer() {
 
 
 
-    if (apiPlayer != null) {  
+    if (apiPlayer != null) {
 
-        _player.value =
+
     val enrichedPlayer =
 
-    playerEnrichmentRepository.enrich(
+        playerEnrichmentRepository.enrich(
 
-        apiPlayer
+            apiPlayer
 
-    )  
-
-
-        _status.value =  
-            "Player found"  
+        )
 
 
-        addLog(  
-            "Player found"  
-        )  
+
+    _player.value =
+
+        enrichedPlayer
 
 
-    } else {  
 
-        _player.value = null  
+    _status.value =
 
-
-        _status.value =  
-            "No player found"  
+        "Player found"
 
 
-        addLog(  
-            "No player found"  
-        )  
 
-    }  
+    addLog(
+
+        "Player found"
+
+    )
+
+
+} else {
+
+
+    _player.value = null
+
+
+    _status.value =
+
+        "No player found"
+
+
+    addLog(
+
+        "No player found"
+
+    )
+
+}  
 
 }  
 
