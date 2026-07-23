@@ -1,5 +1,6 @@
 package com.mydgnbot.data.repository
 
+import com.mydgnbot.data.api.FutGgPlayer
 import com.mydgnbot.data.parser.FutGgHtmlParser
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -7,42 +8,35 @@ import java.io.File
 
 class FutGgImageRepository {
 
-    private val client = OkHttpClient()
 
-    /**
-     * Downloads the official FUT.GG card image.
-     *
-     * Returns:
-     * - Cached image path if already downloaded
-     * - Newly downloaded image path
-     * - null if anything fails
-     */
+    private val client =
+        OkHttpClient()
+
+
+
     suspend fun getCardImage(
 
         cacheDir: File,
 
-        baseId: String,
-
-        assetId: String,
-
-        playerName: String
+        futGgPlayer: FutGgPlayer
 
     ): String? {
 
-        try {
 
-            val slug =
-                playerName
-                    .lowercase()
-                    .replace(" ", "-")
-                    .replace(".", "")
-                    .replace("'", "")
+        return try {
 
-            val pageUrl =
-                "https://www.fut.gg/players/$baseId-$slug/26-$assetId/"
+
+            val assetId =
+                futGgPlayer.eaId.toString()
+
+
 
             val cacheFolder =
-                File(cacheDir, "futgg")
+                File(
+                    cacheDir,
+                    "futgg"
+                )
+
 
             if (!cacheFolder.exists()) {
 
@@ -50,18 +44,29 @@ class FutGgImageRepository {
 
             }
 
-            val cachedImage =
 
+
+            val cachedFile =
                 File(
                     cacheFolder,
                     "$assetId.webp"
                 )
 
-            if (cachedImage.exists()) {
 
-                return cachedImage.absolutePath
+
+            if (cachedFile.exists()) {
+
+                return cachedFile.absolutePath
 
             }
+
+
+
+            val pageUrl =
+
+                "https://www.fut.gg/players/${futGgPlayer.slug}/26-$assetId/"
+
+
 
             val pageRequest =
 
@@ -76,6 +81,8 @@ class FutGgImageRepository {
 
                     .build()
 
+
+
             val html =
 
                 client.newCall(pageRequest)
@@ -88,11 +95,16 @@ class FutGgImageRepository {
 
                     ?: return null
 
+
+
             val imageUrl =
 
                 FutGgHtmlParser.extractCardImageUrl(
                     html
-                ) ?: return null
+                )
+                    ?: return null
+
+
 
             val imageRequest =
 
@@ -107,11 +119,15 @@ class FutGgImageRepository {
 
                     .build()
 
+
+
             val response =
 
                 client.newCall(imageRequest)
 
                     .execute()
+
+
 
             if (!response.isSuccessful) {
 
@@ -119,7 +135,9 @@ class FutGgImageRepository {
 
             }
 
-            val bytes =
+
+
+            val imageBytes =
 
                 response.body
 
@@ -127,9 +145,17 @@ class FutGgImageRepository {
 
                     ?: return null
 
-            cachedImage.writeBytes(bytes)
 
-            return cachedImage.absolutePath
+
+            cachedFile.writeBytes(
+                imageBytes
+            )
+
+
+
+            cachedFile.absolutePath
+
+
 
         } catch (
 
@@ -137,9 +163,10 @@ class FutGgImageRepository {
 
         ) {
 
+
             e.printStackTrace()
 
-            return null
+            null
 
         }
 
