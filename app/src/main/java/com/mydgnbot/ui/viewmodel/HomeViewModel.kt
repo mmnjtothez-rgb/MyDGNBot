@@ -267,17 +267,28 @@ private var logIdCounter = 0L
 
         if (apiPlayer != null) {
 
-            _player.value =
-                apiPlayer.toPlayer()
-
-
             _status.value =
-                "Player found"
+    "Loading FUT.GG..."
 
+addLog(
+    "Loading FUT.GG..."
+)
 
-            addLog(
-                "Player found"
-            )
+val enrichedPlayer =
+
+    playerEnrichmentRepository.enrich(
+        apiPlayer
+    )
+
+_player.value =
+    enrichedPlayer
+
+_status.value =
+    "Player found"
+
+addLog(
+    "Player enriched"
+)
 
 
         } else {
