@@ -6,6 +6,7 @@ import com.mydgnbot.data.mapper.ApiPlayerMapper.toPlayer
 import com.mydgnbot.data.network.ConnectivityObserver
 import com.mydgnbot.data.repository.PlayerRepository
 import com.mydgnbot.data.repository.SettingsRepository
+import com.mydgnbot.data.repository.PlayerEnrichmentRepository
 import com.mydgnbot.domain.model.LogEntry
 import com.mydgnbot.domain.model.Player
 import kotlinx.coroutines.Job
