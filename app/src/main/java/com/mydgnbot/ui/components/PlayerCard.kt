@@ -140,22 +140,20 @@ fun PlayerCard(
 
                     AsyncImage(
 
-                        model =
-                            player.imageUrl,
+    model = player.imageUrl,
 
-                        contentDescription =
-                            player.playerName,
+    contentDescription = player.playerName,
 
-                        Box(
-    modifier = Modifier.size(90.dp, 110.dp),
-    contentAlignment = Alignment.Center
-) {
-    AsyncImage(
-        model = player.imageUrl,
-        contentDescription = player.playerName,
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Crop
-    )
+    modifier =
+        Modifier.size(
+            width = 90.dp,
+            height = 110.dp
+        ),
+
+    contentScale =
+        ContentScale.Crop
+
+)
 }
 
 
