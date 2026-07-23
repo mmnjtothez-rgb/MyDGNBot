@@ -25,6 +25,9 @@ class HomeViewModel(
 
 private val playerRepository: PlayerRepository,  
 
+    private val playerEnrichmentRepository =
+    PlayerEnrichmentRepository()
+
 private val settingsRepository: SettingsRepository,  
 
 connectivityObserver: ConnectivityObserver
