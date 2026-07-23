@@ -17,19 +17,15 @@ class PlayerEnrichmentRepository(
 
 ) {
 
-
     suspend fun enrich(
 
         apiPlayer: ApiPlayer
 
     ): Player {
 
-
         var player =
 
             apiPlayer.toPlayer()
-
-
 
         val futPlayer =
 
@@ -43,10 +39,7 @@ class PlayerEnrichmentRepository(
 
             )
 
-
-
         if (futPlayer != null) {
-
 
             player =
 
@@ -55,59 +48,45 @@ class PlayerEnrichmentRepository(
                     overall =
                         futPlayer.overall,
 
-
                     rarity =
-    "FUTGG OK",
-
+                        futPlayer.rarityGroupName ?: "",
 
                     nationId =
                         futPlayer.nationEaId,
 
-
                     leagueId =
                         futPlayer.leagueEaId,
-
 
                     clubId =
                         futPlayer.clubEaId,
 
-
                     skillMoves =
                         futPlayer.skillMoves,
-
 
                     weakFoot =
                         futPlayer.weakFoot
 
                 )
 
-
-
             val imagePath =
 
                 futGgImageRepository.getCardImage(
 
                     cacheFolder =
-
                         cacheFolder,
 
                     futGgPlayer =
-
                         futPlayer
 
                 )
 
-
-
             if (imagePath != null) {
-
 
                 player =
 
                     player.copy(
 
                         imageUrl =
-
                             imagePath
 
                     )
@@ -115,8 +94,6 @@ class PlayerEnrichmentRepository(
             }
 
         }
-
-
 
         return player
 
