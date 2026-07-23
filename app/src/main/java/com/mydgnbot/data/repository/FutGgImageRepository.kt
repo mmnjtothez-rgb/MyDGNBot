@@ -2,6 +2,8 @@ package com.mydgnbot.data.repository
 
 import com.mydgnbot.data.api.FutGgPlayer
 import com.mydgnbot.data.parser.FutGgHtmlParser
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -20,7 +22,6 @@ class FutGgImageRepository {
 
 
     private val client =
-
         OkHttpClient()
 
 
@@ -31,10 +32,10 @@ class FutGgImageRepository {
 
         futGgPlayer: FutGgPlayer
 
-    ): String? {
+    ): String? = withContext(Dispatchers.IO) {
 
 
-        return try {
+        try {
 
 
             lastStatus =
@@ -75,7 +76,7 @@ class FutGgImageRepository {
                     "Image loaded from cache"
 
 
-                return cachedFile.absolutePath
+                return@withContext cachedFile.absolutePath
 
             }
 
@@ -97,7 +98,15 @@ class FutGgImageRepository {
 
                         "User-Agent",
 
-                        "Mozilla/5.0"
+                        "Mozilla/5.0 (Android)"
+
+                    )
+
+                    .header(
+
+                        "Accept",
+
+                        "text/html"
 
                     )
 
@@ -120,9 +129,9 @@ class FutGgImageRepository {
                     ?: run {
 
                         lastStatus =
-                            "Page empty"
+                            "Empty page"
 
-                        return null
+                        return@withContext null
 
                     }
 
@@ -152,7 +161,7 @@ class FutGgImageRepository {
                     "No image URL found"
 
 
-                return null
+                return@withContext null
 
             }
 
@@ -174,7 +183,15 @@ class FutGgImageRepository {
 
                         "User-Agent",
 
-                        "Mozilla/5.0"
+                        "Mozilla/5.0 (Android)"
+
+                    )
+
+                    .header(
+
+                        "Accept",
+
+                        "image/webp,image/*"
 
                     )
 
@@ -195,10 +212,10 @@ class FutGgImageRepository {
 
                 lastStatus =
 
-                    "Image download failed ${response.code}"
+                    "Image failed ${response.code}"
 
 
-                return null
+                return@withContext null
 
             }
 
@@ -215,9 +232,9 @@ class FutGgImageRepository {
                     ?: run {
 
                         lastStatus =
-                            "Empty image"
+                            "Empty image bytes"
 
-                        return null
+                        return@withContext null
 
                     }
 
@@ -243,19 +260,19 @@ class FutGgImageRepository {
 
         } catch (
 
-    e: Exception
+            e: Exception
 
-) {
-
-
-    lastStatus =
-
-        "Error: ${e.javaClass.simpleName}"
+        ) {
 
 
-    null
+            lastStatus =
 
-}
+                "Error: ${e.javaClass.simpleName}"
+
+
+            null
+
+        }
 
     }
 
