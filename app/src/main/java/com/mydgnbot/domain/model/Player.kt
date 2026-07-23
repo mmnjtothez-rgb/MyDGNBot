@@ -32,19 +32,30 @@ data class Player(
 
     val marketExpiry: Long,
 
-    val status: String
+    val status: String,
 
-) {
+    // ---------- FUT.GG ----------
 
-    /**
-     * FUT player image.
-     *
-     * This can be updated later if MyDGN
-     * changes their preferred image source.
-     */
-    val imageUrl: String
+    val overall: Int? = null,
 
-    get() =
+    val rarity: String? = null,
 
-        "https://cdn.futwiz.com/cdn-cgi/image/width=350,quality=100,format=webp/assets/img/fc26/faces/${assetId}.png"
-}
+    val imageUrl: String? = null,
+
+    val compactImageUrl: String? = null,
+
+    val nationId: Int? = null,
+
+    val leagueId: Int? = null,
+
+    val clubId: Int? = null,
+
+    val skillMoves: Int? = null,
+
+    val weakFoot: Int? = null,
+
+    val preferredFoot: Int? = null,
+
+    val position: Int? = null
+
+)
