@@ -16,7 +16,7 @@ class FutGgImageRepository {
 
     suspend fun getCardImage(
 
-        cacheDir: File,
+        cacheFolder: File,
 
         futGgPlayer: FutGgPlayer
 
@@ -24,18 +24,6 @@ class FutGgImageRepository {
 
 
         return try {
-
-
-            val assetId =
-                futGgPlayer.eaId.toString()
-
-
-
-            val cacheFolder =
-                File(
-                    cacheDir,
-                    "futgg"
-                )
 
 
             if (!cacheFolder.exists()) {
@@ -46,10 +34,18 @@ class FutGgImageRepository {
 
 
 
+            val assetId =
+                futGgPlayer.eaId.toString()
+
+
+
             val cachedFile =
                 File(
+
                     cacheFolder,
+
                     "$assetId.webp"
+
                 )
 
 
@@ -75,8 +71,11 @@ class FutGgImageRepository {
                     .url(pageUrl)
 
                     .header(
+
                         "User-Agent",
+
                         "Mozilla/5.0"
+
                     )
 
                     .build()
@@ -113,8 +112,11 @@ class FutGgImageRepository {
                     .url(imageUrl)
 
                     .header(
+
                         "User-Agent",
+
                         "Mozilla/5.0"
+
                     )
 
                     .build()
@@ -137,7 +139,7 @@ class FutGgImageRepository {
 
 
 
-            val imageBytes =
+            val bytes =
 
                 response.body
 
@@ -148,7 +150,7 @@ class FutGgImageRepository {
 
 
             cachedFile.writeBytes(
-                imageBytes
+                bytes
             )
 
 
