@@ -264,8 +264,12 @@ suspend fun fetchPlayer() {
     if (apiPlayer != null) {  
 
         _player.value =
+    val enrichedPlayer =
+
     playerEnrichmentRepository.enrich(
+
         apiPlayer
+
     )  
 
 
