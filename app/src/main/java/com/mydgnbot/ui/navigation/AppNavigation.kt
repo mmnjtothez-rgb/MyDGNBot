@@ -55,19 +55,11 @@ fun AppNavigation() {
             val homeViewModel: HomeViewModel = viewModel(
 
                 factory = HomeViewModelFactory(
-
-                    playerRepository =
-                        appContainer.playerRepository,
-
-
-                    settingsRepository =
-                        appContainer.settingsRepository,
-
-
-                    connectivityObserver =
-                        appContainer.connectivityObserver
-
-                )
+    playerRepository,
+    settingsRepository,
+    connectivityObserver,
+    context.cacheDir
+)
 
             )
 
