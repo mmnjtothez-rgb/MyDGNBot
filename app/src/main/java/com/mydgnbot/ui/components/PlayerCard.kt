@@ -1,36 +1,19 @@
 package com.mydgnbot.ui.components
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -39,122 +22,147 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun PlayerCard(
+
     player: Player?
+
 ) {
 
-    val context = LocalContext.current
+    if (player == null) {
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp)
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Text(
+                    text = "Waiting for player...",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+            }
+
+        }
+
+        return
+    }
+
+    val remainingTime = remember(player.marketExpiry) {
+
+        mutableLongStateOf(
+            player.marketExpiry -
+                    (System.currentTimeMillis() / 1000)
+        )
+
+    }
+
+    LaunchedEffect(player.marketExpiry) {
+
+        while (remainingTime.longValue > 0) {
+
+            delay(1000)
+
+            remainingTime.longValue =
+                player.marketExpiry -
+                        (System.currentTimeMillis() / 1000)
+
+        }
+
+    }
 
     Card(
+
         modifier = Modifier.fillMaxWidth(),
+
         shape = RoundedCornerShape(20.dp),
+
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
         )
+
     ) {
 
         Column(
+
             modifier = Modifier.padding(16.dp)
+
         ) {
 
-            if (player == null) {
+            Box(
 
-                Text("Waiting for player...")
+                modifier = Modifier
+                    .fillMaxWidth(),
 
-                return@Column
-            }
+                contentAlignment = Alignment.TopEnd
 
-            val remainingTime = remember(player.marketExpiry) {
-
-                mutableLongStateOf(
-                    player.marketExpiry -
-                            (System.currentTimeMillis() / 1000)
-                )
-
-            }
-
-            LaunchedEffect(player.marketExpiry) {
-
-                while (remainingTime.longValue > 0) {
-
-                    delay(1000)
-
-                    remainingTime.longValue =
-                        player.marketExpiry -
-                                (System.currentTimeMillis() / 1000)
-
-                }
-
-            }
-
-            Row(
-                verticalAlignment = Alignment.Top
             ) {
 
-                Box {
+                AsyncImage(
 
-                    AsyncImage(
-                        model = player.imageUrl,
-                        contentDescription = player.playerName,
-                        modifier = Modifier.size(
+                    model = player.imageUrl,
+
+                    contentDescription = player.playerName,
+
+                    modifier = Modifier
+                        .size(
                             width = 150.dp,
                             height = 170.dp
-                        ),
-                        contentScale = ContentScale.Fit
-                    )
+                        )
+                        .align(Alignment.Center),
+
+                    contentScale = ContentScale.Fit
+
+                )
+
+                Surface(
+
+                    modifier = Modifier.padding(8.dp),
+
+                    shape = RoundedCornerShape(16.dp),
+
+                    color = Color.Black.copy(alpha = 0.70f)
+
+                ) {
 
                     Row(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                Color.Black.copy(alpha = 0.65f)
-                            )
-                            .padding(
-                                horizontal = 8.dp,
-                                vertical = 4.dp
-                            ),
+
+                        modifier = Modifier.padding(
+                            horizontal = 8.dp,
+                            vertical = 4.dp
+                        ),
+
                         verticalAlignment = Alignment.CenterVertically
+
                     ) {
 
                         AsyncImage(
+
                             model = "https://www.fut.gg/public-assets/coin.webp",
+
                             contentDescription = "Coins",
+
                             modifier = Modifier.size(18.dp)
+
                         )
 
                         Spacer(
-                            modifier = Modifier.size(4.dp)
+                            modifier = Modifier.width(4.dp)
                         )
 
                         Text(
+
                             text = player.cardValue.toString(),
+
                             color = Color.White,
+
                             fontWeight = FontWeight.Bold
-                        )
 
-                    }
-
-                }
-
-                Spacer(
-                    modifier = Modifier.size(16.dp)
-                )
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-
-                    Text(
-                        text = player.playerName,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    if (!player.rarity.isNullOrBlank()) {
-
-                        Text(
-                            text = player.rarity,
-                            style = MaterialTheme.typography.bodyMedium
                         )
 
                     }
@@ -162,140 +170,222 @@ fun PlayerCard(
                 }
 
             }
-
-            Spacer(
-                modifier = Modifier.height(18.dp)
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-
-                Card(
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-
-                    Column(
-                        modifier = Modifier.padding(12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-
-                        Text(
-                            "Starting Bid",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-
-                        Spacer(
-                            modifier = Modifier.height(6.dp)
-                        )
-
-                        Text(
-                            text = player.startPrice.toString(),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                    }
-
-                }
-
-                Card(
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-
-                    Column(
-                        modifier = Modifier.padding(12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-
-                        Text(
-                            "Buy Now",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-
-                        Spacer(
-                            modifier = Modifier.height(6.dp)
-                        )
-
-                        Text(
-                            text = player.buyNowPrice.toString(),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                    }
-
-                }
-
-            }
-
-            Spacer(
-                modifier = Modifier.height(18.dp)
-            )            infoRow(
-                "Chemistry Style",
-                player.chemistryStyle
-            )
-
-            infoRow(
-                "Owners",
-                player.owners.toString()
-            )
-
-            infoRow(
-                "Expires In",
-                formatCountdown(
-                    remainingTime.longValue
-                )
-            )
-
-            infoRow(
-                "Payment",
-                "$${player.payment}"
-            )
 
             Spacer(
                 modifier = Modifier.height(12.dp)
             )
 
             Text(
-                text = "Transaction ID",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
 
-            Text(
-                text = player.transactionId,
-                style = MaterialTheme.typography.bodySmall
-            )
+                text = player.playerName,
 
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
+                style = MaterialTheme.typography.headlineSmall,
 
-            Text(
-                text = "Trade ID",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Text(
-                text = player.tradeId,
-                style = MaterialTheme.typography.bodySmall
-            )
-
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
-
-            Text(
-                text = readableStatus(
-                    player.status
-                ),
-                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold
+
+            )
+
+            if (!player.rarity.isNullOrBlank()) {
+
+                Text(
+
+                    text = player.rarity,
+
+                    style = MaterialTheme.typography.bodyMedium
+
+                )
+
+            }
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Row(
+
+                modifier = Modifier.fillMaxWidth(),
+
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+
+            ) {
+
+                PriceCard(
+
+                    modifier = Modifier.weight(1f),
+
+                    title = "Starting Bid",
+
+                    value = player.startPrice.toString()
+
+                )
+
+                PriceCard(
+
+                    modifier = Modifier.weight(1f),
+
+                    title = "Buy Now",
+
+                    value = player.buyNowPrice.toString()
+
+                )
+
+            }
+
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
+
+            InfoRow(
+
+                title = "Chemistry Style",
+
+                value = player.chemistryStyle
+
+            )
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
+
+            InfoRow(
+
+                title = "Owners",
+
+                value = player.owners.toString()
+
+            )
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
+
+            InfoRow(
+
+                title = "Expires In",
+
+                value = formatCountdown(
+
+                    remainingTime.longValue
+
+                )
+
+            )
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
+
+            InfoRow(
+
+                title = "Payment",
+
+                value = "$${player.payment}"
+
+            )
+
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
+
+            Row(
+
+                modifier = Modifier.fillMaxWidth(),
+
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+
+            ) {
+
+                androidx.compose.material3.Button(
+
+                    modifier = Modifier.weight(1f),
+
+                    onClick = {
+
+                        // TODO Hook to markBought()
+
+                    }
+
+                ) {
+
+                    Text("✓ Bought")
+
+                }
+
+                androidx.compose.material3.OutlinedButton(
+
+                    modifier = Modifier.weight(1f),
+
+                    onClick = {
+
+                        // TODO Hook to cancelPlayer()
+
+                    }
+
+                ) {
+
+                    Text("✕ Cancel")
+
+                }
+
+            }
+
+        }
+
+    }
+
+}
+
+@Composable
+private fun PriceCard(
+
+    modifier: Modifier = Modifier,
+
+    title: String,
+
+    value: String
+
+) {
+
+    Card(
+
+        modifier = modifier,
+
+        shape = RoundedCornerShape(16.dp),
+
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
+
+    ) {
+
+        Column(
+
+            modifier = Modifier.padding(12.dp),
+
+            horizontalAlignment = Alignment.CenterHorizontally
+
+        ) {
+
+            Text(
+
+                text = title,
+
+                style = MaterialTheme.typography.labelMedium
+
+            )
+
+            Spacer(
+                modifier = Modifier.height(6.dp)
+            )
+
+            Text(
+
+                text = value,
+
+                style = MaterialTheme.typography.titleLarge,
+
+                fontWeight = FontWeight.Bold
+
             )
 
         }
@@ -305,7 +395,7 @@ fun PlayerCard(
 }
 
 @Composable
-private fun infoRow(
+private fun InfoRow(
 
     title: String,
 
@@ -317,11 +407,9 @@ private fun infoRow(
 
         modifier = Modifier.fillMaxWidth(),
 
-        horizontalArrangement =
-            Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.SpaceBetween,
 
-        verticalAlignment =
-            Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically
 
     ) {
 
@@ -329,8 +417,7 @@ private fun infoRow(
 
             text = title,
 
-            style =
-                MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium
 
         )
 
@@ -338,11 +425,9 @@ private fun infoRow(
 
             text = value,
 
-            style =
-                MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium,
 
-            fontWeight =
-                FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold
 
         )
 
@@ -356,7 +441,7 @@ private fun formatCountdown(
 
 ): String {
 
-    if (seconds <= 0) {
+    if (seconds <= 0L) {
 
         return "Expired"
 
@@ -375,29 +460,5 @@ private fun formatCountdown(
         remainingSeconds
 
     )
-
-}
-
-private fun readableStatus(
-
-    status: String
-
-): String {
-
-    return when (
-
-        status.lowercase()
-
-    ) {
-
-        "buy" -> "Waiting for purchase"
-
-        "bought" -> "Completed"
-
-        "cancel" -> "Cancelled"
-
-        else -> status
-
-    }
 
 }
