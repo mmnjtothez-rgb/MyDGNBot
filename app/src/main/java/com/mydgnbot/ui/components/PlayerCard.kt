@@ -30,7 +30,6 @@ import coil.compose.AsyncImage
 import com.mydgnbot.domain.model.Player
 import kotlinx.coroutines.delay
 
-
 @Composable
 fun PlayerCard(
 
@@ -38,11 +37,8 @@ fun PlayerCard(
 
 ) {
 
-
     val context =
         LocalContext.current
-
-
 
     Card(
 
@@ -54,7 +50,6 @@ fun PlayerCard(
 
     ) {
 
-
         Column(
 
             modifier =
@@ -64,7 +59,6 @@ fun PlayerCard(
                 Arrangement.spacedBy(8.dp)
 
         ) {
-
 
             if (player == null) {
 
@@ -80,8 +74,6 @@ fun PlayerCard(
 
             }
 
-
-
             val remainingTime =
                 remember(player.marketExpiry) {
 
@@ -91,8 +83,6 @@ fun PlayerCard(
                     )
 
                 }
-
-
 
             LaunchedEffect(player.marketExpiry) {
 
@@ -110,8 +100,6 @@ fun PlayerCard(
 
             }
 
-
-
             Row(
 
                 modifier =
@@ -121,7 +109,6 @@ fun PlayerCard(
                     Alignment.CenterVertically
 
             ) {
-
 
                 AsyncImage(
 
@@ -139,17 +126,12 @@ fun PlayerCard(
 
                 )
 
-
-
                 Spacer(
                     modifier =
                         Modifier.size(16.dp)
                 )
 
-
-
                 Column {
-
 
                     Text(
 
@@ -161,7 +143,6 @@ fun PlayerCard(
 
                     )
 
-
                     Text(
 
                         text =
@@ -172,6 +153,12 @@ fun PlayerCard(
 
                     )
 
+                    Text(
+
+                        text =
+                            "Rarity: ${player.rarity ?: "-"}"
+
+                    )
 
                     Text(
 
@@ -180,20 +167,14 @@ fun PlayerCard(
 
                     )
 
-
                 }
 
-
             }
-
-
 
             Spacer(
                 modifier =
                     Modifier.height(12.dp)
             )
-
-
 
             Row(
 
@@ -204,7 +185,6 @@ fun PlayerCard(
                     Arrangement.SpaceBetween
 
             ) {
-
 
                 Column {
 
@@ -220,8 +200,6 @@ fun PlayerCard(
 
                 }
 
-
-
                 Column {
 
                     Text(
@@ -236,10 +214,7 @@ fun PlayerCard(
 
                 }
 
-
             }
-
-
 
             Text(
 
@@ -251,7 +226,6 @@ fun PlayerCard(
 
                         val url =
                             "https://www.futbin.com/26/player/${player.assetId}"
-
 
                         context.startActivity(
 
@@ -269,16 +243,12 @@ fun PlayerCard(
 
             )
 
-
-
             Text(
 
                 text =
                     "You Earn: $${player.payment}"
 
             )
-
-
 
             Text(
 
@@ -287,16 +257,12 @@ fun PlayerCard(
 
             )
 
-
-
             Text(
 
                 text =
                     "Owners: ${player.owners}"
 
             )
-
-
 
             Text(
 
@@ -309,8 +275,6 @@ fun PlayerCard(
 
             )
 
-
-
             Text(
 
                 text =
@@ -318,14 +282,12 @@ fun PlayerCard(
 
             )
 
-
             Text(
 
                 text =
                     "Trade ID: ${player.tradeId}"
 
             )
-
 
             Text(
 
@@ -338,14 +300,11 @@ fun PlayerCard(
 
             )
 
-
         }
 
     }
 
 }
-
-
 
 private fun formatCountdown(
 
@@ -353,22 +312,17 @@ private fun formatCountdown(
 
 ): String {
 
-
     if (seconds <= 0) {
 
         return "Expired"
 
     }
 
-
     val minutes =
         seconds / 60
 
-
     val remainingSeconds =
         seconds % 60
-
-
 
     return String.format(
 
@@ -382,14 +336,11 @@ private fun formatCountdown(
 
 }
 
-
-
 private fun readableStatus(
 
     status: String
 
 ): String {
-
 
     return when (
         status.lowercase()
