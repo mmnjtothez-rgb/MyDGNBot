@@ -57,8 +57,7 @@ class PlayerEnrichmentRepository(
 
 
                     rarity =
-                        futPlayer.rarityGroupName
-                            ?: "-",
+    "FUTGG OK",
 
 
                     nationId =
