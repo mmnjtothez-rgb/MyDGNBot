@@ -146,8 +146,8 @@ fun PlayerCard(
 
     modifier =
         Modifier.size(
-            width = 90.dp,
-            height = 110.dp
+            width = 150.dp,
+            height = 170.dp
         ),
 
     contentScale =
