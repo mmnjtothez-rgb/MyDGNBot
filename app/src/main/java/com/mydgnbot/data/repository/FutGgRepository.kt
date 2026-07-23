@@ -23,12 +23,12 @@ class FutGgRepository {
 
             response.data.forEach {
 
-                Log.d(
-                    "FUTGG",
-                    "${it.eaId}  ${it.overall}  ${it.searchableName}"
-                )
+    Log.d(
+        "FUTGG",
+        it.toString()
+    )
 
-            }
+}
 
             response
 
