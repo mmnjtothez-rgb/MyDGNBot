@@ -6,10 +6,21 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 
+
 class FutGgImageRepository {
 
 
+    companion object {
+
+        var lastStatus =
+            "Idle"
+
+    }
+
+
+
     private val client =
+
         OkHttpClient()
 
 
@@ -26,6 +37,11 @@ class FutGgImageRepository {
         return try {
 
 
+            lastStatus =
+                "Opening FUT.GG page"
+
+
+
             if (!cacheFolder.exists()) {
 
                 cacheFolder.mkdirs()
@@ -35,11 +51,13 @@ class FutGgImageRepository {
 
 
             val assetId =
+
                 futGgPlayer.eaId.toString()
 
 
 
             val cachedFile =
+
                 File(
 
                     cacheFolder,
@@ -51,6 +69,11 @@ class FutGgImageRepository {
 
 
             if (cachedFile.exists()) {
+
+
+                lastStatus =
+                    "Image loaded from cache"
+
 
                 return cachedFile.absolutePath
 
@@ -92,16 +115,52 @@ class FutGgImageRepository {
 
                     ?.string()
 
-                    ?: return null
+
+
+                    ?: run {
+
+                        lastStatus =
+                            "Page empty"
+
+                        return null
+
+                    }
+
+
+
+            lastStatus =
+
+                "FUT.GG page loaded"
 
 
 
             val imageUrl =
 
                 FutGgHtmlParser.extractCardImageUrl(
+
                     html
+
                 )
-                    ?: return null
+
+
+
+            if (imageUrl == null) {
+
+
+                lastStatus =
+
+                    "No image URL found"
+
+
+                return null
+
+            }
+
+
+
+            lastStatus =
+
+                "Image URL found"
 
 
 
@@ -133,6 +192,12 @@ class FutGgImageRepository {
 
             if (!response.isSuccessful) {
 
+
+                lastStatus =
+
+                    "Image download failed ${response.code}"
+
+
                 return null
 
             }
@@ -145,13 +210,30 @@ class FutGgImageRepository {
 
                     ?.bytes()
 
-                    ?: return null
+
+
+                    ?: run {
+
+                        lastStatus =
+                            "Empty image"
+
+                        return null
+
+                    }
 
 
 
             cachedFile.writeBytes(
+
                 bytes
+
             )
+
+
+
+            lastStatus =
+
+                "Image cached"
 
 
 
@@ -166,7 +248,10 @@ class FutGgImageRepository {
         ) {
 
 
-            e.printStackTrace()
+            lastStatus =
+
+                "Error: ${e.message}"
+
 
             null
 
