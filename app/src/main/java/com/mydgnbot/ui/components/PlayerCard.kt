@@ -110,10 +110,9 @@ fun PlayerCard(
 
             ) {
 
-                AsyncImage(
-
-                    model =
-                        player.imageUrl,
+                Text(
+    text = "IMAGE: ${player.imageUrl ?: "NULL"}"
+)
 
                     contentDescription =
                         player.playerName,
