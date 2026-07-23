@@ -264,8 +264,10 @@ suspend fun fetchPlayer() {
 
     if (apiPlayer != null) {  
 
-        _player.value =  
-            apiPlayer.toPlayer()  
+        _player.value =
+    playerEnrichmentRepository.enrich(
+        apiPlayer
+    )  
 
 
         _status.value =  
