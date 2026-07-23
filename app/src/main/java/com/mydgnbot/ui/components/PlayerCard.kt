@@ -287,47 +287,7 @@ fun PlayerCard(
                 modifier = Modifier.height(20.dp)
             )
 
-            Row(
-
-                modifier = Modifier.fillMaxWidth(),
-
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-
-            ) {
-
-                androidx.compose.material3.Button(
-
-                    modifier = Modifier.weight(1f),
-
-                    onClick = {
-
-                        // TODO Hook to markBought()
-
-                    }
-
-                ) {
-
-                    Text("✓ Bought")
-
-                }
-
-                androidx.compose.material3.OutlinedButton(
-
-                    modifier = Modifier.weight(1f),
-
-                    onClick = {
-
-                        // TODO Hook to cancelPlayer()
-
-                    }
-
-                ) {
-
-                    Text("✕ Cancel")
-
-                }
-
-            }
+            
 
         }
 
