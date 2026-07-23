@@ -243,19 +243,19 @@ class FutGgImageRepository {
 
         } catch (
 
-            e: Exception
+    e: Exception
 
-        ) {
-
-
-            lastStatus =
-
-                "Error: ${e.message}"
+) {
 
 
-            null
+    lastStatus =
 
-        }
+        "Error: ${e.javaClass.simpleName}"
+
+
+    null
+
+}
 
     }
 
