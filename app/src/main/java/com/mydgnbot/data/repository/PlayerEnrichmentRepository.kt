@@ -16,17 +16,56 @@ class PlayerEnrichmentRepository(
 
     ): Player {
 
-        val player =
+        val player = apiPlayer.toPlayer()
 
-            apiPlayer.toPlayer()
+        val futPlayer =
 
-        // Temporary test.
-        // If we can display this in the UI,
-        // we know the enrichment pipeline works.
+            futGgRepository.getPlayerVersion(
+
+                baseId = player.baseId,
+
+                assetId = player.assetId
+
+            )
+
+        if (futPlayer == null) {
+
+            return player.copy(
+
+                rarity = "NOT FOUND"
+
+            )
+
+        }
 
         return player.copy(
 
-            rarity = "TEST OK"
+            rating =
+                futPlayer.overall,
+
+            rarity =
+                futPlayer.rarityGroupName,
+
+            imageUrl =
+                futPlayer.imageUrl,
+
+            compactImageUrl =
+                futPlayer.compactImageUrl,
+
+            nationId =
+                futPlayer.nationEaId,
+
+            leagueId =
+                futPlayer.leagueEaId,
+
+            clubId =
+                futPlayer.clubEaId,
+
+            skillMoves =
+                futPlayer.skillMoves,
+
+            weakFoot =
+                futPlayer.weakFoot
 
         )
 
