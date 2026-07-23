@@ -3,48 +3,9 @@ package com.mydgnbot.data.repository
 import android.util.Log
 import com.mydgnbot.data.api.ApiClient
 import com.mydgnbot.data.api.FutGgPlayer
-import com.mydgnbot.data.api.FutGgResponse
 
 class FutGgRepository {
 
-    suspend fun testConnection(
-        baseId: String
-    ): FutGgResponse? {
-
-        return try {
-
-            val response =
-                ApiClient.futGgApi.getPlayerVersions(baseId)
-
-            Log.d(
-                "FUTGG",
-                "Received ${response.data.size} versions"
-            )
-
-            response.data.forEach {
-
-    Log.d(
-        "FUTGG",
-        it.toString()
-    )
-
-}
-
-            response
-
-        } catch (e: Exception) {
-
-            Log.e(
-                "FUTGG",
-                "Request failed",
-                e
-            )
-
-            null
-
-        }
-
-    }
 
     suspend fun getPlayerVersion(
 
@@ -54,13 +15,69 @@ class FutGgRepository {
 
     ): FutGgPlayer? {
 
-        val response =
-            testConnection(baseId)
-                ?: return null
 
-        return response.data.firstOrNull {
+        return try {
 
-            it.eaId.toString() == assetId
+
+            val response =
+
+                ApiClient.futGgApi
+                    .getPlayerVersions(baseId)
+
+
+
+            Log.d(
+                "FUTGG",
+                "Received ${response.data.size} versions"
+            )
+
+
+
+            val player =
+
+                response.data.firstOrNull {
+
+                    it.eaId.toString() == assetId
+
+                }
+
+
+
+            if (player != null) {
+
+                Log.d(
+                    "FUTGG",
+                    "Found ${player.searchableName} slug=${player.slug}"
+                )
+
+            } else {
+
+                Log.d(
+                    "FUTGG",
+                    "No matching assetId $assetId"
+                )
+
+            }
+
+
+            player
+
+
+        } catch (
+
+            e: Exception
+
+        ) {
+
+
+            Log.e(
+                "FUTGG",
+                "Request failed",
+                e
+            )
+
+
+            null
 
         }
 
