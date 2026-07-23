@@ -1,14 +1,10 @@
 package com.mydgnbot.data.repository
 
-import android.content.Context
 import com.mydgnbot.data.api.ApiPlayer
 import com.mydgnbot.data.mapper.ApiPlayerMapper.toPlayer
 import com.mydgnbot.domain.model.Player
-import java.io.File
 
 class PlayerEnrichmentRepository(
-
-    private val context: Context,
 
     private val futGgRepository: FutGgRepository =
         FutGgRepository(),
@@ -84,34 +80,13 @@ class PlayerEnrichmentRepository(
                 )
 
 
+            /*
+             We will connect the image downloader
+             after we add a safe cacheDir provider.
 
-            val imagePath =
+             For now, keep metadata working.
+            */
 
-                futGgImageRepository.getCardImage(
-
-                    cacheDir =
-                        context.cacheDir,
-
-                    futGgPlayer =
-                        futPlayer
-
-                )
-
-
-
-            if (imagePath != null) {
-
-
-                player =
-
-                    player.copy(
-
-                        imageUrl =
-                            imagePath
-
-                    )
-
-            }
 
         }
 
