@@ -27,7 +27,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.mydgnbot.data.repository.FutGgImageRepository
 import com.mydgnbot.domain.model.Player
 import kotlinx.coroutines.delay
 
@@ -136,20 +135,7 @@ fun PlayerCard(
                 Column {
 
 
-                    Text(
-
-                        text =
-                            "IMAGE: ${player.imageUrl ?: "NULL"}"
-
-                    )
-
-
-                    Text(
-
-                        text =
-                            "FUT STATUS: ${FutGgImageRepository.lastStatus}"
-
-                    )
+                    
 
 
                     AsyncImage(
@@ -160,8 +146,11 @@ fun PlayerCard(
                         contentDescription =
                             player.playerName,
 
-                        modifier =
-                            Modifier.size(110.dp),
+                        Modifier
+    .size(
+        width = 90.dp,
+        height = 110.dp
+    ),
 
                         contentScale =
                             ContentScale.Fit
@@ -197,27 +186,19 @@ fun PlayerCard(
 
 
                     Text(
+    text = "${player.rating}",
+    style = MaterialTheme.typography.headlineMedium
+)
 
-                        text =
-                            "Rating ${player.rating}"
+Text(
+    text = player.rarity ?: "",
+    style = MaterialTheme.typography.bodyMedium
+)
 
-                    )
-
-
-                    Text(
-
-                        text =
-                            "Rarity: ${player.rarity}"
-
-                    )
-
-
-                    Text(
-
-                        text =
-                            "Platform: ${player.platform}"
-
-                    )
+Text(
+    text = player.platform.toString(),
+    style = MaterialTheme.typography.bodySmall
+)
 
 
                 }
