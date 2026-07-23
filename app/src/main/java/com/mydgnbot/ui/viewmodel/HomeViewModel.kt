@@ -8,7 +8,6 @@ import com.mydgnbot.data.repository.PlayerRepository
 import com.mydgnbot.data.repository.SettingsRepository
 import com.mydgnbot.domain.model.LogEntry
 import com.mydgnbot.domain.model.Player
-import com.mydgnbot.data.repository.PlayerEnrichmentRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,499 +21,482 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 class HomeViewModel(
 
-    private val playerRepository: PlayerRepository,
-    private val playerEnrichmentRepository =
-    PlayerEnrichmentRepository()
+private val playerRepository: PlayerRepository,  
 
-    private val settingsRepository: SettingsRepository,
+private val settingsRepository: SettingsRepository,  
 
-    connectivityObserver: ConnectivityObserver
+connectivityObserver: ConnectivityObserver
 
 ) : ViewModel() {
 
+private val _player =  
+    MutableStateFlow<Player?>(null)  
 
-    private val _player =
-        MutableStateFlow<Player?>(null)
-
-    val player: StateFlow<Player?> =
-        _player
-
-
-
-    private val _status =
-        MutableStateFlow("Ready")
-
-    val status: StateFlow<String> =
-        _status
+val player: StateFlow<Player?> =  
+    _player  
 
 
 
-    private val _isRunning =
-        MutableStateFlow(false)
+private val _status =  
+    MutableStateFlow("Ready")  
 
-    val isRunning: StateFlow<Boolean> =
-        _isRunning
-
-
-
-    private val _logs =
-        MutableStateFlow<List<LogEntry>>(emptyList())
-
-    val logs: StateFlow<List<LogEntry>> =
-        _logs
+val status: StateFlow<String> =  
+    _status  
 
 
 
-    private var searchJob: Job? = null
+private val _isRunning =  
+    MutableStateFlow(false)  
+
+val isRunning: StateFlow<Boolean> =  
+    _isRunning  
+
+
+
+private val _logs =  
+    MutableStateFlow<List<LogEntry>>(emptyList())  
+
+val logs: StateFlow<List<LogEntry>> =  
+    _logs  
+
+
+
+private var searchJob: Job? = null
 
 private var logIdCounter = 0L
 
+val settings =  
+    settingsRepository.settings  
+        .stateIn(  
+            scope = viewModelScope,  
+            started = SharingStarted.WhileSubscribed(5000),  
+            initialValue = emptyMap()  
+        )  
 
 
-    val settings =
-        settingsRepository.settings
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyMap()
-            )
 
+val isOnline =  
+    connectivityObserver.isOnline  
+        .stateIn(  
+            scope = viewModelScope,  
+            started = SharingStarted.WhileSubscribed(5000),  
+            initialValue = false  
+        )  
 
 
-    val isOnline =
-        connectivityObserver.isOnline
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = false
-            )
 
+private fun addLog(  
+    message: String  
+) {  
 
+    val time =  
+        SimpleDateFormat(  
+            "HH:mm:ss",  
+            Locale.getDefault()  
+        ).format(Date())  
 
-    private fun addLog(
-        message: String
-    ) {
 
-        val time =
-            SimpleDateFormat(
-                "HH:mm:ss",
-                Locale.getDefault()
-            ).format(Date())
+    val entry =  
+        LogEntry(  
 
+            id =  
+++logIdCounter,  
 
-        val entry =
-            LogEntry(
+            message =  
+                message,  
 
-                id =
-    ++logIdCounter,
+            timestamp =  
+                time  
 
-                message =
-                    message,
+        )  
 
-                timestamp =
-                    time
 
-            )
+    _logs.value =  
+(_logs.value + entry).takeLast(20)  
 
+}  
 
-        _logs.value =
-    (_logs.value + entry).takeLast(20)
 
-    }
 
+fun startBot() {  
 
+    if (_isRunning.value) return  
 
-    fun startBot() {
 
-        if (_isRunning.value) return
+    _isRunning.value = true  
 
+    addLog(  
+        "Bot started"  
+    )  
 
-        _isRunning.value = true
 
-        addLog(
-            "Bot started"
-        )
+    searchJob =  
+        viewModelScope.launch {  
 
 
-        searchJob =
-            viewModelScope.launch {
+            while (  
+                isActive &&  
+                _isRunning.value  
+            ) {  
 
 
-                while (
-                    isActive &&
-                    _isRunning.value
-                ) {
+                fetchPlayer()  
 
 
-                    fetchPlayer()
+                if (_player.value != null) {  
 
+                    stopBot()  
 
-                    if (_player.value != null) {
+                    break  
 
-                        stopBot()
+                }  
 
-                        break
 
-                    }
+                val currentSettings =  
+                    settings.first()  
 
 
-                    val currentSettings =
-                        settings.first()
+                val intervalSeconds =  
+                    currentSettings["poll_interval"]  
+                        ?.toLongOrNull()  
+                        ?: 10L  
 
 
-                    val intervalSeconds =
-                        currentSettings["poll_interval"]
-                            ?.toLongOrNull()
-                            ?: 10L
+                _status.value =  
+                    "Waiting..."  
 
 
-                    _status.value =
-                        "Waiting..."
+                addLog(  
+                    "Waiting ${intervalSeconds}s"  
+                )  
 
 
-                    addLog(
-                        "Waiting ${intervalSeconds}s"
-                    )
+                delay(  
+                    intervalSeconds * 1000  
+                )  
 
+            }  
 
-                    delay(
-                        intervalSeconds * 1000
-                    )
+        }  
 
-                }
+}  
 
-            }
 
-    }
 
+fun stopBot() {  
 
+    searchJob?.cancel()  
 
-    fun stopBot() {
+    searchJob = null  
 
-        searchJob?.cancel()
+    _isRunning.value = false  
 
-        searchJob = null
+    _status.value =  
+        "Ready"  
 
-        _isRunning.value = false
 
-        _status.value =
-            "Ready"
+    addLog(  
+        "Bot stopped"  
+    )  
 
+}  
 
-        addLog(
-            "Bot stopped"
-        )
 
-    }
 
+suspend fun fetchPlayer() {  
 
+    _status.value =  
+        "Searching..."  
 
-    suspend fun fetchPlayer() {
 
-        _status.value =
-            "Searching..."
+    addLog(  
+        "Searching..."  
+    )  
 
 
-        addLog(
-            "Searching..."
-        )
+    val currentSettings =  
+        settings.first()  
 
 
-        val currentSettings =
-            settings.first()
+    val result =  
+        playerRepository.fetchPlayers(  
 
+            user =  
+                currentSettings["api_user"]  
+                    ?: "",  
 
-        val result =
-            playerRepository.fetchPlayers(
+            secretKey =  
+                currentSettings["secret_key"]  
+                    ?: "",  
 
-                user =
-                    currentSettings["api_user"]
-                        ?: "",
+            platform =  
+                currentSettings["platform"]  
+                    ?: "Console",  
 
-                secretKey =
-                    currentSettings["secret_key"]
-                        ?: "",
+            playerType =  
+                currentSettings["player_type"]  
+                    ?.toIntOrNull()  
+                    ?: 2,  
 
-                platform =
-                    currentSettings["platform"]
-                        ?: "Console",
+            minimumPrice =  
+                currentSettings["minimum_price"]  
+                    ?.toIntOrNull()  
+                    ?: 4000,  
 
-                playerType =
-                    currentSettings["player_type"]
-                        ?.toIntOrNull()
-                        ?: 2,
+            maximumPrice =  
+                currentSettings["maximum_price"]  
+                    ?.toIntOrNull()  
+                    ?: 300000  
 
-                minimumPrice =
-                    currentSettings["minimum_price"]
-                        ?.toIntOrNull()
-                        ?: 4000,
+        )  
 
-                maximumPrice =
-                    currentSettings["maximum_price"]
-                        ?.toIntOrNull()
-                        ?: 300000
 
-            )
+    val apiPlayer =  
+        result.firstOrNull()  
 
 
-        val apiPlayer =
-            result.firstOrNull()
 
+    if (apiPlayer != null) {  
 
+        _player.value =  
+            apiPlayer.toPlayer()  
 
-        if (apiPlayer != null) {
 
-            _status.value =
-    "Loading FUT.GG..."
+        _status.value =  
+            "Player found"  
 
-addLog(
-    "Loading FUT.GG..."
-)
 
-val enrichedPlayer =
+        addLog(  
+            "Player found"  
+        )  
 
-    playerEnrichmentRepository.enrich(
-        apiPlayer
-    )
 
-_player.value =
-    enrichedPlayer
+    } else {  
 
-_status.value =
-    "Player found"
+        _player.value = null  
 
-addLog(
-    "Player enriched"
-)
 
+        _status.value =  
+            "No player found"  
 
-        } else {
 
-            _player.value = null
+        addLog(  
+            "No player found"  
+        )  
 
+    }  
 
-            _status.value =
-                "No player found"
+}  
 
 
-            addLog(
-                "No player found"
-            )
 
-        }
+fun markBought() {  
 
-    }
+    viewModelScope.launch {  
 
 
+        val currentPlayer =  
+            _player.value  
+                ?: return@launch  
 
-    fun markBought() {
 
-        viewModelScope.launch {
+        val transactionId =  
+            currentPlayer.transactionId  
+                .toIntOrNull()  
+                ?: return@launch  
 
 
-            val currentPlayer =
-                _player.value
-                    ?: return@launch
+        val currentSettings =  
+            settings.first()  
 
 
-            val transactionId =
-                currentPlayer.transactionId
-                    .toIntOrNull()
-                    ?: return@launch
 
+        _status.value =  
+            "Sending bought..."  
 
-            val currentSettings =
-                settings.first()
 
+        addLog(  
+            "Sending bought"  
+        )  
 
 
-            _status.value =
-                "Sending bought..."
 
+        val response =  
+            playerRepository.updateOrderStatus(  
 
-            addLog(
-                "Sending bought"
-            )
+                user =  
+                    currentSettings["api_user"]  
+                        ?: "",  
 
+                secretKey =  
+                    currentSettings["secret_key"]  
+                        ?: "",  
 
+                platform =  
+                    currentSettings["platform"]  
+                        ?: "Console",  
 
-            val response =
-                playerRepository.updateOrderStatus(
+                transactionId =  
+                    transactionId,  
 
-                    user =
-                        currentSettings["api_user"]
-                            ?: "",
+                status =  
+                    "bought",  
 
-                    secretKey =
-                        currentSettings["secret_key"]
-                            ?: "",
+                eaEmail =  
+                    currentSettings["ea_email"]  
+                        ?: ""  
 
-                    platform =
-                        currentSettings["platform"]
-                            ?: "Console",
+            )  
 
-                    transactionId =
-                        transactionId,
 
-                    status =
-                        "bought",
 
-                    eaEmail =
-                        currentSettings["ea_email"]
-                            ?: ""
+        if (response?.code == 200) {  
 
-                )
 
+            _status.value =  
+                "Bought ✓"  
 
 
-            if (response?.code == 200) {
+            addLog(  
+                "Bought success"  
+            )  
 
 
-                _status.value =
-                    "Bought ✓"
+            _player.value = null  
 
 
-                addLog(
-                    "Bought success"
-                )
+            delay(1000)  
 
 
-                _player.value = null
+            _status.value =  
+                "Ready"  
 
 
-                delay(1000)
+            startBot()  
 
 
-                _status.value =
-                    "Ready"
+        } else {  
 
 
-                startBot()
+            _status.value =  
+                response?.status  
+                    ?: "Bought failed"  
 
 
-            } else {
+            addLog(  
+                "Bought failed"  
+            )  
 
+        }  
 
-                _status.value =
-                    response?.status
-                        ?: "Bought failed"
+    }  
 
+}  
 
-                addLog(
-                    "Bought failed"
-                )
 
-            }
 
-        }
+fun cancelPlayer() {  
 
-    }
+    viewModelScope.launch {  
 
 
+        val currentPlayer =  
+            _player.value  
+                ?: return@launch  
 
-    fun cancelPlayer() {
 
-        viewModelScope.launch {
+        val transactionId =  
+            currentPlayer.transactionId  
+                .toIntOrNull()  
+                ?: return@launch  
 
 
-            val currentPlayer =
-                _player.value
-                    ?: return@launch
+        val currentSettings =  
+            settings.first()  
 
 
-            val transactionId =
-                currentPlayer.transactionId
-                    .toIntOrNull()
-                    ?: return@launch
 
+        _status.value =  
+            "Sending cancel..."  
 
-            val currentSettings =
-                settings.first()
 
+        addLog(  
+            "Sending cancel"  
+        )  
 
 
-            _status.value =
-                "Sending cancel..."
 
+        val response =  
+            playerRepository.updateOrderStatus(  
 
-            addLog(
-                "Sending cancel"
-            )
+                user =  
+                    currentSettings["api_user"]  
+                        ?: "",  
 
+                secretKey =  
+                    currentSettings["secret_key"]  
+                        ?: "",  
 
+                platform =  
+                    currentSettings["platform"]  
+                        ?: "Console",  
 
-            val response =
-                playerRepository.updateOrderStatus(
+                transactionId =  
+                    transactionId,  
 
-                    user =
-                        currentSettings["api_user"]
-                            ?: "",
+                status =  
+                    "cancel",  
 
-                    secretKey =
-                        currentSettings["secret_key"]
-                            ?: "",
+                code =  
+                    551  
 
-                    platform =
-                        currentSettings["platform"]
-                            ?: "Console",
+            )  
 
-                    transactionId =
-                        transactionId,
 
-                    status =
-                        "cancel",
 
-                    code =
-                        551
+        if (response?.code == 200) {  
 
-                )
 
+            _status.value =  
+                "Cancelled ✓"  
 
 
-            if (response?.code == 200) {
+            addLog(  
+                "Cancel success"  
+            )  
 
 
-                _status.value =
-                    "Cancelled ✓"
+            _player.value = null  
 
 
-                addLog(
-                    "Cancel success"
-                )
+            delay(1000)  
 
 
-                _player.value = null
+            _status.value =  
+                "Ready"  
 
 
-                delay(1000)
+            startBot()  
 
 
-                _status.value =
-                    "Ready"
+        } else {  
 
 
-                startBot()
+            _status.value =  
+                response?.status  
+                    ?: "Cancel failed"  
 
 
-            } else {
+            addLog(  
+                "Cancel failed"  
+            )  
 
+        }  
 
-                _status.value =
-                    response?.status
-                        ?: "Cancel failed"
+    }  
 
-
-                addLog(
-                    "Cancel failed"
-                )
-
-            }
-
-        }
-
-    }
+}
 
 }
