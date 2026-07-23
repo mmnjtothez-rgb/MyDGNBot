@@ -24,22 +24,22 @@ import java.util.Locale
 
 class HomeViewModel(
 
-private val playerRepository: PlayerRepository,  
+    private val playerRepository: PlayerRepository,
 
-    private val playerEnrichmentRepository =
-    PlayerEnrichmentRepository()
+    private val settingsRepository: SettingsRepository,
 
-private val settingsRepository: SettingsRepository,  
-
-connectivityObserver: ConnectivityObserver
+    connectivityObserver: ConnectivityObserver
 
 ) : ViewModel() {
 
-private val _player =  
-    MutableStateFlow<Player?>(null)  
+    private val playerEnrichmentRepository =
+        PlayerEnrichmentRepository()
 
-val player: StateFlow<Player?> =  
-    _player  
+    private val _player =
+        MutableStateFlow<Player?>(null)
+
+    val player: StateFlow<Player?> =
+        _player  
 
 
 
