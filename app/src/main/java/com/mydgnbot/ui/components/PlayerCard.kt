@@ -17,16 +17,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.mydgnbot.data.repository.FutGgImageRepository
 import com.mydgnbot.domain.model.Player
 import kotlinx.coroutines.delay
 
@@ -69,11 +70,10 @@ fun PlayerCard(
             if (player == null) {
 
                 Text(
-                    text =
-                        "Waiting for player...",
 
-                    style =
-                        MaterialTheme.typography.bodyLarge
+                    text =
+                        "Waiting for player..."
+
                 )
 
                 return@Column
@@ -83,6 +83,7 @@ fun PlayerCard(
 
 
             val remainingTime =
+
                 remember(player.marketExpiry) {
 
                     mutableLongStateOf(
@@ -98,18 +99,22 @@ fun PlayerCard(
 
             LaunchedEffect(player.marketExpiry) {
 
+
                 while (
 
                     remainingTime.longValue > 0
 
                 ) {
 
+
                     delay(1000)
+
 
                     remainingTime.longValue =
 
                         player.marketExpiry -
                                 (System.currentTimeMillis() / 1000)
+
 
                 }
 
@@ -130,9 +135,20 @@ fun PlayerCard(
 
                 Column {
 
+
                     Text(
+
                         text =
                             "IMAGE: ${player.imageUrl ?: "NULL"}"
+
+                    )
+
+
+                    Text(
+
+                        text =
+                            "FUT STATUS: ${FutGgImageRepository.lastStatus}"
+
                     )
 
 
@@ -151,6 +167,7 @@ fun PlayerCard(
                             ContentScale.Fit
 
                     )
+
 
                 }
 
@@ -182,10 +199,7 @@ fun PlayerCard(
                     Text(
 
                         text =
-                            "Rating ${player.rating}",
-
-                        style =
-                            MaterialTheme.typography.titleMedium
+                            "Rating ${player.rating}"
 
                     )
 
@@ -207,7 +221,6 @@ fun PlayerCard(
 
 
                 }
-
 
             }
 
@@ -235,15 +248,22 @@ fun PlayerCard(
 
                 Column {
 
-                    Text(
-                        text =
-                            "Starting Bid"
-                    )
 
                     Text(
+
+                        text =
+                            "Starting Bid"
+
+                    )
+
+
+                    Text(
+
                         text =
                             "${player.startPrice}"
+
                     )
+
 
                 }
 
@@ -251,15 +271,22 @@ fun PlayerCard(
 
                 Column {
 
-                    Text(
-                        text =
-                            "Buy Now"
-                    )
 
                     Text(
+
+                        text =
+                            "Buy Now"
+
+                    )
+
+
+                    Text(
+
                         text =
                             "${player.buyNowPrice}"
+
                     )
+
 
                 }
 
@@ -274,6 +301,7 @@ fun PlayerCard(
 
                 modifier =
                     Modifier.clickable {
+
 
                         val url =
 
@@ -291,6 +319,7 @@ fun PlayerCard(
                             )
 
                         )
+
 
                     }
 
@@ -388,11 +417,9 @@ private fun formatCountdown(
     }
 
 
-
     val minutes =
 
         seconds / 60
-
 
 
     val remainingSeconds =
@@ -427,6 +454,7 @@ private fun readableStatus(
         status.lowercase()
 
     ) {
+
 
         "buy" ->
 
