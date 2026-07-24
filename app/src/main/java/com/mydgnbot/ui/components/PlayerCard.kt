@@ -186,7 +186,7 @@ AsyncImage(
     modifier = Modifier
         .align(Alignment.TopStart)
         .padding(
-            start = 105.dp,
+            start = 110.dp,
             top = 80.dp
         )
         .size(24.dp),
