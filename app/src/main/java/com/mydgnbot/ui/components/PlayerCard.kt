@@ -124,13 +124,18 @@ fun PlayerCard(
 
                 Surface(
 
-                    modifier = Modifier.padding(8.dp),
+    modifier = Modifier
+        .align(Alignment.TopEnd)
+        .padding(
+            top = 6.dp,
+            end = 6.dp
+        ),
 
-                    shape = RoundedCornerShape(16.dp),
+    shape = RoundedCornerShape(16.dp),
 
-                    color = Color.Black.copy(alpha = 0.70f)
+    color = Color.Black.copy(alpha = 0.70f)
 
-                ) {
+) {
 
                     Row(
 
@@ -149,7 +154,7 @@ fun PlayerCard(
 
                             contentDescription = "Coins",
 
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
 
                         )
 
