@@ -23,73 +23,58 @@ class PlayerEnrichmentRepository(
 
     ): Player {
 
-        var player =
-
-            apiPlayer.toPlayer()
+        var player = apiPlayer.toPlayer()
 
         val futPlayer =
 
             futGgRepository.getPlayerVersion(
 
-                baseId =
-                    player.baseId,
+                baseId = player.baseId,
 
-                assetId =
-                    player.assetId
+                assetId = player.assetId
 
             )
 
         if (futPlayer != null) {
 
-            player =
+            player = player.copy(
 
-                player.copy(
+                overall = futPlayer.overall,
 
-                    overall =
-                        futPlayer.overall,
+                // TEMPORARY
+                // Show FUT.GG rarity group so we can see
+                // what values FUT.GG actually returns.
+                rarity = futPlayer.rarityGroupName ?: "Unknown",
 
-                    rarity =
-                        futPlayer.rarityGroupName ?: "",
+                nationId = futPlayer.nationEaId,
 
-                    nationId =
-                        futPlayer.nationEaId,
+                leagueId = futPlayer.leagueEaId,
 
-                    leagueId =
-                        futPlayer.leagueEaId,
+                clubId = futPlayer.clubEaId,
 
-                    clubId =
-                        futPlayer.clubEaId,
+                skillMoves = futPlayer.skillMoves,
 
-                    skillMoves =
-                        futPlayer.skillMoves,
+                weakFoot = futPlayer.weakFoot
 
-                    weakFoot =
-                        futPlayer.weakFoot
-
-                )
+            )
 
             val imagePath =
 
                 futGgImageRepository.getCardImage(
 
-                    cacheFolder =
-                        cacheFolder,
+                    cacheFolder = cacheFolder,
 
-                    futGgPlayer =
-                        futPlayer
+                    futGgPlayer = futPlayer
 
                 )
 
             if (imagePath != null) {
 
-                player =
+                player = player.copy(
 
-                    player.copy(
+                    imageUrl = imagePath
 
-                        imageUrl =
-                            imagePath
-
-                    )
+                )
 
             }
 
