@@ -179,19 +179,12 @@ AsyncImage(
     contentDescription = player.chemistryStyle,
 
     modifier = Modifier
-        .align(Alignment.Center)
-        .offset {
-
-            IntOffset(
-
-                x = 22,
-
-                y = 18
-
-            )
-
-        }
-        .size(30.dp),
+    .align(Alignment.TopCenter)
+    .offset(
+        x = 0.dp,
+        y = 42.dp
+    )
+    .size(28.dp),
 
     contentScale = ContentScale.Fit
 
