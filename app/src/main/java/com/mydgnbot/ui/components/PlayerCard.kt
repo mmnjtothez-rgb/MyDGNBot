@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import com.mydgnbot.ui.util.ChemistryStyleIcon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -235,17 +236,7 @@ fun PlayerCard(
                 modifier = Modifier.height(20.dp)
             )
 
-            InfoRow(
-
-                title = "Chemistry Style",
-
-                value = player.chemistryStyle
-
-            )
-
-            Spacer(
-                modifier = Modifier.height(10.dp)
-            )
+            
 
             InfoRow(
 
