@@ -101,12 +101,9 @@ fun PlayerCard(
 
             Box(
 
-                modifier = Modifier
-                    .fillMaxWidth(),
+    modifier = Modifier.fillMaxWidth()
 
-                contentAlignment = Alignment.TopEnd
-
-            ) {
+) {
 
                 AsyncImage(
 
@@ -124,6 +121,57 @@ fun PlayerCard(
                     contentScale = ContentScale.Fit
 
                 )
+
+Surface(
+
+    modifier = Modifier
+        .align(Alignment.TopCenter)
+        .padding(top = 6.dp),
+
+    shape = RoundedCornerShape(18.dp),
+
+    color = Color.Black.copy(alpha = 0.72f)
+
+) {
+
+    Row(
+
+        modifier = Modifier.padding(
+            horizontal = 14.dp,
+            vertical = 6.dp
+        ),
+
+        verticalAlignment = Alignment.CenterVertically
+
+    ) {
+
+        Text(
+
+            text = "⏳",
+
+            style = MaterialTheme.typography.bodyMedium
+
+        )
+
+        Spacer(
+            modifier = Modifier.width(6.dp)
+        )
+
+        Text(
+
+            text = "04:59",
+
+            style = MaterialTheme.typography.bodyLarge,
+
+            fontWeight = FontWeight.Bold,
+
+            color = Color(0xFF62E37A)
+
+        )
+
+    }
+
+}
 
                 Surface(
 
