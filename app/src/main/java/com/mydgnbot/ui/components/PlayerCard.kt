@@ -125,8 +125,11 @@ fun PlayerCard(
 Surface(
 
     modifier = Modifier
-        .align(Alignment.TopCenter)
-        .padding(top = 6.dp),
+    .align(Alignment.TopStart)
+    .padding(
+        top = 6.dp,
+        start = 6.dp
+    ),
 
     shape = RoundedCornerShape(18.dp),
 
@@ -182,7 +185,7 @@ Surface(
             end = 6.dp
         ),
 
-    shape = RoundedCornerShape(16.dp),
+    shape = RoundedCornerShape(18.dp),
 
     color = Color.Black.copy(alpha = 0.70f)
 
