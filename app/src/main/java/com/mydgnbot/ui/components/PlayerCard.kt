@@ -6,6 +6,9 @@ import com.mydgnbot.ui.util.ChemistryStyleIcon
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.mydgnbot.R
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -175,25 +178,7 @@ fun PlayerCard(
                     }
 
                 }
-AsyncImage(
 
-    model = ChemistryStyleIcon.getUrl(
-        player.chemistryStyle
-    ),
-
-    contentDescription = player.chemistryStyle,
-
-    modifier = Modifier
-        .align(Alignment.TopStart)
-        .padding(
-            start = 110.dp,
-            top = 80.dp
-        )
-        .size(24.dp),
-
-    contentScale = ContentScale.Fit
-
-)
             }
 
             Spacer(
@@ -210,17 +195,7 @@ AsyncImage(
 
             )
 
-            if (!player.rarity.isNullOrBlank()) {
-
-                Text(
-
-                    text = player.rarity,
-
-                    style = MaterialTheme.typography.bodyMedium
-
-                )
-
-            }
+            
 
             Spacer(
                 modifier = Modifier.height(16.dp)
@@ -260,7 +235,74 @@ AsyncImage(
                 modifier = Modifier.height(20.dp)
             )
 
-            
+
+   Row(
+
+    modifier = Modifier.fillMaxWidth(),
+
+    verticalAlignment = Alignment.CenterVertically
+
+) {
+
+    Image(
+
+        painter = painterResource(R.drawable.ic_chemistry_flask),
+
+        contentDescription = "Chemistry",
+
+        modifier = Modifier.size(22.dp)
+
+    )
+
+    Spacer(
+        modifier = Modifier.width(8.dp)
+    )
+
+    Text(
+
+        text = "Chemistry",
+
+        style = MaterialTheme.typography.bodyMedium
+
+    )
+
+    Spacer(
+        modifier = Modifier.weight(1f)
+    )
+
+    AsyncImage(
+
+        model = ChemistryStyleIcon.getUrl(
+            player.chemistryStyle
+        ),
+
+        contentDescription = player.chemistryStyle,
+
+        modifier = Modifier.size(22.dp),
+
+        contentScale = ContentScale.Fit
+
+    )
+
+    Spacer(
+        modifier = Modifier.width(6.dp)
+    )
+
+    Text(
+
+        text = player.chemistryStyle,
+
+        style = MaterialTheme.typography.bodyMedium,
+
+        fontWeight = FontWeight.SemiBold
+
+    )
+
+}
+
+Spacer(
+    modifier = Modifier.height(10.dp)
+)         
 
             InfoRow(
 
