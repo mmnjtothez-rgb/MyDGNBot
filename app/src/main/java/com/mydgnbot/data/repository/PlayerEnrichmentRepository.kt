@@ -44,7 +44,7 @@ class PlayerEnrichmentRepository(
                 // TEMPORARY
                 // Show FUT.GG rarity group so we can see
                 // what values FUT.GG actually returns.
-                rarity = futPlayer.rarityGroupName ?: "Unknown",
+                rarity = "ID ${futPlayer.rarityEaId}",
 
                 nationId = futPlayer.nationEaId,
 
