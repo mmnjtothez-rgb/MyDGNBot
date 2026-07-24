@@ -1,6 +1,8 @@
 package com.mydgnbot.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.unit.IntOffset
+import com.mydgnbot.ui.util.ChemistryStyleIcon
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -169,7 +171,32 @@ fun PlayerCard(
                     }
 
                 }
+AsyncImage(
 
+    model = ChemistryStyleIcon.getUrl(
+        player.chemistryStyle
+    ),
+
+    contentDescription = player.chemistryStyle,
+
+    modifier = Modifier
+        .align(Alignment.Center)
+        .offset {
+
+            IntOffset(
+
+                x = 22,
+
+                y = 18
+
+            )
+
+        }
+        .size(30.dp),
+
+    contentScale = ContentScale.Fit
+
+)
             }
 
             Spacer(
