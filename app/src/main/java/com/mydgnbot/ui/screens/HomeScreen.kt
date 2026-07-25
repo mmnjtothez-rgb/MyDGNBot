@@ -116,54 +116,35 @@ fun HomeScreen(
 
             HomeHeader(
 
-                platform = platform,
+    platform = platform,
 
-                method = method,
+    method = method,
 
-                interval = interval,
+    interval = interval,
 
-                connected = isOnline
+    connected = isOnline
 
-            )
+)
 
 Spacer(
-    modifier = Modifier.height(12.dp)
-)
 
-
-Text(
-
-    text = "Status: $status",
-
-    style = MaterialTheme.typography.bodyMedium
+    modifier = Modifier.height(16.dp)
 
 )
 
-            Spacer(
+PlayerCard(
 
-                modifier = Modifier.height(16.dp)
+    player = player
 
-            )
+)
 
+Spacer(
 
+    modifier = Modifier.height(16.dp)
 
-            PlayerCard(
+)
 
-                player = player
-
-            )
-
-
-
-            Spacer(
-
-                modifier = Modifier.height(16.dp)
-
-            )
-
-
-
-            ActionButtons(
+ActionButtons(
 
                 state = when {
 
