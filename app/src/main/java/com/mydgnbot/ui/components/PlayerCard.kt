@@ -95,142 +95,131 @@ fun PlayerCard(
 
         Column(
 
-            modifier = Modifier.padding(16.dp)
-
-        ) {
-
-            Box(
-
-    modifier = Modifier.fillMaxWidth()
+    modifier = Modifier.padding(16.dp)
 
 ) {
 
-                AsyncImage(
+    Surface(
 
-                    model = player.imageUrl,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
 
-                    contentDescription = player.playerName,
+        shape = RoundedCornerShape(18.dp),
 
-                    modifier = Modifier
-                        .size(
-                            width = 190.dp,
-                            height = 210.dp
-                        )
-                        .align(Alignment.Center),
-
-                    contentScale = ContentScale.Fit
-
-                )
-
-Surface(
-
-    modifier = Modifier
-    .align(Alignment.TopStart)
-    .padding(
-        top = 6.dp,
-        start = 6.dp
-    ),
-
-    shape = RoundedCornerShape(18.dp),
-
-    color = Color.Black.copy(alpha = 0.72f)
-
-) {
-
-    Row(
-
-        modifier = Modifier.padding(
-            horizontal = 14.dp,
-            vertical = 6.dp
-        ),
-
-        verticalAlignment = Alignment.CenterVertically
+        color = Color.Black.copy(alpha = 0.70f)
 
     ) {
 
-        Text(
+        Row(
 
-            text = "⏳",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 14.dp,
+                    vertical = 8.dp
+                ),
 
-            style = MaterialTheme.typography.bodyMedium
+            horizontalArrangement = Arrangement.SpaceBetween,
 
-        )
+            verticalAlignment = Alignment.CenterVertically
 
-        Spacer(
-            modifier = Modifier.width(6.dp)
-        )
+        ) {
 
-        Text(
+            Row(
 
-            text = "04:59",
+                verticalAlignment = Alignment.CenterVertically
 
-            style = MaterialTheme.typography.bodyLarge,
+            ) {
 
-            fontWeight = FontWeight.Bold,
+                Text(
 
-            color = Color(0xFF62E37A)
+                    text = "⏳",
+
+                    style = MaterialTheme.typography.bodyMedium
+
+                )
+
+                Spacer(
+                    modifier = Modifier.width(6.dp)
+                )
+
+                Text(
+
+                    text = "04:59",
+
+                    style = MaterialTheme.typography.bodyLarge,
+
+                    fontWeight = FontWeight.Bold,
+
+                    color = Color(0xFF62E37A)
+
+                )
+
+            }
+
+            Row(
+
+                verticalAlignment = Alignment.CenterVertically
+
+            ) {
+
+                AsyncImage(
+
+                    model = "https://www.fut.gg/public-assets/coin.webp",
+
+                    contentDescription = "Coins",
+
+                    modifier = Modifier.size(18.dp)
+
+                )
+
+                Spacer(
+                    modifier = Modifier.width(6.dp)
+                )
+
+                Text(
+
+                    text = player.cardValue.toString(),
+
+                    style = MaterialTheme.typography.bodyLarge,
+
+                    fontWeight = FontWeight.Bold,
+
+                    color = Color.White
+
+                )
+
+            }
+
+        }
+
+    }
+
+    Box(
+
+        modifier = Modifier.fillMaxWidth()
+
+    ) {
+
+        AsyncImage(
+
+            model = player.imageUrl,
+
+            contentDescription = player.playerName,
+
+            modifier = Modifier
+                .size(
+                    width = 190.dp,
+                    height = 210.dp
+                )
+                .align(Alignment.Center),
+
+            contentScale = ContentScale.Fit
 
         )
 
     }
-
-}
-
-                Surface(
-
-    modifier = Modifier
-        .align(Alignment.TopEnd)
-        .padding(
-            top = 6.dp,
-            end = 6.dp
-        ),
-
-    shape = RoundedCornerShape(18.dp),
-
-    color = Color.Black.copy(alpha = 0.70f)
-
-) {
-
-                    Row(
-
-                        modifier = Modifier.padding(
-                            horizontal = 8.dp,
-                            vertical = 4.dp
-                        ),
-
-                        verticalAlignment = Alignment.CenterVertically
-
-                    ) {
-
-                        AsyncImage(
-
-                            model = "https://www.fut.gg/public-assets/coin.webp",
-
-                            contentDescription = "Coins",
-
-                            modifier = Modifier.size(20.dp)
-
-                        )
-
-                        Spacer(
-                            modifier = Modifier.width(4.dp)
-                        )
-
-                        Text(
-
-                            text = player.cardValue.toString(),
-
-                            color = Color.White,
-
-                            fontWeight = FontWeight.Bold
-
-                        )
-
-                    }
-
-                }
-
-            }
 
             Spacer(
                 modifier = Modifier.height(12.dp)
