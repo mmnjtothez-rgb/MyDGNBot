@@ -1,12 +1,15 @@
 package com.mydgnbot.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -17,8 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.mydgnbot.R
 
 @Composable
 fun HomeHeader(
@@ -62,39 +67,71 @@ fun HomeHeader(
 
         ) {
 
-            HeaderItem(
+            HeaderIcon(
 
-                text =
+                icon =
                 if (connected)
-                    "● CONNECTED"
+                    R.drawable.ic_connected
                 else
-                    "● OFFLINE",
+                    R.drawable.ic_connected
 
-                color =
-                if (connected)
-                    Color(0xFF21D07A)
+            )
+
+            Divider()
+
+            HeaderIcon(
+
+                icon =
+                if (platform.equals("PC", true))
+                    R.drawable.ic_pc
                 else
-                    Color.Red
+                    R.drawable.ic_console
 
             )
 
             Divider()
 
-            HeaderItem(
-                text = platform
+            HeaderIcon(
+
+                icon =
+                if (method.contains("Safe", true))
+                    R.drawable.ic_safe
+                else
+                    R.drawable.ic_quicksell
+
             )
 
             Divider()
 
-            HeaderItem(
-                text = method
-            )
+            Row(
 
-            Divider()
+                verticalAlignment = Alignment.CenterVertically
 
-            HeaderItem(
-                text = "${interval}s"
-            )
+            ) {
+
+                HeaderIcon(
+
+                    icon = R.drawable.ic_timer
+
+                )
+
+                Spacer(
+                    modifier = Modifier.width(6.dp)
+                )
+
+                Text(
+
+                    text = "${interval}s",
+
+                    color = Color.White,
+
+                    style = MaterialTheme.typography.bodyMedium,
+
+                    fontWeight = FontWeight.SemiBold
+
+                )
+
+            }
 
         }
 
@@ -103,23 +140,19 @@ fun HomeHeader(
 }
 
 @Composable
-private fun HeaderItem(
+private fun HeaderIcon(
 
-    text: String,
-
-    color: Color = Color.White
+    icon: Int
 
 ) {
 
-    Text(
+    Image(
 
-        text = text,
+        painter = painterResource(icon),
 
-        color = color,
+        contentDescription = null,
 
-        style = MaterialTheme.typography.bodyMedium,
-
-        fontWeight = FontWeight.SemiBold
+        modifier = Modifier.size(22.dp)
 
     )
 
