@@ -1,3 +1,4 @@
+
 package com.mydgnbot.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
@@ -8,25 +9,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.MaterialTheme
 import com.mydgnbot.ui.components.ActionButtons
 import com.mydgnbot.ui.components.ActivityLogCard
 import com.mydgnbot.ui.components.BotActionState
 import com.mydgnbot.ui.components.HomeHeader
+import com.mydgnbot.ui.components.HomeTopBar
 import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
 
@@ -36,187 +31,134 @@ fun HomeScreen(
 
 ) {
 
-
     val player by viewModel.player.collectAsState()
 
     val settings by viewModel.settings.collectAsState()
-    val status by viewModel.status.collectAsState()
+
     val isOnline by viewModel.isOnline.collectAsState()
 
     val isRunning by viewModel.isRunning.collectAsState()
 
     val logs by viewModel.logs.collectAsState()
 
-
-
     val platform =
         settings["platform"]
             ?: "Console"
 
-
-
     val method =
         if (settings["player_type"] == "1") {
-
             "Safe"
-
         } else {
-
             "Quick Sell"
-
         }
-
-
 
     val interval =
         settings["poll_interval"]
             ?: "10"
 
+    Column(
 
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(
+                rememberScrollState()
+            ),
 
-    Scaffold(
+        verticalArrangement = Arrangement.Top
 
-        topBar = {
+    ) {
 
-            TopAppBar(
+        HomeTopBar(
 
-                title = {
+            title = "MyDGNBot",
 
-                    Text("MyDGNBot")
+            onSettingsClick = onSettingsClick
 
-                }
+        )
 
-            )
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
-        }
+        HomeHeader(
 
-    ) { padding ->
+            platform = platform,
 
+            method = method,
 
-        Column(
+            interval = interval,
 
-            modifier = Modifier
+            connected = isOnline
 
-                .fillMaxSize()
+        )
 
-                .padding(padding)
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
-                .padding(16.dp)
+        PlayerCard(
 
-                .verticalScroll(
-                    rememberScrollState()
-                ),
+            player = player
 
+        )
 
-            verticalArrangement =
-                Arrangement.Top
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
-        ) {
+        ActionButtons(
 
+            state = when {
 
-            HomeHeader(
+                player != null ->
+                    BotActionState.PLAYER_FOUND
 
-    platform = platform,
+                isRunning ->
+                    BotActionState.SEARCHING
 
-    method = method,
+                else ->
+                    BotActionState.IDLE
 
-    interval = interval,
+            },
 
-    connected = isOnline
+            onStartClick = {
 
-)
+                viewModel.startBot()
 
-Spacer(
+            },
 
-    modifier = Modifier.height(16.dp)
+            onStopClick = {
 
-)
+                viewModel.stopBot()
 
-PlayerCard(
+            },
 
-    player = player
+            onBoughtClick = {
 
-)
+                viewModel.markBought()
 
-Spacer(
+            },
 
-    modifier = Modifier.height(16.dp)
+            onCancelClick = {
 
-)
+                viewModel.cancelPlayer()
 
-ActionButtons(
+            },
 
-                state = when {
+            onSettingsClick = onSettingsClick
 
+        )
 
-                    player != null ->
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
-                        BotActionState.PLAYER_FOUND
+        ActivityLogCard(
 
+            logs = logs
 
-
-                    isRunning ->
-
-                        BotActionState.SEARCHING
-
-
-
-                    else ->
-
-                        BotActionState.IDLE
-
-                },
-
-
-                onStartClick = {
-
-                    viewModel.startBot()
-
-                },
-
-
-                onStopClick = {
-
-                    viewModel.stopBot()
-
-                },
-
-
-                onBoughtClick = {
-
-                    viewModel.markBought()
-
-                },
-
-
-                onCancelClick = {
-
-                    viewModel.cancelPlayer()
-
-                },
-
-
-                onSettingsClick = onSettingsClick
-
-            )
-
-
-
-            Spacer(
-
-                modifier = Modifier.height(16.dp)
-
-            )
-
-
-
-            ActivityLogCard(
-
-                logs = logs
-
-            )
-
-        }
+        )
 
     }
 
