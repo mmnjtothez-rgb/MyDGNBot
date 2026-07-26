@@ -2,12 +2,12 @@ package com.mydgnbot.ui
 
 import androidx.compose.runtime.Composable
 import com.mydgnbot.ui.navigation.AppNavigation
-import com.mydgnbot.ui.theme.MyDGNTheme
+import com.mydgnbot.ui.theme.MyDGNBotTheme
 
 @Composable
 fun MyDGNApp() {
 
-    MyDGNTheme {
+    MyDGNBotTheme {
 
         AppNavigation()
 
