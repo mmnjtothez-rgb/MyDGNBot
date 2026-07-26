@@ -44,7 +44,7 @@ fun HomeTopBar(
 
                 text = "MyDGNBot",
 
-                fontSize = 30.sp,
+                fontSize = 16.sp,
 
                 fontWeight = FontWeight.Bold,
 
@@ -54,7 +54,7 @@ fun HomeTopBar(
 
             Text(
 
-                text = "Ultimate Team Assistant",
+                text = "API Assistant",
 
                 fontSize = 12.sp,
 
