@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
@@ -30,11 +31,17 @@ import com.mydgnbot.R
 
 @Composable
 fun HomeHeader(
+
     platform: String,
+
     method: String,
+
     interval: String,
-    connected: Boolean,
+
+    connected: Boolean = true,
+
     onSettingsClick: () -> Unit
+
 ) {
 
     Column {
@@ -46,7 +53,7 @@ fun HomeHeader(
 
             Text(
                 text = "MyDGNBot",
-                fontSize = 32.sp,
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.weight(1f)
@@ -54,7 +61,7 @@ fun HomeHeader(
 
             Box(
                 modifier = Modifier
-                    .size(52.dp)
+                    .size(46.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(Color(0xFF1A1D22))
                     .clickable {
@@ -66,14 +73,14 @@ fun HomeHeader(
                 Image(
                     painter = painterResource(R.drawable.ic_settings),
                     contentDescription = "Settings",
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(22.dp)
                 )
 
             }
 
         }
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -89,7 +96,7 @@ fun HomeHeader(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 16.dp),
+                    .padding(horizontal = 18.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -154,7 +161,7 @@ fun HomeHeader(
                     Text(
                         text = "${interval}s",
                         color = Color.White,
-                        fontSize = 20.sp,
+                        fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
                     )
 
