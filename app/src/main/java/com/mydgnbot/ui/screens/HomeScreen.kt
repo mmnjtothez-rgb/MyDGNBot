@@ -71,8 +71,6 @@ fun HomeScreen(
 
         HomeTopBar(
 
-    title = "MyDGNBot",
-
     onSettingsClick = onSettingsClick
 
 )
