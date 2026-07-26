@@ -18,7 +18,6 @@ import com.mydgnbot.ui.components.ActionButtons
 import com.mydgnbot.ui.components.ActivityLogCard
 import com.mydgnbot.ui.components.BotActionState
 import com.mydgnbot.ui.components.HomeHeader
-import com.mydgnbot.ui.components.HomeTopBar
 import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
