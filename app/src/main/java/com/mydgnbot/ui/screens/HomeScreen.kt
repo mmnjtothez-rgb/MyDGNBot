@@ -69,43 +69,33 @@ fun HomeScreen(
 
     ) {
 
-        HomeTopBar(
-
-            title = "MyDGNBot",
-
-            onSettingsClick = onSettingsClick
-
-        )
-
-        Spacer(
-            modifier = Modifier.height(8.dp)
-        )
-
         HomeHeader(
 
-            platform = platform,
+    platform = platform,
 
-            method = method,
+    method = method,
 
-            interval = interval,
+    interval = interval,
 
-            connected = isOnline
+    connected = isOnline,
 
-        )
+    onSettingsClick = onSettingsClick
 
-        Spacer(
-            modifier = Modifier.height(20.dp)
-        )
+)
 
-        PlayerCard(
+Spacer(
+    modifier = Modifier.height(20.dp)
+)
 
-            player = player
+PlayerCard(
 
-        )
+    player = player
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
+)
+
+Spacer(
+    modifier = Modifier.height(16.dp)
+)
 
         ActionButtons(
 
