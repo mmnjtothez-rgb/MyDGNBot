@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -59,16 +62,14 @@ fun HomeScreen(
     Column(
 
     modifier = Modifier
-        .fillMaxSize()
-        .padding(
-            top = 100.dp,
-            start = 16.dp,
-            end = 16.dp,
-            bottom = 16.dp
-        )
-        .verticalScroll(
-            rememberScrollState()
-        ),
+    .fillMaxSize()
+    .statusBarsPadding()
+    .navigationBarsPadding()
+    .padding(horizontal = 16.dp)
+    .padding(bottom = 16.dp)
+    .verticalScroll(
+        rememberScrollState()
+    ),
 
     verticalArrangement = Arrangement.Top
 
