@@ -87,15 +87,11 @@ fun HomeScreen(
        
 
 StatusStrip(
-
     platform = platform,
-
     method = method,
-
     interval = interval,
-
-    connected = isOnline
-
+    connected = isOnline,
+    onSettingsClick = onSettingsClick
 )
 
 Spacer(
