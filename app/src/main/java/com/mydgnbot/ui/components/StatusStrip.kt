@@ -43,17 +43,21 @@ fun StatusStrip(
             .fillMaxWidth()
             .border(
                 BorderStroke(
-                    1.dp,
-                    Color(0xFF14C7A3).copy(alpha = 0.12f)
-                ),
+    1.dp,
+    Color(0xFF14C7A3).copy(alpha = 0.22f)
+),
                 RoundedCornerShape(24.dp)
             ),
 
         shape = RoundedCornerShape(24.dp),
 
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF101818)
-        )
+    containerColor = Color(0xFF11191A)
+),
+
+elevation = CardDefaults.cardElevation(
+    defaultElevation = 8.dp
+)
     ) {
 
         Row(
@@ -115,7 +119,14 @@ fun StatusStrip(
                 modifier = Modifier
                     .size(42.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFF181D1D))
+                    .background(Color(0xFF1B2324))
+.border(
+    BorderStroke(
+        1.dp,
+        Color(0xFF14C7A3).copy(alpha = 0.18f)
+    ),
+    RoundedCornerShape(14.dp)
+)
                     .clickable {
                         onSettingsClick()
                     },
@@ -145,7 +156,7 @@ private fun StripIcon(
     Image(
         painter = painterResource(icon),
         contentDescription = null,
-        modifier = Modifier.size(26.dp)
+        modifier = Modifier.size(28.dp)
     )
 
 }
