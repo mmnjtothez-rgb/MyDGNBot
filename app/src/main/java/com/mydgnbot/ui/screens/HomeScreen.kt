@@ -78,7 +78,7 @@ fun HomeScreen(
         )
 
         Spacer(
-            modifier = Modifier.height(16.dp)
+            modifier = Modifier.height(8.dp)
         )
 
         HomeHeader(
@@ -94,7 +94,7 @@ fun HomeScreen(
         )
 
         Spacer(
-            modifier = Modifier.height(16.dp)
+            modifier = Modifier.height(20.dp)
         )
 
         PlayerCard(
