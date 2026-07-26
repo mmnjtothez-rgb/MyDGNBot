@@ -61,7 +61,7 @@ fun HomeScreen(
     modifier = Modifier
         .fillMaxSize()
         .padding(
-            top = 52.dp,
+            top = 96.dp,
             start = 16.dp,
             end = 16.dp,
             bottom = 16.dp
