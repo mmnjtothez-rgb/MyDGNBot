@@ -43,9 +43,9 @@ fun HomeTopBar(
 
             text = title,
 
-            fontSize = 26.sp,
+            fontSize = 22.sp,
 
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
 
             color = MaterialTheme.colorScheme.onBackground
 
