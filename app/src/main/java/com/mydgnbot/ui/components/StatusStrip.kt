@@ -19,6 +19,8 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -36,113 +38,150 @@ fun StatusStrip(
 
     interval: String,
 
-    connected: Boolean
+    connected: Boolean,
+
+    onSettingsClick: () -> Unit
+
+)
 
 ) {
 
     Card(
 
-        modifier = Modifier.fillMaxWidth(),
+    modifier = Modifier.fillMaxWidth(),
 
-        shape = RoundedCornerShape(22.dp),
+    shape = RoundedCornerShape(24.dp),
 
-        colors = CardDefaults.cardColors(
+    colors = CardDefaults.cardColors(
 
-            containerColor = Color(0xFF181B20)
+        containerColor = Color(0xFF101818)
 
-        ),
+    ),
 
-        elevation = CardDefaults.cardElevation(
+    border = BorderStroke(
 
-            defaultElevation = 0.dp
+        1.dp,
 
-        )
+        Color(0xFF14C7A3).copy(alpha = 0.12f)
 
-    ) {
+    ),
+
+    elevation = CardDefaults.cardElevation(
+
+        defaultElevation = 2.dp
+
+    )
+
+) {
 
         Row(
 
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 16.dp),
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(60.dp)
+        .padding(horizontal = 18.dp),
 
-            horizontalArrangement = Arrangement.SpaceBetween,
+    horizontalArrangement = Arrangement.SpaceBetween,
 
-            verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically
 
-        ) {
+) {
 
-            StripIcon(
+    HeaderIcon(
 
-                icon =
-                if (connected)
-                    R.drawable.ic_connected
-                else
-                    R.drawable.ic_connected
+        icon =
+        if (connected)
+            R.drawable.ic_connected
+        else
+            R.drawable.ic_connected
 
-            )
+    )
 
-            StripDivider()
+    HeaderIcon(
 
-            StripIcon(
+        icon =
+        if (platform.equals("PC", true))
+            R.drawable.ic_pc
+        else
+            R.drawable.ic_console
 
-                icon =
-                if (platform.equals("PC", true))
-                    R.drawable.ic_pc
-                else
-                    R.drawable.ic_console
+    )
 
-            )
+    HeaderIcon(
 
-            StripDivider()
+        icon =
+        if (method == "Safe")
+            R.drawable.ic_safe
+        else
+            R.drawable.ic_quicksell
 
-            StripIcon(
+    )
 
-                icon =
-                if (method == "Safe")
-                    R.drawable.ic_safe
-                else
-                    R.drawable.ic_quicksell
+    Row(
 
-            )
+        verticalAlignment = Alignment.CenterVertically
 
-            StripDivider()
+    ) {
 
-            Row(
+        Image(
 
-                verticalAlignment = Alignment.CenterVertically
+            painter = painterResource(R.drawable.ic_timer),
 
-            ) {
+            contentDescription = null,
 
-                Image(
+            modifier = Modifier.size(22.dp)
 
-                    painter = painterResource(R.drawable.ic_timer),
+        )
 
-                    contentDescription = null,
+        Spacer(
 
-                    modifier = Modifier.size(22.dp)
+            modifier = Modifier.width(6.dp)
 
-                )
+        )
 
-                Spacer(
-                    modifier = Modifier.width(8.dp)
-                )
+        Text(
 
-                Text(
+            text = "${interval}s",
 
-                    text = "${interval}s",
+            color = Color.White,
 
-                    color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
 
-                    fontSize = 18.sp,
+            fontSize = 18.sp
 
-                    fontWeight = FontWeight.Bold
+        )
 
-                )
+    }
 
-            }
+    Box(
 
-        }
+        modifier = Modifier
+            .size(42.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0xFF181D1D))
+            .clickable {
+
+                onSettingsClick()
+
+            },
+
+        contentAlignment = Alignment.Center
+
+    ) {
+
+        Image(
+
+            painter = painterResource(R.drawable.ic_settings),
+
+            contentDescription = "Settings",
+
+            modifier = Modifier.size(22.dp)
+
+        )
+
+    }
+
+}
 
     }
 
