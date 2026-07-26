@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.components.ActionButtons
 import com.mydgnbot.ui.components.ActivityLogCard
 import com.mydgnbot.ui.components.BotActionState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
 import com.mydgnbot.ui.components.HomeTopBar
 import com.mydgnbot.ui.components.StatusStrip
 import com.mydgnbot.ui.components.PlayerCard
@@ -59,21 +61,29 @@ fun HomeScreen(
         settings["poll_interval"]
             ?: "10"
 
-    Column(
+    Surface(
 
-    modifier = Modifier
-    .fillMaxSize()
-    .statusBarsPadding()
-    .navigationBarsPadding()
-    .padding(horizontal = 16.dp)
-    .padding(bottom = 16.dp)
-    .verticalScroll(
-        rememberScrollState()
-    ),
+    modifier = Modifier.fillMaxSize(),
 
-    verticalArrangement = Arrangement.Top
+    color = MaterialTheme.colorScheme.background
 
 ) {
+
+    Column(
+
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
+            .verticalScroll(
+                rememberScrollState()
+            ),
+
+        verticalArrangement = Arrangement.Top
+
+    ) {
 
         HomeTopBar(
 
@@ -158,7 +168,7 @@ Spacer(
             modifier = Modifier.height(16.dp)
         )
 
-        ActivityLogCard(
+                ActivityLogCard(
 
             logs = logs
 
