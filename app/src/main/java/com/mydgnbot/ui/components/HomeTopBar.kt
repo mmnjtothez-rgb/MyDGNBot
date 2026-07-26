@@ -52,15 +52,7 @@ fun HomeTopBar(
 
             )
 
-            Text(
-
-                text = "API Assistant",
-
-                fontSize = 12.sp,
-
-                color = Color.Gray
-
-            )
+          
 
         }
 
