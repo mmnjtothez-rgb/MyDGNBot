@@ -31,7 +31,7 @@ fun HomeTopBar(
 
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(52.dp),
 
         horizontalArrangement = Arrangement.SpaceBetween,
 
