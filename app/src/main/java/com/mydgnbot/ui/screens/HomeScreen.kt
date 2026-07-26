@@ -17,7 +17,8 @@ import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.components.ActionButtons
 import com.mydgnbot.ui.components.ActivityLogCard
 import com.mydgnbot.ui.components.BotActionState
-import com.mydgnbot.ui.components.HomeHeader
+import com.mydgnbot.ui.components.HomeTopBar
+import com.mydgnbot.ui.components.StatusStrip
 import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
@@ -68,7 +69,19 @@ fun HomeScreen(
 
     ) {
 
-        HomeHeader(
+        HomeTopBar(
+
+    title = "MyDGNBot",
+
+    onSettingsClick = onSettingsClick
+
+)
+
+Spacer(
+    modifier = Modifier.height(14.dp)
+)
+
+StatusStrip(
 
     platform = platform,
 
@@ -76,9 +89,7 @@ fun HomeScreen(
 
     interval = interval,
 
-    connected = isOnline,
-
-    onSettingsClick = onSettingsClick
+    connected = isOnline
 
 )
 
