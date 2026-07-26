@@ -22,7 +22,6 @@ import com.mydgnbot.ui.components.ActivityLogCard
 import com.mydgnbot.ui.components.BotActionState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
-import com.mydgnbot.ui.components.HomeTopBar
 import com.mydgnbot.ui.components.StatusStrip
 import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
@@ -85,15 +84,7 @@ fun HomeScreen(
 
     ) {
 
-        HomeTopBar(
-
-    onSettingsClick = onSettingsClick
-
-)
-
-Spacer(
-    modifier = Modifier.height(14.dp)
-)
+       
 
 StatusStrip(
 
