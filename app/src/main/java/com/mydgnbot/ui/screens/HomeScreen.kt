@@ -168,12 +168,14 @@ Spacer(
             modifier = Modifier.height(16.dp)
         )
 
-                ActivityLogCard(
+                        ActivityLogCard(
 
             logs = logs
 
         )
 
-    }
+    }   
 
-}
+}  
+
+}   
