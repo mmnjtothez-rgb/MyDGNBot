@@ -86,6 +86,10 @@ fun HomeScreen(
 
        
 
+Spacer(
+    modifier = Modifier.height(12.dp)
+)
+
 StatusStrip(
     platform = platform,
     method = method,
