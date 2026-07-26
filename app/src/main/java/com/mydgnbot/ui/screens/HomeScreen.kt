@@ -58,16 +58,21 @@ fun HomeScreen(
 
     Column(
 
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(
-                rememberScrollState()
-            ),
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(
+            top = 52.dp,
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 16.dp
+        )
+        .verticalScroll(
+            rememberScrollState()
+        ),
 
-        verticalArrangement = Arrangement.Top
+    verticalArrangement = Arrangement.Top
 
-    ) {
+) {
 
         HomeTopBar(
 
