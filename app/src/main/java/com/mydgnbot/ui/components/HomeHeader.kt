@@ -1,7 +1,7 @@
 package com.mydgnbot.ui.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,134 +30,135 @@ import com.mydgnbot.R
 
 @Composable
 fun HomeHeader(
-
     platform: String,
-
     method: String,
-
     interval: String,
-
     connected: Boolean,
-
     onSettingsClick: () -> Unit
-
 ) {
 
-    Box(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-
-        Text(
-            text = "MyDGNBot",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.align(Alignment.CenterStart)
-        )
-
-        Image(
-            painter = painterResource(R.drawable.ic_settings),
-            contentDescription = "Settings",
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .size(24.dp)
-                .clickable {
-                    onSettingsClick()
-                }
-        )
-    }
-
-    Spacer(
-        modifier = Modifier.height(12.dp)
-    )
-
-    Card(
-
-        modifier = Modifier.fillMaxWidth(),
-
-        shape = RoundedCornerShape(24.dp),
-
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF111517)
-        ),
-
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp
-        )
-
-    ) {
+    Column {
 
         Row(
-
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 14.dp),
-
-            horizontalArrangement = Arrangement.SpaceEvenly,
-
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
-
         ) {
 
-            Image(
-                painter = painterResource(
-                    if (connected)
-                        R.drawable.ic_connected
-                    else
-                        R.drawable.ic_offline
-                ),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
+            Text(
+                text = "MyDGNBot",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.weight(1f)
             )
 
-            Divider()
-
-            Image(
-                painter = painterResource(
-                    if (platform.equals("pc", true))
-                        R.drawable.ic_pc
-                    else
-                        R.drawable.ic_console
-                ),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Divider()
-
-            Image(
-                painter = painterResource(
-                    if (method.equals("Quick Sell", true))
-                        R.drawable.ic_quicksell
-                    else
-                        R.drawable.ic_safe
-                ),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Divider()
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0xFF1A1D22))
+                    .clickable {
+                        onSettingsClick()
+                    },
+                contentAlignment = Alignment.Center
             ) {
 
                 Image(
-                    painter = painterResource(R.drawable.ic_timer),
-                    contentDescription = null,
+                    painter = painterResource(R.drawable.ic_settings),
+                    contentDescription = "Settings",
                     modifier = Modifier.size(24.dp)
                 )
 
-                Spacer(
-                    modifier = Modifier.size(6.dp)
+            }
+
+        }
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF181B20)
+            ),
+            shape = RoundedCornerShape(24.dp),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 0.dp
+            )
+        ) {
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                HeaderItem(
+                    icon = if (connected)
+                        R.drawable.ic_connected
+                    else
+                        R.drawable.ic_connected,
+                    text = ""
                 )
 
-                Text(
-                    text = "${interval}s",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White
+                Divider(
+                    modifier = Modifier
+                        .height(26.dp)
+                        .padding(horizontal = 6.dp),
+                    color = Color.White.copy(alpha = 0.10f)
                 )
+
+                HeaderItem(
+                    icon = if (platform.equals("PC", true))
+                        R.drawable.ic_pc
+                    else
+                        R.drawable.ic_console,
+                    text = ""
+                )
+
+                Divider(
+                    modifier = Modifier
+                        .height(26.dp)
+                        .padding(horizontal = 6.dp),
+                    color = Color.White.copy(alpha = 0.10f)
+                )
+
+                HeaderItem(
+                    icon = if (method == "Safe")
+                        R.drawable.ic_safe
+                    else
+                        R.drawable.ic_quicksell,
+                    text = ""
+                )
+
+                Divider(
+                    modifier = Modifier
+                        .height(26.dp)
+                        .padding(horizontal = 6.dp),
+                    color = Color.White.copy(alpha = 0.10f)
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Image(
+                        painter = painterResource(R.drawable.ic_timer),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    Text(
+                        text = "${interval}s",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                }
 
             }
 
@@ -167,17 +169,33 @@ fun HomeHeader(
 }
 
 @Composable
-private fun Divider() {
+private fun HeaderItem(
+    icon: Int,
+    text: String
+) {
 
-    Box(
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
 
-        modifier = Modifier
-            .height(24.dp)
-            .border(
-                width = 0.5.dp,
-                color = Color.White.copy(alpha = 0.15f)
+        Image(
+            painter = painterResource(icon),
+            contentDescription = null,
+            modifier = Modifier.size(28.dp)
+        )
+
+        if (text.isNotEmpty()) {
+
+            Spacer(modifier = Modifier.size(6.dp))
+
+            Text(
+                text = text,
+                color = Color.White,
+                fontSize = 16.sp
             )
 
-    )
+        }
+
+    }
 
 }
