@@ -21,7 +21,7 @@ import com.mydgnbot.ui.components.ActionButtons
 import com.mydgnbot.ui.components.ActivityLogCard
 import com.mydgnbot.ui.components.BotActionState
 import com.mydgnbot.ui.components.ScannerStatusCard
-import com.mydgnbot.ui.components.StatusStrip
+import com.mydgnbot.ui.components.StatusChipsRow
 import com.mydgnbot.ui.theme.Black0
 import com.mydgnbot.ui.theme.TextPrimary
 import com.mydgnbot.ui.theme.TextSecondary
@@ -81,11 +81,11 @@ fun HomeScreen(
                     )
                 }
 
-                StatusStrip(
+                StatusChipsRow(
+                    connected = isOnline,
                     platform = platform,
                     method = method,
                     interval = interval,
-                    connected = isOnline,
                     onSettingsClick = onSettingsClick
                 )
 
