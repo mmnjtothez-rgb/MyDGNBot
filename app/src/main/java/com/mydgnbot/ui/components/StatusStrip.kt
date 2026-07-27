@@ -82,7 +82,7 @@ fun StatusStrip(
 
             verticalAlignment = Alignment.CenterVertically,
 
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Start
 
         ) {
 
@@ -158,6 +158,12 @@ fun StatusStrip(
 }
 
             }
+
+Spacer(
+
+    modifier = Modifier.weight(1f)
+
+)
 
             Box(
 
