@@ -13,6 +13,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.Paint
+import android.graphics.BlurMaskFilter
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -50,21 +55,21 @@ fun StatusStrip(
                 .fillMaxWidth()
                 .shadow(
 
-                    elevation = 18.dp,
+    elevation = 10.dp,
 
-                    shape = RoundedCornerShape(24.dp),
+    shape = RoundedCornerShape(24.dp),
 
-                    ambientColor = Color(0xFF18E6BE).copy(alpha = 0.18f),
+    ambientColor = Color(0xFF18E6BE).copy(alpha = 0.08f),
 
-                    spotColor = Color(0xFF18E6BE).copy(alpha = 0.22f)
+    spotColor = Color(0xFF18E6BE).copy(alpha = 0.10f)
 
-                ),
+),
 
             shape = RoundedCornerShape(24.dp),
 
             colors = CardDefaults.cardColors(
 
-                containerColor = Color(0xFF101717)
+                containerColor = Color(0xFF131B1C)
 
             ),
 
@@ -72,7 +77,7 @@ fun StatusStrip(
 
                 1.dp,
 
-                Color(0xFF18E6BE).copy(alpha = 0.18f)
+                Color(0xFF18E6BE).copy(alpha = 0.12f)
 
             ),
 
