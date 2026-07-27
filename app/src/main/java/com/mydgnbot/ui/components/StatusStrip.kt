@@ -54,31 +54,30 @@ fun StatusStrip(
                     val h = size.height
 
                     val cornerLayers = listOf(
-                        0.16f to 18f,
-                        0.11f to 12f,
-                        0.07f to 7f
+                        0.14f to 18f,
+                        0.10f to 12f,
+                        0.06f to 7f
                     )
-                    cornerLayers.forEachIndexed { index, (alpha, spread) ->
-                        val topBias = if (index == 0) 1.25f else 1.10f
+                    cornerLayers.forEach { (alpha, spread) ->
                         drawRoundRect(
                             color = glow.copy(alpha = alpha),
-                            topLeft = Offset(-spread, -spread * topBias),
-                            size = Size(w + spread * 2f, h + spread * 1.7f),
-                            cornerRadius = CornerRadius(r + spread * 0.26f, r + spread * 0.26f),
+                            topLeft = Offset(-spread, -spread * 0.95f),
+                            size = Size(w + spread * 2f, h + spread * 1.6f),
+                            cornerRadius = CornerRadius(r + spread * 0.22f, r + spread * 0.22f),
                             blendMode = BlendMode.Screen
                         )
                     }
 
                     val sideLayers = listOf(
-                        0.035f to 12f,
-                        0.020f to 7f
+                        0.04f to 12f,
+                        0.025f to 7f
                     )
                     sideLayers.forEach { (alpha, spread) ->
                         drawRoundRect(
                             color = glow.copy(alpha = alpha),
-                            topLeft = Offset(-spread, -spread * 0.30f),
-                            size = Size(w + spread * 2f, h + spread * 0.85f),
-                            cornerRadius = CornerRadius(r + spread * 0.12f, r + spread * 0.12f),
+                            topLeft = Offset(-spread, -spread * 0.35f),
+                            size = Size(w + spread * 2f, h + spread * 0.9f),
+                            cornerRadius = CornerRadius(r + spread * 0.14f, r + spread * 0.14f),
                             blendMode = BlendMode.Screen
                         )
                     }
