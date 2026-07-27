@@ -47,67 +47,79 @@ fun StatusStrip(
             .drawBehind {
                 if (connected) {
                     drawRoundRect(
-                        brush = Brush.radialGradient(
+                        brush = Brush.linearGradient(
                             colors = listOf(
-                                emerald.copy(alpha = 0.55f),
-                                emerald.copy(alpha = 0.18f),
-                                Color.Transparent
-                            ),
-                            radius = size.minDimension * 0.95f
+                                emerald.copy(alpha = 0.75f),
+                                emerald.copy(alpha = 0.25f),
+                                emerald.copy(alpha = 0.70f)
+                            )
                         ),
-                        topLeft = androidx.compose.ui.geometry.Offset(-18f, -18f),
-                        size = androidx.compose.ui.geometry.Size(size.width + 36f, size.height + 36f),
+                        topLeft = androidx.compose.ui.geometry.Offset(-2f, -2f),
+                        size = androidx.compose.ui.geometry.Size(size.width + 4f, size.height + 4f),
                         cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx(), 24.dp.toPx())
                     )
                 }
             }
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = shape,
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF131B1C)),
-            border = BorderStroke(1.dp, emerald.copy(alpha = if (connected) 0.42f else 0.18f)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(1.dp)
+                .background(
+                    if (connected) emerald.copy(alpha = 0.12f) else Color.Transparent,
+                    shape
+                )
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(68.dp)
-                    .padding(horizontal = 18.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = shape,
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF131B1C)),
+                border = BorderStroke(
+                    1.dp,
+                    if (connected) emerald.copy(alpha = 0.95f) else emerald.copy(alpha = 0.18f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
-                StripIcon(
-                    icon = if (connected) R.drawable.ic_connected else R.drawable.ic_connected
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(68.dp)
+                        .padding(horizontal = 18.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    StripIcon(
+                        icon = if (connected) R.drawable.ic_connected else R.drawable.ic_connected
+                    )
 
-                StripIcon(
-                    icon = if (platform.equals("PC", true)) R.drawable.ic_pc else R.drawable.ic_console
-                )
+                    StripIcon(
+                        icon = if (platform.equals("PC", true)) R.drawable.ic_pc else R.drawable.ic_console
+                    )
 
-                StripIcon(
-                    icon = if (method.equals("Safe", true)) R.drawable.ic_safe else R.drawable.ic_quicksell
-                )
+                    StripIcon(
+                        icon = if (method.equals("Safe", true)) R.drawable.ic_safe else R.drawable.ic_quicksell
+                    )
 
-                Image(
-                    painter = painterResource(R.drawable.ic_timer),
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp)
-                )
+                    Image(
+                        painter = painterResource(R.drawable.ic_timer),
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp)
+                    )
 
-                Text(
-                    text = "${interval}s",
-                    color = Color(0xFFF3F6F7),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
+                    Text(
+                        text = "${interval}s",
+                        color = Color(0xFFF3F6F7),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
 
-                Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.weight(1f))
 
-                SettingsBubble(
-                    onSettingsClick = onSettingsClick,
-                    emerald = emerald
-                )
+                    SettingsBubble(
+                        onSettingsClick = onSettingsClick,
+                        emerald = emerald
+                    )
+                }
             }
         }
     }
@@ -132,7 +144,7 @@ private fun SettingsBubble(
             .size(46.dp)
             .background(Color(0xFF172122), RoundedCornerShape(16.dp))
             .border(
-                BorderStroke(1.dp, emerald.copy(alpha = 0.24f)),
+                BorderStroke(1.dp, emerald.copy(alpha = 0.28f)),
                 RoundedCornerShape(16.dp)
             )
             .clickable(onClick = onSettingsClick),
