@@ -45,32 +45,35 @@ fun StatusStrip(
 
         Box(
 
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .padding(horizontal = 12.dp)
-                .offset(y = 16.dp)
-                .background(
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(82.dp)
+        .padding(horizontal = 6.dp)
+        .offset(y = 12.dp)
+        .clip(RoundedCornerShape(30.dp))
+        .background(
 
-                    Brush.radialGradient(
+            Brush.horizontalGradient(
 
-                        colors = listOf(
+                colors = listOf(
 
-                            Color(0xFF00FFC6).copy(alpha = .18f),
+                    Color.Transparent,
 
-                            Color(0xFF00FFC6).copy(alpha = .06f),
+                    Color(0xFF00FFC6).copy(alpha = 0.10f),
 
-                            Color.Transparent
+                    Color(0xFF00FFC6).copy(alpha = 0.14f),
 
-                        )
+                    Color(0xFF00FFC6).copy(alpha = 0.10f),
 
-                    ),
-
-                    RoundedCornerShape(40.dp)
+                    Color.Transparent
 
                 )
 
+            )
+
         )
+
+)
 
         Card(
 
