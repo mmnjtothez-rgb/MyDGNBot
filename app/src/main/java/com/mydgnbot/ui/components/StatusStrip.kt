@@ -61,13 +61,13 @@ fun StatusStrip(
 
     colors = CardDefaults.cardColors(
 
-        containerColor = Color(0xFF121B1C)
+        containerColor = Color(0xFF0C1415)
 
     ),
 
     elevation = CardDefaults.cardElevation(
 
-        defaultElevation = 12.dp
+        defaultElevation = 4.dp
 
     )
 
@@ -77,8 +77,8 @@ fun StatusStrip(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .height(64.dp)
-                .padding(horizontal = 20.dp),
+                .height(68.dp)
+                .padding(horizontal = 22.dp),
 
             verticalAlignment = Alignment.CenterVertically,
 
@@ -177,7 +177,7 @@ Spacer(
 
                 1.dp,
 
-                Color(0xFF14C7A3).copy(alpha = 0.12f)
+                Color(0xFF14C7A3).copy(alpha = 0.08f)
 
             ),
 
