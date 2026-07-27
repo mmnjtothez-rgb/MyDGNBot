@@ -1,172 +1,127 @@
-
 package com.mydgnbot.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.components.ActionButtons
 import com.mydgnbot.ui.components.ActivityLogCard
 import com.mydgnbot.ui.components.BotActionState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.MaterialTheme
+import com.mydgnbot.ui.components.ScannerStatusCard
 import com.mydgnbot.ui.components.StatusStrip
-import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
+import com.mydgnbot.ui.theme.Black0
+import com.mydgnbot.ui.theme.Black1
+import com.mydgnbot.ui.theme.Black2
+import com.mydgnbot.ui.theme.Emerald
+import com.mydgnbot.ui.theme.MidnightGreen1
+import com.mydgnbot.ui.theme.MidnightGreen2
+import com.mydgnbot.ui.theme.TextPrimary
+import com.mydgnbot.ui.theme.TextSecondary
 
 @Composable
 fun HomeScreen(
-
     onSettingsClick: () -> Unit,
-
     viewModel: HomeViewModel
-
 ) {
-
     val player by viewModel.player.collectAsState()
-
     val settings by viewModel.settings.collectAsState()
-
     val isOnline by viewModel.isOnline.collectAsState()
-
     val isRunning by viewModel.isRunning.collectAsState()
-
     val logs by viewModel.logs.collectAsState()
 
-    val platform =
-        settings["platform"]
-            ?: "Console"
+    val platform = settings["platform"] ?: "Console"
+    val method = if (settings["player_type"] == "1") "Safe" else "Quick Sell"
+    val interval = settings["poll_interval"] ?: "10"
 
-    val method =
-        if (settings["player_type"] == "1") {
-            "Safe"
-        } else {
-            "Quick Sell"
-        }
-
-    val interval =
-        settings["poll_interval"]
-            ?: "10"
+    val actionState = when {
+        player != null -> BotActionState.PLAYER_FOUND
+        isRunning -> BotActionState.SEARCHING
+        else -> BotActionState.IDLE
+    }
 
     Surface(
-
-    modifier = Modifier.fillMaxSize(),
-
-    color = MaterialTheme.colorScheme.background
-
-) {
-
-    Column(
-
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 16.dp)
-            .verticalScroll(
-                rememberScrollState()
-            ),
-
-        verticalArrangement = Arrangement.Top
-
+        modifier = Modifier.fillMaxSize(),
+        color = Black0
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Black0)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 12.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Header()
 
-       
+                StatusStrip(
+                    platform = platform,
+                    method = method,
+                    interval = interval,
+                    connected = isOnline,
+                    onSettingsClick = onSettingsClick
+                )
 
-Spacer(
-    modifier = Modifier.height(12.dp)
-)
+                ScannerStatusCard(
+                    isRunning = isRunning,
+                    playerFound = player != null,
+                    connected = isOnline
+                )
 
-StatusStrip(
-    platform = platform,
-    method = method,
-    interval = interval,
-    connected = isOnline,
-    onSettingsClick = onSettingsClick
-)
+                ActionButtons(
+                    state = actionState,
+                    onStartClick = viewModel::startBot,
+                    onStopClick = viewModel::stopBot,
+                    onBoughtClick = viewModel::markBought,
+                    onCancelClick = viewModel::cancelPlayer,
+                    onSettingsClick = onSettingsClick
+                )
 
-Spacer(
-    modifier = Modifier.height(20.dp)
-)
+                ActivityLogCard(logs = logs)
+            }
+        }
+    }
+}
 
-PlayerCard(
-
-    player = player
-
-)
-
-Spacer(
-    modifier = Modifier.height(16.dp)
-)
-
-        ActionButtons(
-
-            state = when {
-
-                player != null ->
-                    BotActionState.PLAYER_FOUND
-
-                isRunning ->
-                    BotActionState.SEARCHING
-
-                else ->
-                    BotActionState.IDLE
-
-            },
-
-            onStartClick = {
-
-                viewModel.startBot()
-
-            },
-
-            onStopClick = {
-
-                viewModel.stopBot()
-
-            },
-
-            onBoughtClick = {
-
-                viewModel.markBought()
-
-            },
-
-            onCancelClick = {
-
-                viewModel.cancelPlayer()
-
-            },
-
-            onSettingsClick = onSettingsClick
-
+@Composable
+private fun Header() {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = "MyDGNBot",
+            style = MaterialTheme.typography.displayMedium,
+            color = TextPrimary
         )
-
-        Spacer(
-            modifier = Modifier.height(16.dp)
+        Text(
+            text = "Midnight green • AMOLED black • premium bot control",
+            style = MaterialTheme.typography.bodySmall,
+            color = TextSecondary
         )
-
-                        ActivityLogCard(
-
-            logs = logs
-
-        )
-
-    }   
-
-}  
-
-}   
+    }
+}
