@@ -23,6 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,8 +40,9 @@ fun StatusStrip(
     connected: Boolean,
     onSettingsClick: () -> Unit
 ) {
-    val shape = RoundedCornerShape(24.dp)
-    val emerald = Color(0xFF18E6BE)
+    val shape = RoundedCornerShape(18.dp)
+    val emerald = Color(0xFF3DFFB8)
+    val deepBg = Color(0xFF101617)
 
     Box(
         modifier = Modifier
@@ -49,77 +53,76 @@ fun StatusStrip(
                     drawRoundRect(
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                emerald.copy(alpha = 0.75f),
-                                emerald.copy(alpha = 0.25f),
-                                emerald.copy(alpha = 0.70f)
+                                emerald.copy(alpha = 0.00f),
+                                emerald.copy(alpha = 0.85f),
+                                emerald.copy(alpha = 1.00f),
+                                emerald.copy(alpha = 0.85f),
+                                emerald.copy(alpha = 0.00f)
                             )
                         ),
-                        topLeft = androidx.compose.ui.geometry.Offset(-2f, -2f),
-                        size = androidx.compose.ui.geometry.Size(size.width + 4f, size.height + 4f),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx(), 24.dp.toPx())
+                        topLeft = Offset(-1f, -1f),
+                        size = Size(size.width + 2f, size.height + 2f),
+                        cornerRadius = CornerRadius(18.dp.toPx(), 18.dp.toPx())
+                    )
+
+                    drawRoundRect(
+                        color = emerald.copy(alpha = 0.12f),
+                        topLeft = Offset(1.5f, 1.5f),
+                        size = Size(size.width - 3f, size.height - 3f),
+                        cornerRadius = CornerRadius(16.dp.toPx(), 16.dp.toPx())
                     )
                 }
             }
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(1.dp)
-                .background(
-                    if (connected) emerald.copy(alpha = 0.12f) else Color.Transparent,
-                    shape
-                )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = shape,
+            colors = CardDefaults.cardColors(containerColor = deepBg),
+            border = BorderStroke(
+                1.dp,
+                if (connected) emerald.copy(alpha = 0.98f) else emerald.copy(alpha = 0.20f)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = shape,
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF131B1C)),
-                border = BorderStroke(
-                    1.dp,
-                    if (connected) emerald.copy(alpha = 0.95f) else emerald.copy(alpha = 0.18f)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(68.dp)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(68.dp)
-                        .padding(horizontal = 18.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    StripIcon(
-                        icon = if (connected) R.drawable.ic_connected else R.drawable.ic_connected
-                    )
+                StripIcon(
+                    icon = if (connected) R.drawable.ic_connected else R.drawable.ic_connected
+                )
 
-                    StripIcon(
-                        icon = if (platform.equals("PC", true)) R.drawable.ic_pc else R.drawable.ic_console
-                    )
+                StripIcon(
+                    icon = if (platform.equals("PC", true)) R.drawable.ic_pc else R.drawable.ic_console
+                )
 
-                    StripIcon(
-                        icon = if (method.equals("Safe", true)) R.drawable.ic_safe else R.drawable.ic_quicksell
-                    )
+                StripIcon(
+                    icon = if (method.equals("Safe", true)) R.drawable.ic_safe else R.drawable.ic_quicksell
+                )
 
-                    Image(
-                        painter = painterResource(R.drawable.ic_timer),
-                        contentDescription = null,
-                        modifier = Modifier.size(22.dp)
-                    )
+                Image(
+                    painter = painterResource(R.drawable.ic_timer),
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp)
+                )
 
-                    Text(
-                        text = "${interval}s",
-                        color = Color(0xFFF3F6F7),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
+                Text(
+                    text = "${interval}s",
+                    color = Color(0xFFF3F6F7),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 17.sp
+                )
 
-                    Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.weight(1f))
 
-                    SettingsBubble(
-                        onSettingsClick = onSettingsClick,
-                        emerald = emerald
-                    )
-                }
+                SettingsBubble(
+                    onSettingsClick = onSettingsClick,
+                    emerald = emerald
+                )
             }
         }
     }
@@ -141,11 +144,11 @@ private fun SettingsBubble(
 ) {
     Box(
         modifier = Modifier
-            .size(46.dp)
-            .background(Color(0xFF172122), RoundedCornerShape(16.dp))
+            .size(44.dp)
+            .background(Color(0xFF162122), RoundedCornerShape(15.dp))
             .border(
-                BorderStroke(1.dp, emerald.copy(alpha = 0.28f)),
-                RoundedCornerShape(16.dp)
+                BorderStroke(1.dp, emerald.copy(alpha = 0.26f)),
+                RoundedCornerShape(15.dp)
             )
             .clickable(onClick = onSettingsClick),
         contentAlignment = Alignment.Center
