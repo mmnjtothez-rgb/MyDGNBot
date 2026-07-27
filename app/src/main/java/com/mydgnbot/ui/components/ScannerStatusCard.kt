@@ -15,10 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.theme.Black1
 import com.mydgnbot.ui.theme.Emerald
+import com.mydgnbot.ui.theme.TextMuted
 import com.mydgnbot.ui.theme.TextPrimary
 import com.mydgnbot.ui.theme.TextSecondary
 
@@ -46,7 +46,7 @@ fun ScannerStatusCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Black1),
-        border = BorderStroke(1.dp, Emerald.copy(alpha = 0.18f)),
+        border = BorderStroke(1.dp, Emerald.copy(alpha = 0.14f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
