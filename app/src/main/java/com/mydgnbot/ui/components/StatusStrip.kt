@@ -1,6 +1,5 @@
 package com.mydgnbot.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +29,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mydgnbot.R
+import com.mydgnbot.ui.theme.Black1
+import com.mydgnbot.ui.theme.Emerald
+import com.mydgnbot.ui.theme.TextPrimary
+import com.mydgnbot.ui.theme.TextSecondary
 
 @Composable
 fun StatusStrip(
@@ -40,8 +43,6 @@ fun StatusStrip(
     onSettingsClick: () -> Unit
 ) {
     val shape = RoundedCornerShape(18.dp)
-    val glow = Color(0xFF2CFFB9)
-    val base = Color(0xFF0B1011)
 
     Box(
         modifier = Modifier
@@ -49,35 +50,29 @@ fun StatusStrip(
             .padding(horizontal = 2.dp)
             .drawBehind {
                 if (connected) {
+                    val glow = Emerald
                     val r = 18.dp.toPx()
                     val w = size.width
                     val h = size.height
 
-                    val cornerLayers = listOf(
-                        0.14f to 18f,
-                        0.10f to 12f,
-                        0.06f to 7f
-                    )
-                    cornerLayers.forEach { (alpha, spread) ->
+                    val topLayers = listOf(0.16f to 18f, 0.11f to 12f, 0.07f to 7f)
+                    topLayers.forEach { (alpha, spread) ->
                         drawRoundRect(
                             color = glow.copy(alpha = alpha),
-                            topLeft = Offset(-spread, -spread * 0.95f),
-                            size = Size(w + spread * 2f, h + spread * 1.6f),
-                            cornerRadius = CornerRadius(r + spread * 0.22f, r + spread * 0.22f),
+                            topLeft = Offset(-spread, -spread * 1.2f),
+                            size = Size(w + spread * 2f, h + spread * 1.8f),
+                            cornerRadius = CornerRadius(r + spread * 0.18f, r + spread * 0.18f),
                             blendMode = BlendMode.Screen
                         )
                     }
 
-                    val sideLayers = listOf(
-                        0.04f to 12f,
-                        0.025f to 7f
-                    )
+                    val sideLayers = listOf(0.035f to 12f, 0.020f to 7f)
                     sideLayers.forEach { (alpha, spread) ->
                         drawRoundRect(
                             color = glow.copy(alpha = alpha),
-                            topLeft = Offset(-spread, -spread * 0.35f),
-                            size = Size(w + spread * 2f, h + spread * 0.9f),
-                            cornerRadius = CornerRadius(r + spread * 0.14f, r + spread * 0.14f),
+                            topLeft = Offset(-spread, -spread * 0.30f),
+                            size = Size(w + spread * 2f, h + spread * 0.85f),
+                            cornerRadius = CornerRadius(r + spread * 0.12f, r + spread * 0.12f),
                             blendMode = BlendMode.Screen
                         )
                     }
@@ -95,11 +90,7 @@ fun StatusStrip(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = shape,
-            colors = CardDefaults.cardColors(containerColor = base),
-            border = BorderStroke(
-                1.dp,
-                if (connected) Color.Transparent else Color.White.copy(alpha = 0.05f)
-            ),
+            colors = CardDefaults.cardColors(containerColor = Black1),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Row(
@@ -122,7 +113,7 @@ fun StatusStrip(
 
                 Text(
                     text = "${interval}s",
-                    color = Color(0xFFF3F6F7),
+                    color = TextPrimary,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 17.sp
                 )
