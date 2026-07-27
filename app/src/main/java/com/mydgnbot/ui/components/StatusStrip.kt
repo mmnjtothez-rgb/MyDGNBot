@@ -168,16 +168,16 @@ Spacer(
             Box(
 
     modifier = Modifier
-        .size(48.dp)
-        .clip(RoundedCornerShape(18.dp))
-        .background(Color(0xFF1E2829))
+        .size(42.dp)
+        .clip(RoundedCornerShape(14.dp))
+        .background(Color(0xFF151C1D))
         .border(
 
             BorderStroke(
 
                 1.dp,
 
-                Color(0xFF14C7A3).copy(alpha = 0.25f)
+                Color(0xFF14C7A3).copy(alpha = 0.12f)
 
             ),
 
@@ -200,7 +200,7 @@ Spacer(
 
         contentDescription = "Settings",
 
-        modifier = Modifier.size(24.dp)
+        modifier = Modifier.size(21.dp)
 
     )
 
