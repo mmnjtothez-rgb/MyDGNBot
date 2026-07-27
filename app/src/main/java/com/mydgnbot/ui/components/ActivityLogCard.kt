@@ -3,6 +3,7 @@ package com.mydgnbot.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,18 +17,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.mydgnbot.domain.model.LogEntry
 import com.mydgnbot.ui.theme.Black1
 import com.mydgnbot.ui.theme.Emerald
-import com.mydgnbot.ui.theme.Gold
 import com.mydgnbot.ui.theme.TextMuted
 import com.mydgnbot.ui.theme.TextPrimary
 import com.mydgnbot.ui.theme.TextSecondary
 
 @Composable
 fun ActivityLogCard(
-    logs: List<String>
+    logs: List<LogEntry>
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -71,7 +71,7 @@ fun ActivityLogCard(
 
 @Composable
 private fun ActivityRow(
-    log: String
+    log: LogEntry
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -87,10 +87,18 @@ private fun ActivityRow(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = log,
+                text = log.message,
                 color = TextPrimary,
                 style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
             )
+
+            if (log.timestamp.isNotBlank()) {
+                Text(
+                    text = log.timestamp,
+                    color = TextMuted,
+                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall
+                )
+            }
         }
     }
 }
