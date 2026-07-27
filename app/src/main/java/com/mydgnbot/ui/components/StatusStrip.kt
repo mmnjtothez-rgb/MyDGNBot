@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,197 +46,195 @@ fun StatusStrip(
 
 ) {
 
-    Card(
+    Box(
 
-    modifier = Modifier
-        .fillMaxWidth()
-        .border(
-            BorderStroke(
-                1.dp,
-                Color(0xFF14C7A3).copy(alpha = 0.22f)
-            ),
-            RoundedCornerShape(24.dp)
-        ),
+        modifier = Modifier.fillMaxWidth()
 
-    shape = RoundedCornerShape(24.dp),
+    ) {
 
-    colors = CardDefaults.cardColors(
-
-        containerColor = Color(0xFF0C1415)
-
-    ),
-
-    elevation = CardDefaults.cardElevation(
-
-        defaultElevation = 4.dp
-
-    )
-
-) {
-
-        Row(
+        // Soft emerald ambient glow behind the strip
+        Box(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .height(68.dp)
-                .padding(horizontal = 22.dp),
+                .height(76.dp)
+                .offset(y = 4.dp)
+                .clip(RoundedCornerShape(26.dp))
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            Color(0xFF14C7A3).copy(alpha = 0.10f),
+                            Color.Transparent
+                        )
+                    )
+                )
 
-            verticalAlignment = Alignment.CenterVertically,
+        )
 
-            horizontalArrangement = Arrangement.Start
+        Card(
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    BorderStroke(
+                        1.dp,
+                        Color(0xFF14C7A3).copy(alpha = 0.22f)
+                    ),
+                    RoundedCornerShape(24.dp)
+                ),
+
+            shape = RoundedCornerShape(24.dp),
+
+            colors = CardDefaults.cardColors(
+
+                containerColor = Color(0xFF0C1415)
+
+            ),
+
+            elevation = CardDefaults.cardElevation(
+
+                defaultElevation = 4.dp
+
+            )
 
         ) {
 
             Row(
 
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(68.dp)
+                    .padding(horizontal = 22.dp),
+
                 verticalAlignment = Alignment.CenterVertically,
 
-                horizontalArrangement = Arrangement.spacedBy(22.dp)
+                horizontalArrangement = Arrangement.Start
 
             ) {
 
-                StripIcon(
-
-                    if (connected)
-                        R.drawable.ic_connected
-                    else
-                        R.drawable.ic_connected
-
-                )
-
-                StripIcon(
-
-                    if (platform.equals("PC", true))
-                        R.drawable.ic_pc
-                    else
-                        R.drawable.ic_console
-
-                )
-
-                StripIcon(
-
-                    if (method.equals("Safe", true))
-                        R.drawable.ic_safe
-                    else
-                        R.drawable.ic_quicksell
-
-                )
-
                 Row(
 
-    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
 
-) {
+                    horizontalArrangement = Arrangement.spacedBy(22.dp)
 
-    Image(
+                ) {
 
-        painter = painterResource(R.drawable.ic_timer),
+                    StripIcon(
 
-        contentDescription = null,
+                        if (connected)
+                            R.drawable.ic_connected
+                        else
+                            R.drawable.ic_connected
 
-        modifier = Modifier.size(24.dp)
+                    )
 
-    )
+                    StripIcon(
 
-    Spacer(
+                        if (platform.equals("PC", true))
+                            R.drawable.ic_pc
+                        else
+                            R.drawable.ic_console
 
-        modifier = Modifier.width(8.dp)
+                    )
 
-    )
+                    StripIcon(
 
-    Text(
+                        if (method.equals("Safe", true))
+                            R.drawable.ic_safe
+                        else
+                            R.drawable.ic_quicksell
 
-        text = "${interval}s",
+                    )
 
-        color = Color(0xFFF2F4F5),
+                    Row(
 
-        fontWeight = FontWeight.Bold,
+                        verticalAlignment = Alignment.CenterVertically
 
-        fontSize = 19.sp
+                    ) {
 
-    )
+                        Image(
 
-}
+                            painter = painterResource(R.drawable.ic_timer),
+
+                            contentDescription = null,
+
+                            modifier = Modifier.size(24.dp)
+
+                        )
+
+                        Spacer(
+
+                            modifier = Modifier.width(8.dp)
+
+                        )
+
+                        Text(
+
+                            text = "${interval}s",
+
+                            color = Color(0xFFF2F4F5),
+
+                            fontWeight = FontWeight.Bold,
+
+                            fontSize = 19.sp
+
+                        )
+
+                    }
+
+                }
+
+                Spacer(
+
+                    modifier = Modifier.weight(1f)
+
+                )
+
+                Box(
+
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color(0xFF151C1D))
+                        .border(
+
+                            BorderStroke(
+
+                                1.dp,
+
+                                Color(0xFF14C7A3).copy(alpha = 0.08f)
+
+                            ),
+
+                            RoundedCornerShape(18.dp)
+
+                        )
+                        .clickable {
+
+                            onSettingsClick()
+
+                        },
+
+                    contentAlignment = Alignment.Center
+
+                ) {
+
+                    Image(
+
+                        painter = painterResource(R.drawable.ic_settings),
+
+                        contentDescription = "Settings",
+
+                        modifier = Modifier.size(21.dp)
+
+                    )
+
+                }
 
             }
 
-Spacer(
-
-    modifier = Modifier.weight(1f)
-
-)
-
-            Box(
-
-    modifier = Modifier
-        .size(42.dp)
-        .clip(RoundedCornerShape(14.dp))
-        .background(Color(0xFF151C1D))
-        .border(
-
-            BorderStroke(
-
-                1.dp,
-
-                Color(0xFF14C7A3).copy(alpha = 0.08f)
-
-            ),
-
-            RoundedCornerShape(18.dp)
-
-        )
-        .clickable {
-
-            onSettingsClick()
-
-        },
-
-    contentAlignment = Alignment.Center
-
-) {
-
-    Image(
-
-        painter = painterResource(R.drawable.ic_settings),
-
-        contentDescription = "Settings",
-
-        modifier = Modifier.size(21.dp)
-
-    )
-
-}
-
         }
-
-    }
-
-}
-
-@Composable
-private fun StripIcon(
-
-    icon: Int
-
-) {
-
-    Box(
-
-        modifier = Modifier.size(34.dp),
-
-        contentAlignment = Alignment.Center
-
-    ) {
-
-        Image(
-
-            painter = painterResource(icon),
-
-            contentDescription = null,
-
-            modifier = Modifier.size(28.dp)
-
-        )
 
     }
 
