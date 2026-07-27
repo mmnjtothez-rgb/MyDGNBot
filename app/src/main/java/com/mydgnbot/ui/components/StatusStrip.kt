@@ -75,6 +75,22 @@ fun StatusStrip(
 
 )
 
+Box(
+
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(96.dp)
+        .padding(horizontal = 18.dp)
+        .offset(y = 16.dp)
+        .clip(RoundedCornerShape(40.dp))
+        .background(
+
+            Color(0xFF00FFC6).copy(alpha = 0.025f)
+
+        )
+
+)
+
         Card(
 
             modifier = Modifier.fillMaxWidth(),
