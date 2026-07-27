@@ -239,3 +239,44 @@ fun StatusStrip(
     }
 
 }
+
+@Composable
+private fun StripIcon(
+
+    icon: Int
+
+) {
+
+    Box(
+
+        modifier = Modifier
+            .size(34.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                Color(0xFF0F1718)
+            )
+            .border(
+                BorderStroke(
+                    1.dp,
+                    Color(0xFF14C7A3).copy(alpha = 0.05f)
+                ),
+                RoundedCornerShape(12.dp)
+            ),
+
+        contentAlignment = Alignment.Center
+
+    ) {
+
+        Image(
+
+            painter = painterResource(icon),
+
+            contentDescription = null,
+
+            modifier = Modifier.size(28.dp)
+
+        )
+
+    }
+
+}
