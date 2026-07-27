@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,31 +47,31 @@ fun StatusStrip(
 
     Card(
 
-        modifier = Modifier.fillMaxWidth(),
-
-        shape = RoundedCornerShape(24.dp),
-
-        colors = CardDefaults.cardColors(
-
-            containerColor = Color(0xFF11191A)
-
+    modifier = Modifier
+        .fillMaxWidth()
+        .border(
+            BorderStroke(
+                1.dp,
+                Color(0xFF14C7A3).copy(alpha = 0.22f)
+            ),
+            RoundedCornerShape(24.dp)
         ),
 
-        border = BorderStroke(
+    shape = RoundedCornerShape(24.dp),
 
-            1.dp,
+    colors = CardDefaults.cardColors(
 
-            Color(0xFF14C7A3).copy(alpha = 0.18f)
+        containerColor = Color(0xFF121B1C)
 
-        ),
+    ),
 
-        elevation = CardDefaults.cardElevation(
+    elevation = CardDefaults.cardElevation(
 
-            defaultElevation = 8.dp
+        defaultElevation = 12.dp
 
-        )
+    )
 
-    ) {
+) {
 
         Row(
 
@@ -122,82 +123,82 @@ fun StatusStrip(
 
                 Row(
 
-                    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically
 
-                ) {
+) {
 
-                    Image(
+    Image(
 
-                        painter = painterResource(R.drawable.ic_timer),
+        painter = painterResource(R.drawable.ic_timer),
 
-                        contentDescription = null,
+        contentDescription = null,
 
-                        modifier = Modifier.size(22.dp)
+        modifier = Modifier.size(24.dp)
 
-                    )
+    )
 
-                    Spacer(
+    Spacer(
 
-                        modifier = Modifier.width(6.dp)
+        modifier = Modifier.width(8.dp)
 
-                    )
+    )
 
-                    Text(
+    Text(
 
-                        text = "${interval}s",
+        text = "${interval}s",
 
-                        color = Color.White,
+        color = Color(0xFFF2F4F5),
 
-                        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Bold,
 
-                        fontSize = 18.sp
+        fontSize = 19.sp
 
-                    )
+    )
 
-                }
+}
 
             }
 
             Box(
 
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF1B2324))
-                    .border(
+    modifier = Modifier
+        .size(48.dp)
+        .clip(RoundedCornerShape(18.dp))
+        .background(Color(0xFF1E2829))
+        .border(
 
-                        BorderStroke(
+            BorderStroke(
 
-                            1.dp,
+                1.dp,
 
-                            Color(0xFF14C7A3).copy(alpha = 0.18f)
+                Color(0xFF14C7A3).copy(alpha = 0.25f)
 
-                        ),
+            ),
 
-                        RoundedCornerShape(16.dp)
+            RoundedCornerShape(18.dp)
 
-                    )
-                    .clickable {
+        )
+        .clickable {
 
-                        onSettingsClick()
+            onSettingsClick()
 
-                    },
+        },
 
-                contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center
 
-            ) {
+) {
 
-                Image(
+    Image(
 
-                    painter = painterResource(R.drawable.ic_settings),
+        painter = painterResource(R.drawable.ic_settings),
 
-                    contentDescription = "Settings",
+        contentDescription = "Settings",
 
-                    modifier = Modifier.size(22.dp)
+        modifier = Modifier.size(24.dp)
 
-                )
+    )
 
-            }
+}
 
         }
 
@@ -212,14 +213,25 @@ private fun StripIcon(
 
 ) {
 
-    Image(
+    Box(
 
-        painter = painterResource(icon),
+        modifier = Modifier.size(34.dp),
 
-        contentDescription = null,
+        contentAlignment = Alignment.Center
 
-        modifier = Modifier.size(28.dp)
+    ) {
 
-    )
+        Image(
 
+            painter = painterResource(icon),
+
+            contentDescription = null,
+
+            modifier = Modifier.size(28.dp)
+
+        )
+
+    }
+
+}
 }
