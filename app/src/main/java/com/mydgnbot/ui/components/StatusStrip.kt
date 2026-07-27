@@ -55,21 +55,30 @@ fun StatusStrip(
         // Soft emerald ambient glow behind the strip
         Box(
 
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(76.dp)
-                .offset(y = 4.dp)
-                .clip(RoundedCornerShape(26.dp))
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            Color(0xFF14C7A3).copy(alpha = 0.10f),
-                            Color.Transparent
-                        )
-                    )
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(110.dp)
+        .offset(y = 18.dp)
+        .clip(RoundedCornerShape(40.dp))
+        .background(
+
+            Brush.radialGradient(
+
+                colors = listOf(
+
+                    Color(0xFF00FFC6).copy(alpha = 0.18f),
+
+                    Color(0xFF00FFC6).copy(alpha = 0.08f),
+
+                    Color.Transparent
+
                 )
 
+            )
+
         )
+
+)
 
         Card(
 
@@ -78,7 +87,7 @@ fun StatusStrip(
                 .border(
                     BorderStroke(
                         1.dp,
-                        Color(0xFF14C7A3).copy(alpha = 0.22f)
+                        Color(0xFF18F7C8).copy(alpha = 0.15f)
                     ),
                     RoundedCornerShape(24.dp)
                 ),
@@ -87,7 +96,7 @@ fun StatusStrip(
 
             colors = CardDefaults.cardColors(
 
-                containerColor = Color(0xFF0C1415)
+                containerColor = Color(0xFF111718)
 
             ),
 
@@ -194,9 +203,9 @@ fun StatusStrip(
                 Box(
 
                     modifier = Modifier
-                        .size(42.dp)
+                        .size(46.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF151C1D))
+                        .background(Color(0xFF182123))
                         .border(
 
                             BorderStroke(
@@ -247,36 +256,16 @@ private fun StripIcon(
 
 ) {
 
-    Box(
+    Image(
 
-        modifier = Modifier
-            .size(34.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                Color(0xFF0F1718)
-            )
-            .border(
-                BorderStroke(
-                    1.dp,
-                    Color(0xFF14C7A3).copy(alpha = 0.05f)
-                ),
-                RoundedCornerShape(12.dp)
-            ),
+        painter = painterResource(icon),
 
-        contentAlignment = Alignment.Center
+        contentDescription = null,
 
-    ) {
+        modifier = Modifier.size(30.dp)
 
-        Image(
+    )
 
-            painter = painterResource(icon),
-
-            contentDescription = null,
-
-            modifier = Modifier.size(28.dp)
-
-        )
-
-    }
+}
 
 }
