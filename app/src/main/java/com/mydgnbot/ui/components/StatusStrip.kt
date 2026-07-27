@@ -1,4 +1,3 @@
-
 package com.mydgnbot.ui.components
 
 import androidx.compose.foundation.BorderStroke
@@ -25,7 +24,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +41,7 @@ fun StatusStrip(
 ) {
     val shape = RoundedCornerShape(18.dp)
     val glow = Color(0xFF2CFFB9)
-    val base = Color(0xFF101617)
+    val base = Color(0xFF0B1011)
 
     Box(
         modifier = Modifier
@@ -52,34 +50,43 @@ fun StatusStrip(
             .drawBehind {
                 if (connected) {
                     val r = 18.dp.toPx()
-                    val layers = listOf(
-                        0.12f to 28f,
-                        0.10f to 20f,
-                        0.07f to 14f,
-                        0.04f to 8f
-                    )
+                    val w = size.width
+                    val h = size.height
 
-                    for ((alpha, spread) in layers) {
+                    val cornerLayers = listOf(
+                        0.16f to 18f,
+                        0.11f to 12f,
+                        0.07f to 7f
+                    )
+                    cornerLayers.forEachIndexed { index, (alpha, spread) ->
+                        val topBias = if (index == 0) 1.25f else 1.10f
                         drawRoundRect(
                             color = glow.copy(alpha = alpha),
-                            topLeft = Offset(-spread, -spread),
-                            size = Size(size.width + spread * 2f, size.height + spread * 2f),
-                            cornerRadius = CornerRadius(r + spread * 0.28f, r + spread * 0.28f),
+                            topLeft = Offset(-spread, -spread * topBias),
+                            size = Size(w + spread * 2f, h + spread * 1.7f),
+                            cornerRadius = CornerRadius(r + spread * 0.26f, r + spread * 0.26f),
+                            blendMode = BlendMode.Screen
+                        )
+                    }
+
+                    val sideLayers = listOf(
+                        0.035f to 12f,
+                        0.020f to 7f
+                    )
+                    sideLayers.forEach { (alpha, spread) ->
+                        drawRoundRect(
+                            color = glow.copy(alpha = alpha),
+                            topLeft = Offset(-spread, -spread * 0.30f),
+                            size = Size(w + spread * 2f, h + spread * 0.85f),
+                            cornerRadius = CornerRadius(r + spread * 0.12f, r + spread * 0.12f),
                             blendMode = BlendMode.Screen
                         )
                     }
 
                     drawRoundRect(
-                        brush = Brush.radialGradient(
-                            colors = listOf(
-                                glow.copy(alpha = 0.08f),
-                                Color.Transparent
-                            ),
-                            radius = size.minDimension * 1.05f,
-                            center = Offset(size.width * 0.5f, size.height * 0.5f)
-                        ),
-                        topLeft = Offset(-2f, -2f),
-                        size = Size(size.width + 4f, size.height + 4f),
+                        color = glow.copy(alpha = 0.02f),
+                        topLeft = Offset(0f, 0f),
+                        size = Size(w, h),
                         cornerRadius = CornerRadius(r, r),
                         blendMode = BlendMode.Screen
                     )
@@ -92,7 +99,7 @@ fun StatusStrip(
             colors = CardDefaults.cardColors(containerColor = base),
             border = BorderStroke(
                 1.dp,
-                if (connected) glow.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.05f)
+                if (connected) Color.Transparent else Color.White.copy(alpha = 0.05f)
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
@@ -139,9 +146,7 @@ private fun StripIcon(icon: Int) {
 }
 
 @Composable
-private fun SettingsBubble(
-    onSettingsClick: () -> Unit
-) {
+private fun SettingsBubble(onSettingsClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(44.dp)
