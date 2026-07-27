@@ -13,8 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,52 +38,33 @@ fun StatusStrip(
 
     Box(
 
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp)
 
     ) {
 
-        Box(
-
-    modifier = Modifier
-        .fillMaxWidth()
-        .height(82.dp)
-        .padding(horizontal = 6.dp)
-        .offset(y = 12.dp)
-        .clip(RoundedCornerShape(30.dp))
-        .background(
-
-            Brush.horizontalGradient(
-
-                colors = listOf(
-
-                    Color.Transparent,
-
-                    Color(0xFF00FFC6).copy(alpha = 0.10f),
-
-                    Color(0xFF00FFC6).copy(alpha = 0.14f),
-
-                    Color(0xFF00FFC6).copy(alpha = 0.10f),
-
-                    Color.Transparent
-
-                )
-
-            )
-
-        )
-
-)
-
-
         Card(
 
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+
+                    elevation = 18.dp,
+
+                    shape = RoundedCornerShape(24.dp),
+
+                    ambientColor = Color(0xFF18E6BE).copy(alpha = 0.18f),
+
+                    spotColor = Color(0xFF18E6BE).copy(alpha = 0.22f)
+
+                ),
 
             shape = RoundedCornerShape(24.dp),
 
             colors = CardDefaults.cardColors(
 
-                containerColor = Color(0xFF101818)
+                containerColor = Color(0xFF101717)
 
             ),
 
@@ -92,7 +72,7 @@ fun StatusStrip(
 
                 1.dp,
 
-                Color(0xFF16F2C2).copy(alpha = .18f)
+                Color(0xFF18E6BE).copy(alpha = 0.18f)
 
             ),
 
@@ -103,6 +83,19 @@ fun StatusStrip(
             )
 
         ) {
+
+            Box(
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(
+
+                        Color.White.copy(alpha = 0.05f)
+
+                    )
+
+            )
 
             Row(
 
@@ -118,53 +111,82 @@ fun StatusStrip(
                 StripIcon(
 
                     if (connected)
+
                         R.drawable.ic_connected
+
                     else
+
                         R.drawable.ic_connected
 
                 )
 
-                Spacer(Modifier.width(26.dp))
+                Spacer(
+
+                    modifier = Modifier.width(22.dp)
+
+                )
 
                 StripIcon(
 
                     if (platform.equals("PC", true))
+
                         R.drawable.ic_pc
+
                     else
+
                         R.drawable.ic_console
 
                 )
 
-                Spacer(Modifier.width(26.dp))
+                Spacer(
+
+                    modifier = Modifier.width(22.dp)
+
+                )
 
                 StripIcon(
 
-                    if (method == "Safe")
+                    if (method.equals("Safe", true))
+
                         R.drawable.ic_safe
+
                     else
+
                         R.drawable.ic_quicksell
 
                 )
 
-                Spacer(Modifier.width(26.dp))
+                Spacer(
 
-                Image(
-
-                    painter = painterResource(R.drawable.ic_timer),
-
-                    contentDescription = null,
-
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.width(22.dp)
 
                 )
 
-                Spacer(Modifier.width(8.dp))
+                Image(
+
+                    painter = painterResource(
+
+                        R.drawable.ic_timer
+
+                    ),
+
+                    contentDescription = null,
+
+                    modifier = Modifier.size(22.dp)
+
+                )
+
+                Spacer(
+
+                    modifier = Modifier.width(8.dp)
+
+                )
 
                 Text(
 
                     text = "${interval}s",
 
-                    color = Color.White,
+                    color = Color(0xFFF3F6F7),
 
                     fontWeight = FontWeight.Bold,
 
@@ -222,20 +244,11 @@ private fun SettingsBubble(
 
         modifier = Modifier
             .size(46.dp)
-            .clip(RoundedCornerShape(15.dp))
             .background(
 
-                Brush.verticalGradient(
+                Color(0xFF172122),
 
-                    listOf(
-
-                        Color(0xFF1A2425),
-
-                        Color(0xFF131B1C)
-
-                    )
-
-                )
+                RoundedCornerShape(16.dp)
 
             )
             .border(
@@ -244,11 +257,11 @@ private fun SettingsBubble(
 
                     1.dp,
 
-                    Color(0xFF18F7C8).copy(alpha = .15f)
+                    Color(0xFF18E6BE).copy(alpha = 0.16f)
 
                 ),
 
-                RoundedCornerShape(15.dp)
+                RoundedCornerShape(16.dp)
 
             )
             .clickable {
@@ -261,9 +274,27 @@ private fun SettingsBubble(
 
     ) {
 
+        Box(
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(
+
+                    Color.White.copy(alpha = 0.04f)
+
+                )
+                .align(Alignment.TopCenter)
+
+        )
+
         Image(
 
-            painter = painterResource(R.drawable.ic_settings),
+            painter = painterResource(
+
+                R.drawable.ic_settings
+
+            ),
 
             contentDescription = "Settings",
 
