@@ -23,9 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,9 +40,8 @@ fun StatusStrip(
     connected: Boolean,
     onSettingsClick: () -> Unit
 ) {
-    val shape = RoundedCornerShape(18.dp)
-    val emerald = Color(0xFF3DFFB8)
-    val deepBg = Color(0xFF101617)
+    val shape = RoundedCornerShape(22.dp)
+    val glow = Color(0xFF18E6BE)
 
     Box(
         modifier = Modifier
@@ -51,25 +50,17 @@ fun StatusStrip(
             .drawBehind {
                 if (connected) {
                     drawRoundRect(
-                        brush = Brush.linearGradient(
+                        brush = Brush.radialGradient(
                             colors = listOf(
-                                emerald.copy(alpha = 0.00f),
-                                emerald.copy(alpha = 0.85f),
-                                emerald.copy(alpha = 1.00f),
-                                emerald.copy(alpha = 0.85f),
-                                emerald.copy(alpha = 0.00f)
-                            )
+                                glow.copy(alpha = 0.28f),
+                                glow.copy(alpha = 0.10f),
+                                Color.Transparent
+                            ),
+                            radius = size.minDimension * 1.15f
                         ),
-                        topLeft = Offset(-1f, -1f),
-                        size = Size(size.width + 2f, size.height + 2f),
-                        cornerRadius = CornerRadius(18.dp.toPx(), 18.dp.toPx())
-                    )
-
-                    drawRoundRect(
-                        color = emerald.copy(alpha = 0.12f),
-                        topLeft = Offset(1.5f, 1.5f),
-                        size = Size(size.width - 3f, size.height - 3f),
-                        cornerRadius = CornerRadius(16.dp.toPx(), 16.dp.toPx())
+                        topLeft = Offset(-12f, -10f),
+                        size = Size(size.width + 24f, size.height + 20f),
+                        cornerRadius = CornerRadius(22.dp.toPx(), 22.dp.toPx())
                     )
                 }
             }
@@ -77,10 +68,10 @@ fun StatusStrip(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = shape,
-            colors = CardDefaults.cardColors(containerColor = deepBg),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF111718)),
             border = BorderStroke(
                 1.dp,
-                if (connected) emerald.copy(alpha = 0.98f) else emerald.copy(alpha = 0.20f)
+                if (connected) glow.copy(alpha = 0.28f) else Color.White.copy(alpha = 0.06f)
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
@@ -88,9 +79,9 @@ fun StatusStrip(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(68.dp)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 18.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 StripIcon(
                     icon = if (connected) R.drawable.ic_connected else R.drawable.ic_connected
@@ -113,15 +104,15 @@ fun StatusStrip(
                 Text(
                     text = "${interval}s",
                     color = Color(0xFFF3F6F7),
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 17.sp
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
 
                 SettingsBubble(
                     onSettingsClick = onSettingsClick,
-                    emerald = emerald
+                    glow = glow
                 )
             }
         }
@@ -140,15 +131,15 @@ private fun StripIcon(icon: Int) {
 @Composable
 private fun SettingsBubble(
     onSettingsClick: () -> Unit,
-    emerald: Color
+    glow: Color
 ) {
     Box(
         modifier = Modifier
-            .size(44.dp)
-            .background(Color(0xFF162122), RoundedCornerShape(15.dp))
+            .size(46.dp)
+            .background(Color(0xFF162122), RoundedCornerShape(16.dp))
             .border(
-                BorderStroke(1.dp, emerald.copy(alpha = 0.26f)),
-                RoundedCornerShape(15.dp)
+                BorderStroke(1.dp, glow.copy(alpha = 0.16f)),
+                RoundedCornerShape(16.dp)
             )
             .clickable(onClick = onSettingsClick),
         contentAlignment = Alignment.Center
