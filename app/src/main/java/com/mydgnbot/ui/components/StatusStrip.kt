@@ -1,9 +1,9 @@
+
 package com.mydgnbot.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,11 +21,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,8 +41,9 @@ fun StatusStrip(
     connected: Boolean,
     onSettingsClick: () -> Unit
 ) {
-    val shape = RoundedCornerShape(22.dp)
-    val glow = Color(0xFF18E6BE)
+    val shape = RoundedCornerShape(18.dp)
+    val glow = Color(0xFF2CFFB9)
+    val base = Color(0xFF101617)
 
     Box(
         modifier = Modifier
@@ -49,18 +51,37 @@ fun StatusStrip(
             .padding(horizontal = 2.dp)
             .drawBehind {
                 if (connected) {
+                    val r = 18.dp.toPx()
+                    val layers = listOf(
+                        0.12f to 28f,
+                        0.10f to 20f,
+                        0.07f to 14f,
+                        0.04f to 8f
+                    )
+
+                    for ((alpha, spread) in layers) {
+                        drawRoundRect(
+                            color = glow.copy(alpha = alpha),
+                            topLeft = Offset(-spread, -spread),
+                            size = Size(size.width + spread * 2f, size.height + spread * 2f),
+                            cornerRadius = CornerRadius(r + spread * 0.28f, r + spread * 0.28f),
+                            blendMode = BlendMode.Screen
+                        )
+                    }
+
                     drawRoundRect(
                         brush = Brush.radialGradient(
                             colors = listOf(
-                                glow.copy(alpha = 0.28f),
-                                glow.copy(alpha = 0.10f),
+                                glow.copy(alpha = 0.08f),
                                 Color.Transparent
                             ),
-                            radius = size.minDimension * 1.15f
+                            radius = size.minDimension * 1.05f,
+                            center = Offset(size.width * 0.5f, size.height * 0.5f)
                         ),
-                        topLeft = Offset(-12f, -10f),
-                        size = Size(size.width + 24f, size.height + 20f),
-                        cornerRadius = CornerRadius(22.dp.toPx(), 22.dp.toPx())
+                        topLeft = Offset(-2f, -2f),
+                        size = Size(size.width + 4f, size.height + 4f),
+                        cornerRadius = CornerRadius(r, r),
+                        blendMode = BlendMode.Screen
                     )
                 }
             }
@@ -68,10 +89,10 @@ fun StatusStrip(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = shape,
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF111718)),
+            colors = CardDefaults.cardColors(containerColor = base),
             border = BorderStroke(
                 1.dp,
-                if (connected) glow.copy(alpha = 0.28f) else Color.White.copy(alpha = 0.06f)
+                if (connected) glow.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.05f)
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
@@ -79,21 +100,13 @@ fun StatusStrip(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(68.dp)
-                    .padding(horizontal = 18.dp),
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                StripIcon(
-                    icon = if (connected) R.drawable.ic_connected else R.drawable.ic_connected
-                )
-
-                StripIcon(
-                    icon = if (platform.equals("PC", true)) R.drawable.ic_pc else R.drawable.ic_console
-                )
-
-                StripIcon(
-                    icon = if (method.equals("Safe", true)) R.drawable.ic_safe else R.drawable.ic_quicksell
-                )
+                StripIcon(if (connected) R.drawable.ic_connected else R.drawable.ic_connected)
+                StripIcon(if (platform.equals("PC", true)) R.drawable.ic_pc else R.drawable.ic_console)
+                StripIcon(if (method.equals("Safe", true)) R.drawable.ic_safe else R.drawable.ic_quicksell)
 
                 Image(
                     painter = painterResource(R.drawable.ic_timer),
@@ -104,16 +117,13 @@ fun StatusStrip(
                 Text(
                     text = "${interval}s",
                     color = Color(0xFFF3F6F7),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 17.sp
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                SettingsBubble(
-                    onSettingsClick = onSettingsClick,
-                    glow = glow
-                )
+                SettingsBubble(onSettingsClick = onSettingsClick)
             }
         }
     }
@@ -130,17 +140,12 @@ private fun StripIcon(icon: Int) {
 
 @Composable
 private fun SettingsBubble(
-    onSettingsClick: () -> Unit,
-    glow: Color
+    onSettingsClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
-            .size(46.dp)
-            .background(Color(0xFF162122), RoundedCornerShape(16.dp))
-            .border(
-                BorderStroke(1.dp, glow.copy(alpha = 0.16f)),
-                RoundedCornerShape(16.dp)
-            )
+            .size(44.dp)
+            .background(Color(0xFF162122), RoundedCornerShape(15.dp))
             .clickable(onClick = onSettingsClick),
         contentAlignment = Alignment.Center
     ) {
