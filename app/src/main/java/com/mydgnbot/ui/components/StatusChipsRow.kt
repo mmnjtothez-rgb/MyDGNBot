@@ -1,5 +1,6 @@
 package com.mydgnbot.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,22 +43,22 @@ fun StatusChipsRow(
                     color = TextPrimary
                 )
             },
-            colors = AssistChipDefaults.assistChipColors(
-                containerColor = Color(0xFF07110F),
-                labelColor = TextPrimary,
-                leadingIconContentColor = Emerald
-            ),
-            border = AssistChipDefaults.assistChipBorder(
-                borderColor = Emerald.copy(alpha = 0.22f),
-                borderWidth = 1.dp
-            ),
             leadingIcon = {
                 Text(
                     text = "●",
                     color = if (connected) Emerald else TextSecondary,
                     style = MaterialTheme.typography.labelSmall
                 )
-            }
+            },
+            colors = AssistChipDefaults.assistChipColors(
+                containerColor = Color(0xFF07110F),
+                labelColor = TextPrimary,
+                leadingIconContentColor = Emerald
+            ),
+            border = BorderStroke(
+                1.dp,
+                Emerald.copy(alpha = 0.22f)
+            )
         )
 
         AssistChip(
@@ -73,9 +74,9 @@ fun StatusChipsRow(
                 containerColor = Color(0xFF07110F),
                 labelColor = TextPrimary
             ),
-            border = AssistChipDefaults.assistChipBorder(
-                borderColor = Emerald.copy(alpha = 0.16f),
-                borderWidth = 1.dp
+            border = BorderStroke(
+                1.dp,
+                Emerald.copy(alpha = 0.16f)
             )
         )
 
@@ -92,9 +93,9 @@ fun StatusChipsRow(
                 containerColor = Color(0xFF07110F),
                 labelColor = TextPrimary
             ),
-            border = AssistChipDefaults.assistChipBorder(
-                borderColor = Emerald.copy(alpha = 0.16f),
-                borderWidth = 1.dp
+            border = BorderStroke(
+                1.dp,
+                Emerald.copy(alpha = 0.16f)
             )
         )
 
@@ -111,9 +112,9 @@ fun StatusChipsRow(
                 containerColor = Color(0xFF07110F),
                 labelColor = if (connected) Emerald else TextSecondary
             ),
-            border = AssistChipDefaults.assistChipBorder(
-                borderColor = if (connected) Emerald.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.08f),
-                borderWidth = 1.dp
+            border = BorderStroke(
+                1.dp,
+                if (connected) Emerald.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.08f)
             )
         )
     }
