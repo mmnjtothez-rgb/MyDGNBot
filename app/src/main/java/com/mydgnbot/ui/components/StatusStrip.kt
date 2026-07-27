@@ -1,21 +1,13 @@
 package com.mydgnbot.ui.components
 
+package com.mydgnbot.ui.components
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,57 +45,58 @@ fun StatusStrip(
 
     ) {
 
-        // Soft emerald ambient glow behind the strip
         Box(
-
-    modifier = Modifier
-        .fillMaxWidth()
-        .height(110.dp)
-        .offset(y = 18.dp)
-        .clip(RoundedCornerShape(40.dp))
-        .background(
-
-            Brush.radialGradient(
-
-                colors = listOf(
-
-                    Color(0xFF00FFC6).copy(alpha = 0.18f),
-
-                    Color(0xFF00FFC6).copy(alpha = 0.08f),
-
-                    Color.Transparent
-
-                )
-
-            )
-
-        )
-
-)
-
-        Card(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .border(
-                    BorderStroke(
-                        1.dp,
-                        Color(0xFF18F7C8).copy(alpha = 0.15f)
+                .height(100.dp)
+                .padding(horizontal = 12.dp)
+                .offset(y = 16.dp)
+                .background(
+
+                    Brush.radialGradient(
+
+                        colors = listOf(
+
+                            Color(0xFF00FFC6).copy(alpha = .18f),
+
+                            Color(0xFF00FFC6).copy(alpha = .06f),
+
+                            Color.Transparent
+
+                        )
+
                     ),
-                    RoundedCornerShape(24.dp)
-                ),
+
+                    RoundedCornerShape(40.dp)
+
+                )
+
+        )
+
+        Card(
+
+            modifier = Modifier.fillMaxWidth(),
 
             shape = RoundedCornerShape(24.dp),
 
             colors = CardDefaults.cardColors(
 
-                containerColor = Color(0xFF111718)
+                containerColor = Color(0xFF101818)
+
+            ),
+
+            border = BorderStroke(
+
+                1.dp,
+
+                Color(0xFF16F2C2).copy(alpha = .18f)
 
             ),
 
             elevation = CardDefaults.cardElevation(
 
-                defaultElevation = 4.dp
+                defaultElevation = 0.dp
 
             )
 
@@ -115,84 +109,66 @@ fun StatusStrip(
                     .height(68.dp)
                     .padding(horizontal = 22.dp),
 
-                verticalAlignment = Alignment.CenterVertically,
-
-                horizontalArrangement = Arrangement.Start
+                verticalAlignment = Alignment.CenterVertically
 
             ) {
 
-                Row(
+                StripIcon(
 
-                    verticalAlignment = Alignment.CenterVertically,
+                    if (connected)
+                        R.drawable.ic_connected
+                    else
+                        R.drawable.ic_connected
 
-                    horizontalArrangement = Arrangement.spacedBy(22.dp)
+                )
 
-                ) {
+                Spacer(Modifier.width(26.dp))
 
-                    StripIcon(
+                StripIcon(
 
-                        if (connected)
-                            R.drawable.ic_connected
-                        else
-                            R.drawable.ic_connected
+                    if (platform.equals("PC", true))
+                        R.drawable.ic_pc
+                    else
+                        R.drawable.ic_console
 
-                    )
+                )
 
-                    StripIcon(
+                Spacer(Modifier.width(26.dp))
 
-                        if (platform.equals("PC", true))
-                            R.drawable.ic_pc
-                        else
-                            R.drawable.ic_console
+                StripIcon(
 
-                    )
+                    if (method == "Safe")
+                        R.drawable.ic_safe
+                    else
+                        R.drawable.ic_quicksell
 
-                    StripIcon(
+                )
 
-                        if (method.equals("Safe", true))
-                            R.drawable.ic_safe
-                        else
-                            R.drawable.ic_quicksell
+                Spacer(Modifier.width(26.dp))
 
-                    )
+                Image(
 
-                    Row(
+                    painter = painterResource(R.drawable.ic_timer),
 
-                        verticalAlignment = Alignment.CenterVertically
+                    contentDescription = null,
 
-                    ) {
+                    modifier = Modifier.size(24.dp)
 
-                        Image(
+                )
 
-                            painter = painterResource(R.drawable.ic_timer),
+                Spacer(Modifier.width(8.dp))
 
-                            contentDescription = null,
+                Text(
 
-                            modifier = Modifier.size(24.dp)
+                    text = "${interval}s",
 
-                        )
+                    color = Color.White,
 
-                        Spacer(
+                    fontWeight = FontWeight.Bold,
 
-                            modifier = Modifier.width(8.dp)
+                    fontSize = 18.sp
 
-                        )
-
-                        Text(
-
-                            text = "${interval}s",
-
-                            color = Color(0xFFF2F4F5),
-
-                            fontWeight = FontWeight.Bold,
-
-                            fontSize = 19.sp
-
-                        )
-
-                    }
-
-                }
+                )
 
                 Spacer(
 
@@ -200,46 +176,11 @@ fun StatusStrip(
 
                 )
 
-                Box(
+                SettingsBubble(
 
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF182123))
-                        .border(
+                    onSettingsClick
 
-                            BorderStroke(
-
-                                1.dp,
-
-                                Color(0xFF14C7A3).copy(alpha = 0.08f)
-
-                            ),
-
-                            RoundedCornerShape(18.dp)
-
-                        )
-                        .clickable {
-
-                            onSettingsClick()
-
-                        },
-
-                    contentAlignment = Alignment.Center
-
-                ) {
-
-                    Image(
-
-                        painter = painterResource(R.drawable.ic_settings),
-
-                        contentDescription = "Settings",
-
-                        modifier = Modifier.size(21.dp)
-
-                    )
-
-                }
+                )
 
             }
 
@@ -267,5 +208,67 @@ private fun StripIcon(
     )
 
 }
+
+@Composable
+private fun SettingsBubble(
+
+    onSettingsClick: () -> Unit
+
+) {
+
+    Box(
+
+        modifier = Modifier
+            .size(46.dp)
+            .clip(RoundedCornerShape(15.dp))
+            .background(
+
+                Brush.verticalGradient(
+
+                    listOf(
+
+                        Color(0xFF1A2425),
+
+                        Color(0xFF131B1C)
+
+                    )
+
+                )
+
+            )
+            .border(
+
+                BorderStroke(
+
+                    1.dp,
+
+                    Color(0xFF18F7C8).copy(alpha = .15f)
+
+                ),
+
+                RoundedCornerShape(15.dp)
+
+            )
+            .clickable {
+
+                onSettingsClick()
+
+            },
+
+        contentAlignment = Alignment.Center
+
+    ) {
+
+        Image(
+
+            painter = painterResource(R.drawable.ic_settings),
+
+            contentDescription = "Settings",
+
+            modifier = Modifier.size(22.dp)
+
+        )
+
+    }
 
 }
