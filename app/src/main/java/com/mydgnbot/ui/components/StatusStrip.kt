@@ -234,4 +234,3 @@ private fun StripIcon(
     }
 
 }
-}
