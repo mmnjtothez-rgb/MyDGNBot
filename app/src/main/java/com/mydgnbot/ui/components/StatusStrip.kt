@@ -20,7 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,24 +44,29 @@ fun StatusStrip(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 2.dp)
+            .drawBehind {
+                if (connected) {
+                    drawRoundRect(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                emerald.copy(alpha = 0.55f),
+                                emerald.copy(alpha = 0.18f),
+                                Color.Transparent
+                            ),
+                            radius = size.minDimension * 0.95f
+                        ),
+                        topLeft = androidx.compose.ui.geometry.Offset(-18f, -18f),
+                        size = androidx.compose.ui.geometry.Size(size.width + 36f, size.height + 36f),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx(), 24.dp.toPx())
+                    )
+                }
+            }
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(
-                    elevation = 24.dp,
-                    shape = shape,
-                    ambientColor = emerald.copy(alpha = 0.22f),
-                    spotColor = emerald.copy(alpha = 0.30f)
-                )
-                .background(Color(0xFF0F1516), shape)
-        )
-
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = shape,
             colors = CardDefaults.cardColors(containerColor = Color(0xFF131B1C)),
-            border = BorderStroke(1.dp, emerald.copy(alpha = 0.22f)),
+            border = BorderStroke(1.dp, emerald.copy(alpha = if (connected) 0.42f else 0.18f)),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Row(
@@ -108,9 +114,7 @@ fun StatusStrip(
 }
 
 @Composable
-private fun StripIcon(
-    icon: Int
-) {
+private fun StripIcon(icon: Int) {
     Image(
         painter = painterResource(icon),
         contentDescription = null,
@@ -128,7 +132,7 @@ private fun SettingsBubble(
             .size(46.dp)
             .background(Color(0xFF172122), RoundedCornerShape(16.dp))
             .border(
-                BorderStroke(1.dp, emerald.copy(alpha = 0.18f)),
+                BorderStroke(1.dp, emerald.copy(alpha = 0.24f)),
                 RoundedCornerShape(16.dp)
             )
             .clickable(onClick = onSettingsClick),
