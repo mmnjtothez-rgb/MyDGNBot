@@ -4,9 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -64,6 +67,8 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Black0)
+                .statusBarsPadding()
+                .navigationBarsPadding()
         ) {
             Column(
                 modifier = Modifier
@@ -115,14 +120,14 @@ private fun TopHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "MyDGNBot",
+            text = "DGBot",
             style = MaterialTheme.typography.titleLarge,
-            color = TextPrimary,
-            modifier = Modifier.weight(1f)
+            color = TextPrimary
         )
 
         Box(
             modifier = Modifier
+                .padding(start = 8.dp)
                 .background(Color(0xFF0A1110), RoundedCornerShape(14.dp))
                 .padding(2.dp)
         ) {
