@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,16 +20,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,11 +44,8 @@ import com.mydgnbot.ui.theme.Emerald
 import com.mydgnbot.ui.theme.TextPrimary
 import com.mydgnbot.ui.theme.TextSecondary
 
-private enum class HistorySort {
-    NEWEST,
-    RATING,
-    BUY_NOW
-}
+private enum class HistorySort { NEWEST, RATING, BUY_NOW }
+private enum class HistoryFilter { ALL, FOUND, BOUGHT, CANCELLED }
 
 @Composable
 fun HistoryScreen(
@@ -58,23 +53,31 @@ fun HistoryScreen(
     onBackClick: () -> Unit,
     onPlayerClick: (Player) -> Unit
 ) {
-    var sort by remember { mutableStateOf(HistorySort.NEWEST) }
-    var filterText by remember { mutableStateOf("All") }
-    var sortExpanded by remember { mutableStateOf(false) }
-    var filterExpanded by remember { mutableStateOf(false) }
+    var sortIndex by remember { mutableIntStateOf(0) }
+    var filterIndex by remember { mutableIntStateOf(0) }
 
-    val filtered = remember(players, filterText, sort) {
-        val base = when (filterText) {
-            "Bought" -> players.filter { it.status.contains("bought", ignoreCase = true) }
-            "Found" -> players.filter { it.status.contains("found", ignoreCase = true) }
-            "Cancelled" -> players.filter { it.status.contains("cancel", ignoreCase = true) }
-            else -> players
+    val sortOptions = listOf("Newest", "Rating", "Buy Now")
+    val filterOptions = listOf("All", "Found", "Bought", "Cancelled")
+
+    val filtered = remember(players, sortIndex, filterIndex) {
+        val filter = when (filterIndex) {
+            1 -> HistoryFilter.FOUND
+            2 -> HistoryFilter.BOUGHT
+            3 -> HistoryFilter.CANCELLED
+            else -> HistoryFilter.ALL
         }
 
-        when (sort) {
-            HistorySort.NEWEST -> base.sortedByDescending { it.marketExpiry }
-            HistorySort.RATING -> base.sortedByDescending { it.rating }
-            HistorySort.BUY_NOW -> base.sortedByDescending { it.buyNowPrice }
+        val sortedBase = when (filter) {
+            HistoryFilter.FOUND -> players.filter { it.status.contains("found", ignoreCase = true) }
+            HistoryFilter.BOUGHT -> players.filter { it.status.contains("bought", ignoreCase = true) }
+            HistoryFilter.CANCELLED -> players.filter { it.status.contains("cancel", ignoreCase = true) }
+            HistoryFilter.ALL -> players
+        }
+
+        when (sortIndex) {
+            1 -> sortedBase.sortedByDescending { it.rating }
+            2 -> sortedBase.sortedByDescending { it.buyNowPrice }
+            else -> sortedBase.sortedByDescending { it.marketExpiry }
         }
     }
 
@@ -91,36 +94,28 @@ fun HistoryScreen(
         ) {
             HistoryTopBar(onBackClick = onBackClick)
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp, bottom = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                FilterChipMenu(
-                    label = "Sort: ${sort.name.lowercase().replaceFirstChar { it.uppercase() }}",
-                    expanded = sortExpanded,
-                    onExpandedChange = { sortExpanded = it },
-                    options = listOf("Newest", "Rating", "Buy now"),
-                    onSelected = {
-                        sort = when (it) {
-                            "Rating" -> HistorySort.RATING
-                            "Buy now" -> HistorySort.BUY_NOW
-                            else -> HistorySort.NEWEST
-                        }
-                    },
-                    modifier = Modifier.weight(1f)
-                )
+            Text(
+                text = "Latest fetched players",
+                color = TextSecondary,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+            )
 
-                FilterChipMenu(
-                    label = "Filter: $filterText",
-                    expanded = filterExpanded,
-                    onExpandedChange = { filterExpanded = it },
-                    options = listOf("All", "Found", "Bought", "Cancelled"),
-                    onSelected = { filterText = it },
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            SegmentedRow(
+                title = "Sort",
+                options = sortOptions,
+                selectedIndex = sortIndex,
+                onSelected = { sortIndex = it }
+            )
+
+            SegmentedRow(
+                title = "Filter",
+                options = filterOptions,
+                selectedIndex = filterIndex,
+                onSelected = { filterIndex = it },
+                topPadding = 10.dp,
+                bottomPadding = 12.dp
+            )
 
             Text(
                 text = "${filtered.size} players",
@@ -145,6 +140,48 @@ fun HistoryScreen(
                             onClick = { onPlayerClick(player) }
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SegmentedRow(
+    title: String,
+    options: List<String>,
+    selectedIndex: Int,
+    onSelected: (Int) -> Unit,
+    topPadding: androidx.compose.ui.unit.Dp = 0.dp,
+    bottomPadding: androidx.compose.ui.unit.Dp = 0.dp
+) {
+    Column(
+        modifier = Modifier.padding(top = topPadding, bottom = bottomPadding),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = title,
+            color = TextSecondary,
+            style = MaterialTheme.typography.labelSmall
+        )
+
+        SingleChoiceSegmentedButtonRow {
+            options.forEachIndexed { index, label ->
+                SegmentedButton(
+                    selected = index == selectedIndex,
+                    onClick = { onSelected(index) },
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                    colors = SegmentedButtonDefaults.colors(
+                        activeContainerColor = Emerald,
+                        activeContentColor = Color.Black,
+                        inactiveContainerColor = Black1,
+                        inactiveContentColor = TextPrimary
+                    )
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelMedium
+                    )
                 }
             }
         }
@@ -180,48 +217,6 @@ private fun HistoryTopBar(
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(start = 10.dp)
         )
-    }
-}
-
-@Composable
-private fun FilterChipMenu(
-    label: String,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    options: List<String>,
-    onSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(modifier = modifier) {
-        TextButton(
-            onClick = { onExpandedChange(true) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp),
-            shape = RoundedCornerShape(14.dp)
-        ) {
-            Text(
-                text = label,
-                color = TextPrimary,
-                style = MaterialTheme.typography.labelMedium
-            )
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { onExpandedChange(false) },
-            modifier = Modifier.background(Black1)
-        ) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option, color = TextPrimary) },
-                    onClick = {
-                        onSelected(option)
-                        onExpandedChange(false)
-                    }
-                )
-            }
-        }
     }
 }
 
