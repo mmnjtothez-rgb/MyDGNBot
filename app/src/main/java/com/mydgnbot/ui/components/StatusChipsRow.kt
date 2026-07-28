@@ -35,12 +35,12 @@ fun StatusChipsRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         AssistChip(
-            onClick = onPlatformClick,
+            onClick = onSettingsClick,
             label = {
                 Text(
-                    text = platform.uppercase(),
+                    text = if (connected) "ONLINE" else "OFFLINE",
                     style = MaterialTheme.typography.labelSmall,
-                    color = TextPrimary
+                    color = if (connected) Emerald else TextSecondary
                 )
             },
             leadingIcon = {
@@ -52,12 +52,31 @@ fun StatusChipsRow(
             },
             colors = AssistChipDefaults.assistChipColors(
                 containerColor = Color(0xFF07110F),
-                labelColor = TextPrimary,
-                leadingIconContentColor = Emerald
+                labelColor = if (connected) Emerald else TextSecondary,
+                leadingIconContentColor = if (connected) Emerald else TextSecondary
             ),
             border = BorderStroke(
                 1.dp,
-                Emerald.copy(alpha = 0.22f)
+                if (connected) Emerald.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.08f)
+            )
+        )
+
+        AssistChip(
+            onClick = onPlatformClick,
+            label = {
+                Text(
+                    text = platform.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextPrimary
+                )
+            },
+            colors = AssistChipDefaults.assistChipColors(
+                containerColor = Color(0xFF07110F),
+                labelColor = TextPrimary
+            ),
+            border = BorderStroke(
+                1.dp,
+                Emerald.copy(alpha = 0.16f)
             )
         )
 
@@ -96,25 +115,6 @@ fun StatusChipsRow(
             border = BorderStroke(
                 1.dp,
                 Emerald.copy(alpha = 0.16f)
-            )
-        )
-
-        AssistChip(
-            onClick = onSettingsClick,
-            label = {
-                Text(
-                    text = if (connected) "ONLINE" else "OFFLINE",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (connected) Emerald else TextSecondary
-                )
-            },
-            colors = AssistChipDefaults.assistChipColors(
-                containerColor = Color(0xFF07110F),
-                labelColor = if (connected) Emerald else TextSecondary
-            ),
-            border = BorderStroke(
-                1.dp,
-                if (connected) Emerald.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.08f)
             )
         )
     }
