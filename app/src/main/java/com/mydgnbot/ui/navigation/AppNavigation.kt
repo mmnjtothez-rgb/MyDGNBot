@@ -1,8 +1,6 @@
 package com.mydgnbot.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -44,21 +42,20 @@ fun AppNavigation() {
     val appContainer = AppContainer(context)
     val gson = Gson()
 
+    val homeViewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(
+            appContainer.playerRepository,
+            appContainer.settingsRepository,
+            appContainer.connectivityObserver,
+            context.cacheDir
+        )
+    )
+
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
     ) {
         composable(Screen.Home.route) {
-            val homeViewModel: HomeViewModel = viewModel(
-                factory = HomeViewModelFactory(
-                    appContainer.playerRepository,
-                    appContainer.settingsRepository,
-                    appContainer.connectivityObserver,
-                    context.cacheDir
-                )
-            )
-            val recentPlayers by homeViewModel.recentPlayers.collectAsState()
-
             HomeScreen(
                 onSettingsClick = {
                     navController.navigate(Screen.Settings.route)
@@ -90,18 +87,8 @@ fun AppNavigation() {
         }
 
         composable(Screen.History.route) {
-            val homeViewModel: HomeViewModel = viewModel(
-                factory = HomeViewModelFactory(
-                    appContainer.playerRepository,
-                    appContainer.settingsRepository,
-                    appContainer.connectivityObserver,
-                    context.cacheDir
-                )
-            )
-            val recentPlayers by homeViewModel.recentPlayers.collectAsState()
-
             HistoryScreen(
-                players = recentPlayers,
+                players = homeViewModel.recentPlayers.collectAsState().value,
                 onBackClick = {
                     navController.popBackStack()
                 },
