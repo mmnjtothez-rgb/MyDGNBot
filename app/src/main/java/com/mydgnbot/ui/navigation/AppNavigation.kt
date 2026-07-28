@@ -1,6 +1,8 @@
 package com.mydgnbot.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -13,6 +15,7 @@ import com.mydgnbot.data.AppContainer
 import com.mydgnbot.domain.model.Player
 import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.screens.HomeScreen
+import com.mydgnbot.ui.screens.HistoryScreen
 import com.mydgnbot.ui.screens.SettingsScreen
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 import com.mydgnbot.ui.viewmodel.HomeViewModelFactory
@@ -25,6 +28,7 @@ import java.nio.charset.StandardCharsets
 sealed class Screen(val route: String) {
     data object Home : Screen("home")
     data object Settings : Screen("settings")
+    data object History : Screen("history")
     data object Player : Screen("player/{playerJson}") {
         fun createRoute(playerJson: String): String {
             val encoded = URLEncoder.encode(playerJson, StandardCharsets.UTF_8.toString())
@@ -53,6 +57,7 @@ fun AppNavigation() {
                     context.cacheDir
                 )
             )
+            val recentPlayers by homeViewModel.recentPlayers.collectAsState()
 
             HomeScreen(
                 onSettingsClick = {
@@ -61,6 +66,9 @@ fun AppNavigation() {
                 onPlayerFound = { player ->
                     val json = gson.toJson(player)
                     navController.navigate(Screen.Player.createRoute(json))
+                },
+                onHistoryClick = {
+                    navController.navigate(Screen.History.route)
                 },
                 viewModel = homeViewModel
             )
@@ -78,6 +86,29 @@ fun AppNavigation() {
                     navController.popBackStack()
                 },
                 viewModel = settingsViewModel
+            )
+        }
+
+        composable(Screen.History.route) {
+            val homeViewModel: HomeViewModel = viewModel(
+                factory = HomeViewModelFactory(
+                    appContainer.playerRepository,
+                    appContainer.settingsRepository,
+                    appContainer.connectivityObserver,
+                    context.cacheDir
+                )
+            )
+            val recentPlayers by homeViewModel.recentPlayers.collectAsState()
+
+            HistoryScreen(
+                players = recentPlayers,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onPlayerClick = { player ->
+                    val json = gson.toJson(player)
+                    navController.navigate(Screen.Player.createRoute(json))
+                }
             )
         }
 
