@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import java.time.LocalDateTime
@@ -78,7 +77,7 @@ class HomeViewModel(
         initialValue = emptyList()
     )
 
-    // History visibility (if you still use it anywhere)
+    // History visibility
     private val _showHistory = MutableStateFlow(false)
     val showHistory: StateFlow<Boolean> = _showHistory.asStateFlow()
 
@@ -88,18 +87,9 @@ class HomeViewModel(
 
     private val stampFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
 
-    // Settings exposed as a simple Map<String, String>.
-    // We only map keys used by HomeScreen: platform, player_type, poll_interval.
+    // Settings as the same Map<String,String> used across SettingsDataStore/SettingsRepository.
     val settings: StateFlow<Map<String, String>> =
         settingsRepository.settings
-            .map { model ->
-                // CHANGE THESE NAMES if your actual Settings model uses different fields.
-                mapOf(
-                    "platform" to (model.platform ?: "Console"),
-                    "player_type" to (model.playerType ?: "1"),
-                    "poll_interval" to model.pollInterval.toString()
-                )
-            }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -155,7 +145,7 @@ class HomeViewModel(
 
     private fun addLog(message: String) {
         val entry = LogEntry(
-            id = System.currentTimeMillis(), // keeps numeric timestamp precision
+            id = System.currentTimeMillis(),
             message = message,
             timestamp = LocalDateTime.now().format(stampFormat)
         )
