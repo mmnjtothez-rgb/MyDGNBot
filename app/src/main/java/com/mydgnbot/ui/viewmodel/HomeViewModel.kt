@@ -50,23 +50,23 @@ class HomeViewModel(
     val currentHistoryFilter: StateFlow<HistoryFilter> = _historyFilter.asStateFlow()
 
     val recentPlayers: StateFlow<List<Player>> = combine(
-    _recentPlayers,
-    _historySort,
-    _historyFilter
-) { players, sort, _ ->
-    
-    val base = players
+        _recentPlayers,
+        _historySort,
+        _historyFilter
+    ) { players, sort, _ ->
+        // Filtering by status removed because Player has no 'status' field.
+        val base = players
 
-    when (sort) {
-        HistorySort.NEWEST -> base.sortedByDescending { it.marketExpiry }
-        HistorySort.RATING -> base.sortedByDescending { it.rating }
-        HistorySort.BUY_NOW -> base.sortedByDescending { it.buyNowPrice }
-    }
-}.stateIn(
-    scope = viewModelScope,
-    started = SharingStarted.WhileSubscribed(5_000),
-    initialValue = emptyList()
-)
+        when (sort) {
+            HistorySort.NEWEST -> base.sortedByDescending { it.marketExpiry }
+            HistorySort.RATING -> base.sortedByDescending { it.rating }
+            HistorySort.BUY_NOW -> base.sortedByDescending { it.buyNowPrice }
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList()
+    )
 
     private val _showHistory = MutableStateFlow(false)
     val showHistory: StateFlow<Boolean> = _showHistory.asStateFlow()
@@ -84,8 +84,9 @@ class HomeViewModel(
                 initialValue = emptyMap()
             )
 
+    // Use ConnectivityObserver.isOnline Flow<Boolean> and convert to StateFlow<Boolean>
     val isOnline: StateFlow<Boolean> =
-        connectivityObserver.status
+        connectivityObserver.isOnline
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
