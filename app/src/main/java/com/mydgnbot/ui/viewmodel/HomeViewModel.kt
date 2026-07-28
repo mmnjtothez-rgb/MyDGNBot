@@ -8,6 +8,7 @@ import com.mydgnbot.data.repository.PlayerRepository
 import com.mydgnbot.data.repository.SettingsRepository
 import com.mydgnbot.domain.model.LogEntry
 import com.mydgnbot.domain.model.Player
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -53,14 +55,21 @@ class HomeViewModel(
         _recentPlayers,
         _historySort,
         _historyFilter
-    ) { players, sort, _ ->
-        // Filtering by status removed because Player has no 'status' field.
-        val base = players
+    ) { players, sort, filter ->
+        val filtered = when (filter) {
+            HistoryFilter.FOUND ->
+                players.filter { it.status.contains("found", ignoreCase = true) }
+            HistoryFilter.BOUGHT ->
+                players.filter { it.status.contains("bought", ignoreCase = true) }
+            HistoryFilter.CANCELLED ->
+                players.filter { it.status.contains("cancel", ignoreCase = true) }
+            HistoryFilter.ALL -> players
+        }
 
         when (sort) {
-            HistorySort.NEWEST -> base.sortedByDescending { it.marketExpiry }
-            HistorySort.RATING -> base.sortedByDescending { it.rating }
-            HistorySort.BUY_NOW -> base.sortedByDescending { it.buyNowPrice }
+            HistorySort.NEWEST -> filtered.sortedByDescending { it.marketExpiry }
+            HistorySort.RATING -> filtered.sortedByDescending { it.rating }
+            HistorySort.BUY_NOW -> filtered.sortedByDescending { it.buyNowPrice }
         }
     }.stateIn(
         scope = viewModelScope,
@@ -76,6 +85,7 @@ class HomeViewModel(
 
     private val stampFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
 
+    // Settings map from DataStore/Repository
     val settings: StateFlow<Map<String, String>> =
         settingsRepository.settings
             .stateIn(
@@ -84,7 +94,7 @@ class HomeViewModel(
                 initialValue = emptyMap()
             )
 
-    // Use ConnectivityObserver.isOnline Flow<Boolean> and convert to StateFlow<Boolean>
+    // Connectivity state
     val isOnline: StateFlow<Boolean> =
         connectivityObserver.isOnline
             .stateIn(
@@ -145,21 +155,69 @@ class HomeViewModel(
     fun onPlayerFound(found: Player) {
         _player.value = found
         addRecentPlayer(found)
-        addLog("Player found")
+        addLog("Player found (${found.playerName})")
     }
 
     fun startBot() {
-        if (!_isRunning.value) {
-            _isRunning.value = true
-            addLog("Bot started")
+        if (_isRunning.value) return
+
+        _isRunning.value = true
+        addLog("Bot started")
+
+        viewModelScope.launch {
+            while (_isRunning.value) {
+                if (!isOnline.value) {
+                    addLog("Waiting for connection...")
+                    delay(2_000)
+                    continue
+                }
+
+                val currentSettings = settings.value
+                val apiUser = currentSettings["api_user"].orEmpty()
+                val secretKey = currentSettings["secret_key"].orEmpty()
+                val platform = currentSettings["platform"] ?: "Console"
+                val minPrice = currentSettings["minimum_price"]?.toIntOrNull() ?: 4000
+                val maxPrice = currentSettings["maximum_price"]?.toIntOrNull() ?: 300000
+                val playerType = currentSettings["player_type"]?.toIntOrNull() ?: 2
+                val pollSeconds = currentSettings["poll_interval"]?.toLongOrNull() ?: 10L
+
+                if (apiUser.isBlank() || secretKey.isBlank()) {
+                    addLog("Missing API credentials")
+                    delay(pollSeconds * 1000)
+                    continue
+                }
+
+                try {
+                    val apiPlayers = playerRepository.fetchPlayers(
+                        user = apiUser,
+                        secretKey = secretKey,
+                        platform = platform,
+                        playerType = playerType,
+                        minimumPrice = minPrice,
+                        maximumPrice = maxPrice
+                    )
+
+                    if (apiPlayers.isNotEmpty()) {
+                        // For now, take the first result and enrich it.
+                        val apiPlayer = apiPlayers.first()
+                        val domainPlayer = playerEnrichmentRepository.enrich(apiPlayer)
+                        onPlayerFound(domainPlayer)
+                    } else {
+                        addLog("No players found")
+                    }
+                } catch (e: Exception) {
+                    addLog("Error fetching players: ${e.message ?: "unknown error"}")
+                }
+
+                delay(pollSeconds * 1000)
+            }
         }
     }
 
     fun stopBot() {
-        if (_isRunning.value) {
-            _isRunning.value = false
-            addLog("Bot stopped")
-        }
+        if (!_isRunning.value) return
+        _isRunning.value = false
+        addLog("Bot stopped")
     }
 
     fun markBought() {
