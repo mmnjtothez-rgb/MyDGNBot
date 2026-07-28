@@ -53,9 +53,8 @@ class HomeViewModel(
         _recentPlayers,
         _historySort,
         _historyFilter
-    ) { players, sort, _ ->
-        // For now, ignore filter because Player has no 'status' field.
-        // You still get sorting, and HistoryScreen will work.
+    ) { players, sort, _ /* filter */ ->
+        // No use of 'status' here – just sort the list.
         val base = players
 
         when (sort) {
