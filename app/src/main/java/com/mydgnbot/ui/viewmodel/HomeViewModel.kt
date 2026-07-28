@@ -44,10 +44,13 @@ class HomeViewModel(
     }
 
     private fun playerKey(player: Player): String {
-        return listOfNotNull(
-            player.toString(),
-            player.javaClass.simpleName
-        ).joinToString("|")
+        return player.transactionId.ifBlank {
+            player.resourceId.ifBlank {
+                player.assetId.ifBlank {
+                    "${player.baseId}:${player.marketExpiry}"
+                }
+            }
+        }
     }
 
     private fun addRecentPlayer(player: Player) {
