@@ -116,6 +116,7 @@ class HomeViewModel(
 
     private fun addLog(message: String) {
         val entry = LogEntry(
+            id = System.currentTimeMillis().toString(),
             message = message,
             timestamp = LocalDateTime.now().format(stampFormat)
         )
