@@ -30,9 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,17 +52,16 @@ fun HistoryScreen(
     onPlayerClick: (Player) -> Unit
 ) {
     val players by viewModel.recentPlayers.collectAsState()
+    val sortState by viewModel.currentHistorySort.collectAsState()
+    val filterState by viewModel.currentHistoryFilter.collectAsState()
 
-    val sortOptions = listOf("Newest", "Rating", "Buy Now")
-    val filterOptions = listOf("All", "Found", "Bought", "Cancelled")
-
-    val sortIndex = when (viewModel.currentHistorySort.collectAsState().value) {
+    val sortIndex = when (sortState) {
         HistorySort.NEWEST -> 0
         HistorySort.RATING -> 1
         HistorySort.BUY_NOW -> 2
     }
 
-    val filterIndex = when (viewModel.currentHistoryFilter.collectAsState().value) {
+    val filterIndex = when (filterState) {
         HistoryFilter.ALL -> 0
         HistoryFilter.FOUND -> 1
         HistoryFilter.BOUGHT -> 2
@@ -94,7 +90,7 @@ fun HistoryScreen(
 
             SegmentedRow(
                 title = "Sort",
-                options = sortOptions,
+                options = listOf("Newest", "Rating", "Buy Now"),
                 selectedIndex = sortIndex,
                 onSelected = { index ->
                     viewModel.setHistorySort(
@@ -109,7 +105,7 @@ fun HistoryScreen(
 
             SegmentedRow(
                 title = "Filter",
-                options = filterOptions,
+                options = listOf("All", "Found", "Bought", "Cancelled"),
                 selectedIndex = filterIndex,
                 onSelected = { index ->
                     viewModel.setHistoryFilter(
