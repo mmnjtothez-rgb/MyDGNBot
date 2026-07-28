@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -69,7 +70,10 @@ fun HistoryScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(players, key = { it.resourceId.ifBlank { it.transactionId } }) { player ->
+                    items(
+                        items = players,
+                        key = { it.resourceId.ifBlank { it.transactionId } }
+                    ) { player ->
                         HistoryPlayerCard(
                             player = player,
                             onClick = { onPlayerClick(player) }
@@ -157,9 +161,7 @@ private fun HistoryPlayerCard(
                 style = MaterialTheme.typography.bodySmall
             )
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "BIN ${player.buyNowPrice}",
                     color = TextPrimary,
