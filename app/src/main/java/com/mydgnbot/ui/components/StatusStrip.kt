@@ -32,7 +32,6 @@ import com.mydgnbot.R
 import com.mydgnbot.ui.theme.Black1
 import com.mydgnbot.ui.theme.Emerald
 import com.mydgnbot.ui.theme.TextPrimary
-import com.mydgnbot.ui.theme.TextSecondary
 
 @Composable
 fun StatusStrip(
