@@ -1,6 +1,7 @@
 package com.mydgnbot.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.mydgnbot.data.network.ConnectivityObserver
 import com.mydgnbot.data.repository.PlayerEnrichmentRepository
 import com.mydgnbot.data.repository.PlayerRepository
@@ -9,8 +10,10 @@ import com.mydgnbot.domain.model.LogEntry
 import com.mydgnbot.domain.model.Player
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -39,8 +42,12 @@ class HomeViewModel(
     val player: StateFlow<Player?> = _player.asStateFlow()
 
     private val _recentPlayers = MutableStateFlow<List<Player>>(emptyList())
+
     private val _historySort = MutableStateFlow(HistorySort.NEWEST)
+    val currentHistorySort: StateFlow<HistorySort> = _historySort.asStateFlow()
+
     private val _historyFilter = MutableStateFlow(HistoryFilter.ALL)
+    val currentHistoryFilter: StateFlow<HistoryFilter> = _historyFilter.asStateFlow()
 
     val recentPlayers: StateFlow<List<Player>> = combine(
         _recentPlayers,
@@ -59,10 +66,11 @@ class HomeViewModel(
             HistorySort.RATING -> filtered.sortedByDescending { it.rating }
             HistorySort.BUY_NOW -> filtered.sortedByDescending { it.buyNowPrice }
         }
-    }.let { flow ->
-        @Suppress("UNCHECKED_CAST")
-        flow as StateFlow<List<Player>>
-    }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList()
+    )
 
     private val _showHistory = MutableStateFlow(false)
     val showHistory: StateFlow<Boolean> = _showHistory.asStateFlow()
