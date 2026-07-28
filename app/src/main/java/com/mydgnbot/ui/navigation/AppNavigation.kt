@@ -1,6 +1,8 @@
 package com.mydgnbot.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -87,8 +89,10 @@ fun AppNavigation() {
         }
 
         composable(Screen.History.route) {
+            val recentPlayers by homeViewModel.recentPlayers.collectAsState()
+
             HistoryScreen(
-                players = homeViewModel.recentPlayers.collectAsState().value,
+                players = recentPlayers,
                 onBackClick = {
                     navController.popBackStack()
                 },
