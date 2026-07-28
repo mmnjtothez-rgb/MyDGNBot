@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.R
+import com.mydgnbot.domain.model.Player
 import com.mydgnbot.ui.components.ActionButtons
 import com.mydgnbot.ui.components.ActivityLogCard
 import com.mydgnbot.ui.components.BotActionState
@@ -35,12 +37,12 @@ import com.mydgnbot.ui.components.StatusChipsRow
 import com.mydgnbot.ui.theme.Black0
 import com.mydgnbot.ui.theme.Emerald
 import com.mydgnbot.ui.theme.TextPrimary
-import com.mydgnbot.ui.theme.TextSecondary
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
 @Composable
 fun HomeScreen(
     onSettingsClick: () -> Unit,
+    onPlayerFound: (Player) -> Unit,
     viewModel: HomeViewModel
 ) {
     val player by viewModel.player.collectAsState()
@@ -48,6 +50,10 @@ fun HomeScreen(
     val isOnline by viewModel.isOnline.collectAsState()
     val isRunning by viewModel.isRunning.collectAsState()
     val logs by viewModel.logs.collectAsState()
+
+    LaunchedEffect(player) {
+        player?.let(onPlayerFound)
+    }
 
     val platform = settings["platform"] ?: "Console"
     val method = if (settings["player_type"] == "1") "Safe" else "Quick Sell"
