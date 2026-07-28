@@ -1,7 +1,6 @@
 package com.mydgnbot.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.mydgnbot.data.network.ConnectivityObserver
 import com.mydgnbot.data.repository.PlayerEnrichmentRepository
 import com.mydgnbot.data.repository.PlayerRepository
@@ -34,7 +33,7 @@ class HomeViewModel(
     private val _logs = MutableStateFlow<List<LogEntry>>(emptyList())
     val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow()
 
-    private val timestampFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
+    private val stampFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
 
     fun requestHistory() {
         _showHistory.value = true
@@ -44,26 +43,25 @@ class HomeViewModel(
         _showHistory.value = false
     }
 
-    fun clearHistory() {
-        _recentPlayers.value = emptyList()
-        addLog("History cleared")
+    private fun playerKey(player: Player): String {
+        return listOfNotNull(
+            player.toString(),
+            player.javaClass.simpleName
+        ).joinToString("|")
     }
 
     private fun addRecentPlayer(player: Player) {
+        val key = playerKey(player)
         _recentPlayers.update { current ->
-            buildList {
-                add(player)
-                current.forEach { existing ->
-                    if (existing.name != player.name) add(existing)
-                }
-            }.take(20)
+            val filtered = current.filterNot { playerKey(it) == key }
+            (listOf(player) + filtered).take(20)
         }
     }
 
     private fun addLog(message: String) {
         val entry = LogEntry(
             message = message,
-            timestamp = LocalDateTime.now().format(timestampFormat)
+            timestamp = LocalDateTime.now().format(stampFormat)
         )
         _logs.update { current -> (current + entry).takeLast(50) }
     }
@@ -71,7 +69,7 @@ class HomeViewModel(
     fun onPlayerFound(found: Player) {
         _player.value = found
         addRecentPlayer(found)
-        addLog("Player found: ${found.name}")
+        addLog("Player found")
     }
 
     fun startBot() {
@@ -84,15 +82,15 @@ class HomeViewModel(
 
     fun markBought() {
         _player.value?.let { found ->
-            addLog("Bought: ${found.name}")
             addRecentPlayer(found)
+            addLog("Bought player")
         }
         _player.value = null
     }
 
     fun cancelPlayer() {
-        _player.value?.let { found ->
-            addLog("Cancelled: ${found.name}")
+        _player.value?.let {
+            addLog("Cancelled player")
         }
         _player.value = null
     }
