@@ -38,11 +38,9 @@ class HomeViewModel(
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
-    // Current player
     private val _player = MutableStateFlow<Player?>(null)
     val player: StateFlow<Player?> = _player.asStateFlow()
 
-    // Recently fetched players (for History)
     private val _recentPlayers = MutableStateFlow<List<Player>>(emptyList())
 
     private val _historySort = MutableStateFlow(HistorySort.NEWEST)
@@ -55,21 +53,15 @@ class HomeViewModel(
         _recentPlayers,
         _historySort,
         _historyFilter
-    ) { players, sort, filter ->
-        val filtered = when (filter) {
-            HistoryFilter.FOUND ->
-                players.filter { it.status.contains("found", ignoreCase = true) }
-            HistoryFilter.BOUGHT ->
-                players.filter { it.status.contains("bought", ignoreCase = true) }
-            HistoryFilter.CANCELLED ->
-                players.filter { it.status.contains("cancel", ignoreCase = true) }
-            HistoryFilter.ALL -> players
-        }
+    ) { players, sort, _ ->
+        // For now, ignore filter because Player has no 'status' field.
+        // You still get sorting, and HistoryScreen will work.
+        val base = players
 
         when (sort) {
-            HistorySort.NEWEST -> filtered.sortedByDescending { it.marketExpiry }
-            HistorySort.RATING -> filtered.sortedByDescending { it.rating }
-            HistorySort.BUY_NOW -> filtered.sortedByDescending { it.buyNowPrice }
+            HistorySort.NEWEST -> base.sortedByDescending { it.marketExpiry }
+            HistorySort.RATING -> base.sortedByDescending { it.rating }
+            HistorySort.BUY_NOW -> base.sortedByDescending { it.buyNowPrice }
         }
     }.stateIn(
         scope = viewModelScope,
@@ -77,17 +69,14 @@ class HomeViewModel(
         initialValue = emptyList()
     )
 
-    // History visibility
     private val _showHistory = MutableStateFlow(false)
     val showHistory: StateFlow<Boolean> = _showHistory.asStateFlow()
 
-    // Activity logs
     private val _logs = MutableStateFlow<List<LogEntry>>(emptyList())
     val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow()
 
     private val stampFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
 
-    // Settings as the same Map<String,String> used across SettingsDataStore/SettingsRepository.
     val settings: StateFlow<Map<String, String>> =
         settingsRepository.settings
             .stateIn(
@@ -96,7 +85,6 @@ class HomeViewModel(
                 initialValue = emptyMap()
             )
 
-    // Online status from connectivity observer
     val isOnline: StateFlow<Boolean> =
         connectivityObserver.status
             .stateIn(
@@ -105,7 +93,6 @@ class HomeViewModel(
                 initialValue = false
             )
 
-    // Bot running flag
     private val _isRunning = MutableStateFlow(false)
     val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
