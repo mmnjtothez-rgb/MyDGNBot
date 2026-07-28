@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -66,8 +64,6 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Black0)
-                .statusBarsPadding()
-                .navigationBarsPadding()
         ) {
             Column(
                 modifier = Modifier
@@ -75,7 +71,7 @@ fun HomeScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp)
                     .padding(top = 8.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 TopHeader(onSettingsClick = onSettingsClick)
 
@@ -112,32 +108,21 @@ fun HomeScreen(
 private fun TopHeader(
     onSettingsClick: () -> Unit
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 2.dp)
+            .padding(top = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(end = 56.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            Text(
-                text = "MyDGNBot",
-                style = MaterialTheme.typography.displayMedium,
-                color = TextPrimary
-            )
-            Text(
-                text = "Midnight green • AMOLED black • premium bot control",
-                style = MaterialTheme.typography.bodySmall,
-                color = TextSecondary
-            )
-        }
+        Text(
+            text = "MyDGNBot",
+            style = MaterialTheme.typography.titleLarge,
+            color = TextPrimary,
+            modifier = Modifier.weight(1f)
+        )
 
         Box(
             modifier = Modifier
-                .align(Alignment.TopEnd)
                 .background(Color(0xFF0A1110), RoundedCornerShape(14.dp))
                 .padding(2.dp)
         ) {
