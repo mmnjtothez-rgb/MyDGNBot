@@ -49,8 +49,8 @@ fun AppNavigation() {
                 factory = HomeViewModelFactory(
                     appContainer.playerRepository,
                     appContainer.settingsRepository,
-                    appContainer.playerEnrichmentRepository,
-                    appContainer.connectivityObserver
+                    appContainer.connectivityObserver,
+                    context.cacheDir
                 )
             )
 
