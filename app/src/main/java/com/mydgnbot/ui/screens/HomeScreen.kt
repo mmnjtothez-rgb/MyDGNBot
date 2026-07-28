@@ -1,6 +1,7 @@
 package com.mydgnbot.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,12 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -84,7 +85,9 @@ fun HomeScreen(
                     .padding(top = 8.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                TopHeader(onSettingsClick = onSettingsClick)
+                TopHeader(
+                    onSettingsClick = onSettingsClick
+                )
 
                 StatusChipsRow(
                     connected = isOnline,
@@ -131,19 +134,21 @@ private fun TopHeader(
             color = TextPrimary
         )
 
+        androidx.compose.foundation.layout.Spacer(modifier = Modifier.weight(1f))
+
         Box(
             modifier = Modifier
-                .padding(start = 8.dp)
-                .background(Color(0xFF0A1110), RoundedCornerShape(14.dp))
-                .padding(2.dp)
+                .size(28.dp)
+                .background(Color(0xFF0A1110), RoundedCornerShape(10.dp))
+                .clickable(onClick = onSettingsClick),
+            contentAlignment = Alignment.Center
         ) {
-            IconButton(onClick = onSettingsClick) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_settings),
-                    contentDescription = "Settings",
-                    tint = Emerald
-                )
-            }
+            Icon(
+                painter = painterResource(R.drawable.ic_settings),
+                contentDescription = "Settings",
+                tint = Emerald,
+                modifier = Modifier.size(15.dp)
+            )
         }
     }
 }
