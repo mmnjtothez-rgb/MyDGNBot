@@ -28,6 +28,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -43,42 +44,32 @@ import com.mydgnbot.ui.theme.Black1
 import com.mydgnbot.ui.theme.Emerald
 import com.mydgnbot.ui.theme.TextPrimary
 import com.mydgnbot.ui.theme.TextSecondary
-
-private enum class HistorySort { NEWEST, RATING, BUY_NOW }
-private enum class HistoryFilter { ALL, FOUND, BOUGHT, CANCELLED }
+import com.mydgnbot.ui.viewmodel.HomeViewModel
+import com.mydgnbot.ui.viewmodel.HistoryFilter
+import com.mydgnbot.ui.viewmodel.HistorySort
 
 @Composable
 fun HistoryScreen(
-    players: List<Player>,
+    viewModel: HomeViewModel,
     onBackClick: () -> Unit,
     onPlayerClick: (Player) -> Unit
 ) {
-    var sortIndex by remember { mutableIntStateOf(0) }
-    var filterIndex by remember { mutableIntStateOf(0) }
+    val players by viewModel.recentPlayers.collectAsState()
 
     val sortOptions = listOf("Newest", "Rating", "Buy Now")
     val filterOptions = listOf("All", "Found", "Bought", "Cancelled")
 
-    val filtered = remember(players, sortIndex, filterIndex) {
-        val filter = when (filterIndex) {
-            1 -> HistoryFilter.FOUND
-            2 -> HistoryFilter.BOUGHT
-            3 -> HistoryFilter.CANCELLED
-            else -> HistoryFilter.ALL
-        }
+    val sortIndex = when (viewModel.currentHistorySort.collectAsState().value) {
+        HistorySort.NEWEST -> 0
+        HistorySort.RATING -> 1
+        HistorySort.BUY_NOW -> 2
+    }
 
-        val sortedBase = when (filter) {
-            HistoryFilter.FOUND -> players.filter { it.status.contains("found", ignoreCase = true) }
-            HistoryFilter.BOUGHT -> players.filter { it.status.contains("bought", ignoreCase = true) }
-            HistoryFilter.CANCELLED -> players.filter { it.status.contains("cancel", ignoreCase = true) }
-            HistoryFilter.ALL -> players
-        }
-
-        when (sortIndex) {
-            1 -> sortedBase.sortedByDescending { it.rating }
-            2 -> sortedBase.sortedByDescending { it.buyNowPrice }
-            else -> sortedBase.sortedByDescending { it.marketExpiry }
-        }
+    val filterIndex = when (viewModel.currentHistoryFilter.collectAsState().value) {
+        HistoryFilter.ALL -> 0
+        HistoryFilter.FOUND -> 1
+        HistoryFilter.BOUGHT -> 2
+        HistoryFilter.CANCELLED -> 3
     }
 
     Surface(
@@ -105,26 +96,43 @@ fun HistoryScreen(
                 title = "Sort",
                 options = sortOptions,
                 selectedIndex = sortIndex,
-                onSelected = { sortIndex = it }
+                onSelected = { index ->
+                    viewModel.setHistorySort(
+                        when (index) {
+                            1 -> HistorySort.RATING
+                            2 -> HistorySort.BUY_NOW
+                            else -> HistorySort.NEWEST
+                        }
+                    )
+                }
             )
 
             SegmentedRow(
                 title = "Filter",
                 options = filterOptions,
                 selectedIndex = filterIndex,
-                onSelected = { filterIndex = it },
+                onSelected = { index ->
+                    viewModel.setHistoryFilter(
+                        when (index) {
+                            1 -> HistoryFilter.FOUND
+                            2 -> HistoryFilter.BOUGHT
+                            3 -> HistoryFilter.CANCELLED
+                            else -> HistoryFilter.ALL
+                        }
+                    )
+                },
                 topPadding = 10.dp,
                 bottomPadding = 12.dp
             )
 
             Text(
-                text = "${filtered.size} players",
+                text = "${players.size} players",
                 color = TextSecondary,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            if (filtered.isEmpty()) {
+            if (players.isEmpty()) {
                 EmptyHistoryState()
             } else {
                 LazyColumn(
@@ -132,7 +140,7 @@ fun HistoryScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(
-                        items = filtered,
+                        items = players,
                         key = { it.resourceId.ifBlank { it.transactionId } }
                     ) { player ->
                         HistoryPlayerCard(
