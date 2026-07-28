@@ -1,49 +1,38 @@
 package com.mydgnbot.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.mydgnbot.R
 import com.mydgnbot.domain.model.Player
 import com.mydgnbot.ui.components.ActionButtons
 import com.mydgnbot.ui.components.ActivityLogCard
 import com.mydgnbot.ui.components.BotActionState
-import com.mydgnbot.ui.components.ScannerStatusCard
+import com.mydgnbot.ui.components.RadarScannerCard
 import com.mydgnbot.ui.components.StatusChipsRow
 import com.mydgnbot.ui.theme.Black0
-import com.mydgnbot.ui.theme.Emerald
-import com.mydgnbot.ui.theme.TextPrimary
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
 @Composable
 fun HomeScreen(
     onSettingsClick: () -> Unit,
     onPlayerFound: (Player) -> Unit,
+    onHistoryClick: () -> Unit,
     viewModel: HomeViewModel
 ) {
     val player by viewModel.player.collectAsState()
@@ -83,7 +72,7 @@ fun HomeScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp)
                     .padding(top = 8.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 TopHeader(
                     onSettingsClick = onSettingsClick
@@ -94,10 +83,13 @@ fun HomeScreen(
                     platform = platform,
                     method = method,
                     interval = interval,
-                    onSettingsClick = onSettingsClick
+                    onSettingsClick = onSettingsClick,
+                    onPlatformClick = {},
+                    onMethodClick = {},
+                    onIntervalClick = {}
                 )
 
-                ScannerStatusCard(
+                RadarScannerCard(
                     isRunning = isRunning,
                     playerFound = player != null,
                     connected = isOnline
@@ -109,7 +101,7 @@ fun HomeScreen(
                     onStopClick = viewModel::stopBot,
                     onBoughtClick = viewModel::markBought,
                     onCancelClick = viewModel::cancelPlayer,
-                    onSettingsClick = onSettingsClick
+                    onHistoryClick = onHistoryClick
                 )
 
                 ActivityLogCard(logs = logs)
@@ -122,31 +114,34 @@ fun HomeScreen(
 private fun TopHeader(
     onSettingsClick: () -> Unit
 ) {
-    Row(
+    androidx.compose.foundation.layout.Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 2.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
     ) {
-        Text(
+        androidx.compose.material3.Text(
             text = "DGBot",
             style = MaterialTheme.typography.titleLarge,
-            color = TextPrimary
+            color = com.mydgnbot.ui.theme.TextPrimary
         )
 
         androidx.compose.foundation.layout.Spacer(modifier = Modifier.weight(1f))
 
-        Box(
+        androidx.compose.foundation.layout.Box(
             modifier = Modifier
                 .size(28.dp)
-                .background(Color(0xFF0A1110), RoundedCornerShape(10.dp))
+                .background(
+                    color = androidx.compose.ui.graphics.Color(0xFF0A1110),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
+                )
                 .clickable(onClick = onSettingsClick),
-            contentAlignment = Alignment.Center
+            contentAlignment = androidx.compose.ui.Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_settings),
+            androidx.compose.material3.Icon(
+                painter = androidx.compose.ui.res.painterResource(com.mydgnbot.R.drawable.ic_settings),
                 contentDescription = "Settings",
-                tint = Emerald,
+                tint = com.mydgnbot.ui.theme.Emerald,
                 modifier = Modifier.size(15.dp)
             )
         }
