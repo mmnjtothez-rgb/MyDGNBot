@@ -1,20 +1,25 @@
 package com.mydgnbot.ui.components
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Chip
+import androidx.compose.material3.ChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.theme.Emerald
-import com.mydgnbot.ui.theme.TextPrimary
 import com.mydgnbot.ui.theme.TextSecondary
 
 @Composable
@@ -23,90 +28,88 @@ fun StatusChipsRow(
     platform: String,
     method: String,
     interval: String,
-    onSettingsClick: () -> Unit,
-    onPlatformClick: () -> Unit = {},
-    onMethodClick: () -> Unit = {},
-    onIntervalClick: () -> Unit = {}
+    onSettingsClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 4.dp, bottom = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        AssistChip(
-            onClick = onSettingsClick,
+        // Platform chip
+        Chip(
             label = {
                 Text(
-                    text = if (connected) "ONLINE" else "OFFLINE",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (connected) Emerald else TextSecondary
-                )
-            },
-            leadingIcon = {
-                Text(
-                    text = "●",
-                    color = if (connected) Emerald else TextSecondary,
+                    text = platform,
                     style = MaterialTheme.typography.labelSmall
                 )
             },
-            colors = AssistChipDefaults.assistChipColors(
-                containerColor = Color(0xFF07110F),
-                labelColor = if (connected) Emerald else TextSecondary,
-                leadingIconContentColor = if (connected) Emerald else TextSecondary
+            onClick = { },
+            colors = ChipDefaults.chipColors(
+                containerColor = Emerald.copy(alpha = 0.18f)
             ),
-            border = BorderStroke(
-                1.dp,
-                if (connected) Emerald.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.08f)
-            )
+            modifier = Modifier.weight(1f)
         )
 
-        AssistChip(
-            onClick = onPlatformClick,
+        // Method chip (Safe / Quicksell)
+        Chip(
             label = {
                 Text(
-                    text = platform.uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = TextPrimary
+                    text = method,
+                    style = MaterialTheme.typography.labelSmall
                 )
             },
-            colors = AssistChipDefaults.assistChipColors(
-                containerColor = Color(0xFF07110F),
-                labelColor = TextPrimary
+            onClick = { },
+            colors = ChipDefaults.chipColors(
+                containerColor = Emerald.copy(alpha = 0.18f)
             ),
-            border = BorderStroke(1.dp, Emerald.copy(alpha = 0.16f))
+            modifier = Modifier.weight(1f)
         )
 
-        AssistChip(
-            onClick = onMethodClick,
+        // Interval chip
+        Chip(
             label = {
                 Text(
-                    text = method.uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = TextPrimary
+                    text = interval,
+                    style = MaterialTheme.typography.labelSmall
                 )
             },
-            colors = AssistChipDefaults.assistChipColors(
-                containerColor = Color(0xFF07110F),
-                labelColor = TextPrimary
+            onClick = { },
+            colors = ChipDefaults.chipColors(
+                containerColor = Emerald.copy(alpha = 0.18f)
             ),
-            border = BorderStroke(1.dp, Emerald.copy(alpha = 0.16f))
+            modifier = Modifier.weight(1f)
         )
 
-        AssistChip(
-            onClick = onIntervalClick,
+        // Connection status chip
+        Chip(
             label = {
                 Text(
-                    text = "${interval}s",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = TextPrimary
+                    text = if (connected) "Connected" else "Offline",
+                    style = MaterialTheme.typography.labelSmall
                 )
             },
-            colors = AssistChipDefaults.assistChipColors(
-                containerColor = Color(0xFF07110F),
-                labelColor = TextPrimary
+            onClick = onSettingsClick,
+            colors = ChipDefaults.chipColors(
+                containerColor = if (connected)
+                    Emerald.copy(alpha = 0.25f)
+                else
+                    TextSecondary.copy(alpha = 0.25f)
             ),
-            border = BorderStroke(1.dp, Emerald.copy(alpha = 0.16f))
+            leadingIcon = {
+                Icon(
+                    imageVector = if (connected)
+                        Icons.Default.Check
+                    else
+                        Icons.Default.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = if (connected) Emerald else TextSecondary
+                )
+            },
+            modifier = Modifier
+                .weight(1f)
+                .clickable(onClick = onSettingsClick)
         )
     }
 }
