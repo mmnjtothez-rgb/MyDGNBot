@@ -1,20 +1,38 @@
 package com.mydgnbot.ui.components
 
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -22,20 +40,26 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.R
 import com.mydgnbot.ui.theme.Black1
 import com.mydgnbot.ui.theme.Emerald
 import com.mydgnbot.ui.theme.TextPrimary
 import com.mydgnbot.ui.theme.TextSecondary
+import kotlinx.coroutines.delay
 
 enum class BotStatus {
     SEARCHING,
@@ -61,12 +85,12 @@ fun BotStatusCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(5.dp)
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 StatusLine(status = status, waitSeconds = waitSeconds)
                 Text(
@@ -76,7 +100,7 @@ fun BotStatusCard(
                 )
             }
 
-            RotatingFc26Cards()
+            RotatingFc26CardSlot()
         }
     }
 }
@@ -99,8 +123,7 @@ private fun StatusLine(
     ) {
         Box(
             modifier = Modifier
-                .width(8.dp)
-                .height(8.dp)
+                .size(8.dp)
                 .clip(CircleShape)
                 .background(
                     when (status) {
@@ -130,7 +153,7 @@ private fun subtitleFor(status: BotStatus): String {
 }
 
 @Composable
-private fun RotatingFc26Cards() {
+private fun RotatingFc26CardSlot() {
     val cards = remember {
         listOf(
             R.drawable.fc26_gold_card,
@@ -150,64 +173,56 @@ private fun RotatingFc26Cards() {
         )
     }
 
-    val transition = rememberInfiniteTransition()
-    val progress by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = cards.size.toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 7000, easing = LinearEasing)
-        )
-    )
+    var index by remember { mutableIntStateOf(0) }
 
-    val activeIndex = (progress.toInt()) % cards.size
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        cards.forEachIndexed { index, resId ->
-            val active = index == activeIndex
-            Fc26CardThumb(
-                resId = resId,
-                active = active
-            )
+    LaunchedEffect(cards.size) {
+        while (true) {
+            delay(1800)
+            index = (index + 1) % cards.size
         }
     }
-}
-
-@Composable
-private fun Fc26CardThumb(
-    resId: Int,
-    active: Boolean
-) {
-    val scale by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (active) 1.15f else 0.92f,
-        animationSpec = tween(450)
-    )
-
-    val rotation by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (active) 0f else 18f,
-        animationSpec = tween(450)
-    )
 
     Box(
         modifier = Modifier
-            .width(36.dp)
-            .height(72.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-                rotationY = rotation
-                cameraDistance = 18 * density
-            }
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color.Transparent),
+            .padding(start = 12.dp)
+            .size(width = 82.dp, height = 128.dp),
         contentAlignment = Alignment.Center
     ) {
-        androidx.compose.foundation.Image(
-            painter = painterResource(id = resId),
-            contentDescription = null,
-            modifier = Modifier.fillMaxWidth()
-        )
+        AnimatedContent(
+            targetState = index,
+            transitionSpec = {
+                androidx.compose.animation.core.togetherWith(
+                    androidx.compose.animation.scaleIn(
+                        animationSpec = spring(
+                            dampingRatio = 0.55f,
+                            stiffness = 320f
+                        ),
+                        initialScale = 0.82f
+                    ) + androidx.compose.animation.fadeIn(
+                        animationSpec = tween(180)
+                    )
+                ) + androidx.compose.animation.scaleOut(
+                    animationSpec = spring(
+                        dampingRatio = 0.7f,
+                        stiffness = 380f
+                    ),
+                    targetScale = 1.08f
+                ) + androidx.compose.animation.fadeOut(
+                    animationSpec = tween(120)
+                )
+            },
+            label = "fc26-card-switch"
+        ) { current ->
+            Image(
+                painter = painterResource(id = cards[current]),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(width = 82.dp, height = 128.dp)
+                    .graphicsLayer {
+                        cameraDistance = 18 * density
+                    }
+            )
+        }
     }
 }
