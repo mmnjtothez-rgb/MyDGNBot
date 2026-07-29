@@ -2,7 +2,6 @@ package com.mydgnbot.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.mydgnbot.domain.model.PlayerMethod
 import com.mydgnbot.ui.components.ActionButtons
 import com.mydgnbot.ui.components.BotActionState
 import com.mydgnbot.ui.components.BotStatusCard
@@ -48,15 +48,31 @@ fun HomeScreen(
     val waitSeconds by viewModel.waitSeconds.collectAsState()
 
     LaunchedEffect(player) {
-        if (player != null) onPlayerFound()
+        if (player != null) {
+            onPlayerFound()
+        }
     }
 
-    val method = when ((settings["method"] ?: "").lowercase()) {
-        "quicksell" -> "quicksell"
-        else -> "safe"
+    // Read raw settings from DataStore-backed map
+    val platform = settings["platform"] ?: "Console"
+    val playerTypeRaw = settings["player_type"] ?: "2"
+    val pollIntervalRaw = settings["poll_interval"] ?: "10"
+
+    // Map player_type (1/2) to PlayerMethod enum
+    val playerMethodEnum = PlayerMethod.fromValue(
+        playerTypeRaw.toIntOrNull() ?: 2
+    )
+
+    // Derive chip labels
+    val methodChip = when (playerMethodEnum) {
+        PlayerMethod.SAFE -> "Safe"
+        PlayerMethod.QUICKSELL -> "Quicksell"
     }
 
-    val interval = settings["interval"] ?: "0"
+    val intervalChip = pollIntervalRaw
+        .toIntOrNull()
+        ?.let { "${it}s" }
+        ?: "0s"
 
     Scaffold(
         topBar = {
@@ -88,11 +104,12 @@ fun HomeScreen(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.Top
         ) {
+            // Method and interval chips now reactive to settings changes
             StatusChipsRow(
                 connected = isOnline,
-                platform = settings["platform"] ?: "platform",
-                method = method,
-                interval = interval,
+                platform = platform,
+                method = methodChip,
+                interval = intervalChip,
                 onSettingsClick = onSettingsClick
             )
 
