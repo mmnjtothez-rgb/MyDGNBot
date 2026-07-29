@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.mydgnbot.data.datastore.SettingsDataStore
 import com.mydgnbot.data.network.ConnectivityObserver
-import com.mydgnbot.data.network.ConnectivityObserverImpl // replace with your actual implementation
+import com.mydgnbot.data.network.NetworkConnectivityObserver
 import com.mydgnbot.data.repository.PlayerRepository
 import com.mydgnbot.data.repository.SettingsRepository
 import com.mydgnbot.ui.screens.HomeScreen
@@ -30,9 +30,9 @@ fun AppNavigation() {
     }
     val playerRepository = remember { PlayerRepository() }
 
-    // Connectivity observer implementation
+    // Real connectivity observer
     val connectivityObserver: ConnectivityObserver = remember {
-        ConnectivityObserverImpl(context)
+        NetworkConnectivityObserver(context)
     }
 
     // ViewModels
@@ -78,7 +78,7 @@ fun AppNavigation() {
             )
         }
 
-        // Only add this if you actually have a HistoryScreen:
+        // Add history route only if you have a HistoryScreen:
         // composable("history") {
         //     HistoryScreen(
         //         viewModel = homeViewModel,
