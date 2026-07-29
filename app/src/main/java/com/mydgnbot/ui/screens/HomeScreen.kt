@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,6 +31,7 @@ import com.mydgnbot.ui.components.BotActionState
 import com.mydgnbot.ui.components.RadarScannerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -113,7 +115,6 @@ private fun HomeContent(
     ) {
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Radar Scanner
         RadarScannerCard(
             isRunning = isRunning,
             playerFound = player != null,
@@ -123,7 +124,6 @@ private fun HomeContent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Compact status strip (replaces ActivityLogCard)
         BotStatusCard(
             status = botStatus,
             waitSeconds = waitSeconds,
@@ -132,7 +132,6 @@ private fun HomeContent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Action buttons
         val actionState = when {
             isRunning -> BotActionState.SEARCHING
             player != null -> BotActionState.PLAYER_FOUND
@@ -152,8 +151,6 @@ private fun HomeContent(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        // Additional content (if you have any) can go here.
     }
 }
 
