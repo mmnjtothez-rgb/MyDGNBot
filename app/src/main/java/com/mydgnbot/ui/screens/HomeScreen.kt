@@ -51,6 +51,13 @@ fun HomeScreen(
         if (player != null) onPlayerFound()
     }
 
+    val method = when ((settings["method"] ?: "").lowercase()) {
+        "quicksell" -> "quicksell"
+        else -> "safe"
+    }
+
+    val interval = settings["interval"] ?: "0"
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -84,8 +91,8 @@ fun HomeScreen(
             StatusChipsRow(
                 connected = isOnline,
                 platform = settings["platform"] ?: "platform",
-                method = settings["method"] ?: "method",
-                interval = settings["interval"] ?: "0",
+                method = method,
+                interval = interval,
                 onSettingsClick = onSettingsClick
             )
 
