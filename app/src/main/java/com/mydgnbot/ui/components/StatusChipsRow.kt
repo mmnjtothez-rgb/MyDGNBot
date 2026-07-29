@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Chip
-import androidx.compose.material3.ChipDefaults
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.theme.Emerald
 import com.mydgnbot.ui.theme.TextSecondary
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatusChipsRow(
     connected: Boolean,
@@ -31,71 +32,64 @@ fun StatusChipsRow(
     onSettingsClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Platform chip
-        Chip(
+        AssistChip(
+            onClick = { },
             label = {
                 Text(
                     text = platform,
                     style = MaterialTheme.typography.labelSmall
                 )
             },
-            onClick = { },
-            colors = ChipDefaults.chipColors(
+            colors = AssistChipDefaults.assistChipColors(
                 containerColor = Emerald.copy(alpha = 0.18f)
             ),
             modifier = Modifier.weight(1f)
         )
 
         // Method chip (Safe / Quicksell)
-        Chip(
+        AssistChip(
+            onClick = { },
             label = {
                 Text(
                     text = method,
                     style = MaterialTheme.typography.labelSmall
                 )
             },
-            onClick = { },
-            colors = ChipDefaults.chipColors(
+            colors = AssistChipDefaults.assistChipColors(
                 containerColor = Emerald.copy(alpha = 0.18f)
             ),
             modifier = Modifier.weight(1f)
         )
 
         // Interval chip
-        Chip(
+        AssistChip(
+            onClick = { },
             label = {
                 Text(
                     text = interval,
                     style = MaterialTheme.typography.labelSmall
                 )
             },
-            onClick = { },
-            colors = ChipDefaults.chipColors(
+            colors = AssistChipDefaults.assistChipColors(
                 containerColor = Emerald.copy(alpha = 0.18f)
             ),
             modifier = Modifier.weight(1f)
         )
 
         // Connection status chip
-        Chip(
+        AssistChip(
+            onClick = onSettingsClick,
             label = {
                 Text(
                     text = if (connected) "Connected" else "Offline",
                     style = MaterialTheme.typography.labelSmall
                 )
             },
-            onClick = onSettingsClick,
-            colors = ChipDefaults.chipColors(
-                containerColor = if (connected)
-                    Emerald.copy(alpha = 0.25f)
-                else
-                    TextSecondary.copy(alpha = 0.25f)
-            ),
             leadingIcon = {
                 Icon(
                     imageVector = if (connected)
@@ -107,6 +101,12 @@ fun StatusChipsRow(
                     tint = if (connected) Emerald else TextSecondary
                 )
             },
+            colors = AssistChipDefaults.assistChipColors(
+                containerColor = if (connected)
+                    Emerald.copy(alpha = 0.25f)
+                else
+                    TextSecondary.copy(alpha = 0.25f)
+            ),
             modifier = Modifier
                 .weight(1f)
                 .clickable(onClick = onSettingsClick)
