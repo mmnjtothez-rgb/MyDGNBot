@@ -78,7 +78,7 @@ fun AppNavigation() {
             HistoryScreen(
                 viewModel = homeViewModel,
                 onBackClick = { navController.popBackStack() },
-                onPlayerClick = { player ->
+                onPlayerClick = {
                     navController.navigate("player")
                 }
             )
