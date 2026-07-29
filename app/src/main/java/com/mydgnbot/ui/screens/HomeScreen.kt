@@ -1,7 +1,5 @@
 package com.mydgnbot.ui.screens
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,12 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.components.ActionButtons
 import com.mydgnbot.ui.components.BotActionState
-import com.mydgnbot.ui.components.BotStatus
 import com.mydgnbot.ui.components.BotStatusCard
 import com.mydgnbot.ui.components.RadarScannerCard
 import com.mydgnbot.ui.components.StatusChipsRow
@@ -86,9 +82,11 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Top
         ) {
             StatusChipsRow(
-                isOnline = isOnline,
-                isRunning = isRunning,
-                hasPlayer = player != null
+                connected = isOnline,
+                platform = settings["platform"] ?: "platform",
+                method = settings["method"] ?: "method",
+                interval = settings["interval"] ?: "0",
+                onSettingsClick = onSettingsClick
             )
 
             Spacer(modifier = Modifier.height(10.dp))
