@@ -5,32 +5,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
-import com.mydgnbot.ui.navigation.AppNavigation
-import com.mydgnbot.ui.theme.MyDGNBotTheme
+import com.mydgnbot.ui.MyDGNApp
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
-
-        WindowCompat.setDecorFitsSystemWindows(
-            window,
-            false
-        )
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-
-            MyDGNBotTheme {
-
-                AppNavigation()
-
-            }
-
+            MyDGNApp()
         }
-
     }
-
 }
