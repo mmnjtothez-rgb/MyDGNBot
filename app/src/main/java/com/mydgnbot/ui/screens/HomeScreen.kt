@@ -1,5 +1,7 @@
 package com.mydgnbot.ui.screens
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,15 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.components.ActionButtons
-import com.mydgnbot.ui.components.BotStatusCard
 import com.mydgnbot.ui.components.BotStatus
-import com.mydgnbot.ui.components.RadarScannerCard
+import com.mydgnbot.ui.components.BotStatusCard
 import com.mydgnbot.ui.components.BotActionState
-import com.mydgnbot.ui.viewmodel.HistoryFilter
-import com.mydgnbot.ui.viewmodel.HistorySort
+import com.mydgnbot.ui.components.RadarScannerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
 @Composable
@@ -42,8 +43,6 @@ fun HomeScreen(
     val settings by viewModel.settings.collectAsState()
     val botStatus by viewModel.botStatus.collectAsState()
     val waitSeconds by viewModel.waitSeconds.collectAsState()
-
-    val scrollState = rememberScrollState()
 
     LaunchedEffect(player) {
         if (player != null) {
@@ -102,6 +101,7 @@ private fun HomeContent(
     onPlayerFound: () -> Unit
 ) {
     val scrollState = rememberScrollState()
+    val player by viewModel.player.collectAsState()
 
     Column(
         modifier = Modifier
@@ -113,17 +113,17 @@ private fun HomeContent(
     ) {
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Radar scanner
+        // Radar Scanner
         RadarScannerCard(
             isRunning = isRunning,
-            playerFound = viewModel.player.collectAsState().value != null,
+            playerFound = player != null,
             connected = isOnline,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        
+        // Compact status strip (replaces ActivityLogCard)
         BotStatusCard(
             status = botStatus,
             waitSeconds = waitSeconds,
@@ -132,10 +132,10 @@ private fun HomeContent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Action buttons (Start/Stop/History/Bought/Cancel)
+        // Action buttons
         val actionState = when {
             isRunning -> BotActionState.SEARCHING
-            viewModel.player.collectAsState().value != null -> BotActionState.PLAYER_FOUND
+            player != null -> BotActionState.PLAYER_FOUND
             else -> BotActionState.IDLE
         }
 
@@ -153,16 +153,16 @@ private fun HomeContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        
+        // Additional content (if you have any) can go here.
     }
 }
 
 @Composable
 private fun Modifier.clickableWithNoRipple(onClick: () -> Unit): Modifier {
     return this.then(
-        androidx.compose.foundation.clickable(
+        clickable(
             indication = null,
-            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+            interactionSource = remember { MutableInteractionSource() },
             onClick = onClick
         )
     )
