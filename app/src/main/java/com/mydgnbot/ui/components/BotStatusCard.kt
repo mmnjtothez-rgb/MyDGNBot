@@ -1,11 +1,12 @@
 package com.mydgnbot.ui.components
 
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,14 +49,15 @@ fun BotStatusCard(
 ) {
     Card(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = Emerald.copy(alpha = 0.14f),
+                shape = RoundedCornerShape(18.dp)
+            ),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Black1),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = CardDefaults.outlinedCardBorder(
-            enabled = true,
-            borderColor = Emerald.copy(alpha = 0.14f)
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
@@ -63,14 +65,12 @@ fun BotStatusCard(
                 .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left: status text
             StatusColumn(
                 status = status,
                 waitSeconds = waitSeconds,
                 modifier = Modifier.weight(1f)
             )
 
-            // Right: FUT card carousel
             FutCardCarousel()
         }
     }
@@ -149,19 +149,15 @@ private fun subtitleFor(status: BotStatus): String {
 
 @Composable
 private fun FutCardCarousel() {
-    val cards = remember {
-        listOf("Gold", "TOTW", "TOTS")
-    }
+    val cards = remember { listOf("Gold", "TOTW", "TOTS") }
 
-    val transition = rememberInfiniteTransition(label = "futCards")
+    val transition = rememberInfiniteTransition()
     val indexAnim by transition.animateFloat(
         initialValue = 0f,
         targetValue = cards.size.toFloat(),
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "cardIndex"
+            animation = tween(durationMillis = 4000, easing = LinearEasing)
+        )
     )
     val index = (indexAnim.toInt()) % cards.size
 
@@ -196,20 +192,13 @@ private fun FutMiniCard(
             .background(
                 baseColor.copy(alpha = if (active) 1f else 0.75f)
             )
-            .background(
-                Color.Black.copy(alpha = 0.4f),
-                RoundedCornerShape(10.dp)
+            .border(
+                width = if (active) 2.dp else 1.dp,
+                color = borderColor.copy(alpha = if (active) 1f else 0.6f),
+                shape = RoundedCornerShape(10.dp)
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Simple border effect via overlay
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clip(RoundedCornerShape(10.dp))
-                .background(Color.Transparent)
-        )
-
         if (active) {
             Text(
                 text = type,
