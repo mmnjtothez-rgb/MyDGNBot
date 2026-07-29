@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -55,19 +53,17 @@ fun ActionButtons(
     onHistoryClick: () -> Unit
 ) {
     val isRunning = state == BotActionState.SEARCHING
+    val canShowPlayerActions = state == BotActionState.PLAYER_FOUND
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         StartBotButton(
             isRunning = isRunning,
-            onClick = {
-                if (isRunning) onStopClick() else onStartClick()
-            },
+            onClick = { if (isRunning) onStopClick() else onStartClick() },
             modifier = Modifier.weight(2f)
         )
 
@@ -78,24 +74,25 @@ fun ActionButtons(
         )
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        SmallSecondaryButton(
-            label = "Bought",
-            modifier = Modifier.weight(1f),
-            onClick = onBoughtClick
-        )
+    if (canShowPlayerActions) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            SmallSecondaryButton(
+                label = "Bought",
+                modifier = Modifier.weight(1f),
+                onClick = onBoughtClick
+            )
 
-        SmallSecondaryButton(
-            label = "Cancel",
-            modifier = Modifier.weight(1f),
-            onClick = onCancelClick
-        )
+            SmallSecondaryButton(
+                label = "Cancel",
+                modifier = Modifier.weight(1f),
+                onClick = onCancelClick
+            )
+        }
     }
 }
 
@@ -110,16 +107,16 @@ private fun StartBotButton(
 
     val infiniteTransition = rememberInfiniteTransition()
     val sheenOffset by infiniteTransition.animateFloat(
-        initialValue = -0.3f,
-        targetValue = 1.3f,
+        initialValue = -0.25f,
+        targetValue = 1.25f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1800, easing = LinearEasing),
+            animation = tween(durationMillis = 4200, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         )
     )
 
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
+        targetValue = if (isPressed) 0.98f else 1f,
         animationSpec = tween(120)
     )
 
@@ -127,33 +124,28 @@ private fun StartBotButton(
         modifier = modifier
             .scale(scale)
             .clip(RoundedCornerShape(16.dp))
-            .background(
-                if (isRunning) Emerald else Black1,
-                RoundedCornerShape(16.dp)
-            )
+            .background(if (isRunning) Emerald else Black1, RoundedCornerShape(16.dp))
             .drawBehind {
-                // Inner highlight
                 drawRect(
                     brush = Brush.verticalGradient(
                         listOf(
-                            Color.White.copy(alpha = if (isRunning) 0.18f else 0.12f),
+                            Color.White.copy(alpha = if (isRunning) 0.16f else 0.10f),
                             Color.Transparent
                         )
                     )
                 )
 
-                // Sheen band (only when not running)
                 if (!isRunning) {
                     val width = size.width
                     val height = size.height
-                    val bandWidth = width * 0.35f
+                    val bandWidth = width * 0.28f
                     val x = (sheenOffset * width) - bandWidth
                     drawRect(
                         brush = Brush.linearGradient(
                             colors = listOf(
                                 Color.White.copy(alpha = 0f),
-                                Color.White.copy(alpha = 0.35f),
-                                Color.White.copy(alpha = 0f),
+                                Color.White.copy(alpha = 0.22f),
+                                Color.White.copy(alpha = 0f)
                             )
                         ),
                         topLeft = Offset(x, 0f),
