@@ -2,6 +2,7 @@ package com.mydgnbot.ui.components
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -34,18 +35,17 @@ fun RadarScannerCard(
     connected: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val transition = rememberInfiniteTransition(label = "radar")
+    val transition = rememberInfiniteTransition()
     val angle by transition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
             animation = tween(
-                durationMillis = 10_000, // slower sweep: 10s per rotation
+                durationMillis = 10_000, // slower sweep
                 easing = LinearEasing
             ),
             repeatMode = RepeatMode.Restart
-        ),
-        label = "radarAngle"
+        )
     )
 
     Box(
@@ -79,7 +79,7 @@ fun RadarScannerCard(
                 center = center
             )
 
-            // Sweep beam (only when running)
+            // Sweep beam (only when running and online)
             if (isRunning && connected) {
                 rotate(degrees = angle, pivot = center) {
                     val sweepAngle = 45f
@@ -104,7 +104,7 @@ fun RadarScannerCard(
                 center = center
             )
 
-            // Small subtle inner dot
+            // Small inner dot
             drawCircle(
                 color = Color.Black.copy(alpha = 0.4f),
                 radius = radius * 0.04f,
@@ -112,7 +112,6 @@ fun RadarScannerCard(
             )
         }
 
-        // Status text anchored at bottom
         val statusText = when {
             !connected -> "Offline • Check connection"
             playerFound -> "Player found"
