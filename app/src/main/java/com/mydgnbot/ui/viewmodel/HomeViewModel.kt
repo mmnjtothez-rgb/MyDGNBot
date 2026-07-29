@@ -41,11 +41,9 @@ class HomeViewModel(
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
-    // Current player shown in UI
     private val _player = MutableStateFlow<Player?>(null)
     val player: StateFlow<Player?> = _player.asStateFlow()
 
-    // Recent players for History
     private val _recentPlayers = MutableStateFlow<List<Player>>(emptyList())
 
     private val _historySort = MutableStateFlow(HistorySort.NEWEST)
@@ -80,17 +78,14 @@ class HomeViewModel(
         initialValue = emptyList()
     )
 
-    // History panel visibility
     private val _showHistory = MutableStateFlow(false)
     val showHistory: StateFlow<Boolean> = _showHistory.asStateFlow()
 
-    // Logs (if you still show them elsewhere)
     private val _logs = MutableStateFlow<List<LogEntry>>(emptyList())
     val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow()
 
     private val stampFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
 
-    // Settings map from DataStore/Repository
     val settings: StateFlow<Map<String, String>> =
         settingsRepository.settings
             .stateIn(
@@ -99,7 +94,6 @@ class HomeViewModel(
                 initialValue = emptyMap()
             )
 
-    // Connectivity state
     val isOnline: StateFlow<Boolean> =
         connectivityObserver.isOnline
             .stateIn(
@@ -108,11 +102,9 @@ class HomeViewModel(
                 initialValue = false
             )
 
-    // Bot running flag
     private val _isRunning = MutableStateFlow(false)
     val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
-    // Compact status strip data
     private val _botStatus = MutableStateFlow(BotStatus.WAITING)
     val botStatus: StateFlow<BotStatus> = _botStatus.asStateFlow()
 
