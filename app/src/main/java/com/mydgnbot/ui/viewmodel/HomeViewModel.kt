@@ -8,6 +8,7 @@ import com.mydgnbot.data.repository.PlayerRepository
 import com.mydgnbot.data.repository.SettingsRepository
 import com.mydgnbot.domain.model.LogEntry
 import com.mydgnbot.domain.model.Player
+import com.mydgnbot.ui.components.BotStatus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,9 +41,11 @@ class HomeViewModel(
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
+    // Current player shown in UI
     private val _player = MutableStateFlow<Player?>(null)
     val player: StateFlow<Player?> = _player.asStateFlow()
 
+    // Recent players for History
     private val _recentPlayers = MutableStateFlow<List<Player>>(emptyList())
 
     private val _historySort = MutableStateFlow(HistorySort.NEWEST)
@@ -77,9 +80,11 @@ class HomeViewModel(
         initialValue = emptyList()
     )
 
+    // History panel visibility
     private val _showHistory = MutableStateFlow(false)
     val showHistory: StateFlow<Boolean> = _showHistory.asStateFlow()
 
+    // Logs (if you still show them elsewhere)
     private val _logs = MutableStateFlow<List<LogEntry>>(emptyList())
     val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow()
 
@@ -103,8 +108,16 @@ class HomeViewModel(
                 initialValue = false
             )
 
+    // Bot running flag
     private val _isRunning = MutableStateFlow(false)
     val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
+
+    // Compact status strip data
+    private val _botStatus = MutableStateFlow(BotStatus.WAITING)
+    val botStatus: StateFlow<BotStatus> = _botStatus.asStateFlow()
+
+    private val _waitSeconds = MutableStateFlow(0)
+    val waitSeconds: StateFlow<Int> = _waitSeconds.asStateFlow()
 
     fun requestHistory() {
         _showHistory.value = true
@@ -155,6 +168,7 @@ class HomeViewModel(
     fun onPlayerFound(found: Player) {
         _player.value = found
         addRecentPlayer(found)
+        _botStatus.value = BotStatus.PLAYER_FOUND
         addLog("Player found (${found.playerName})")
     }
 
@@ -162,11 +176,14 @@ class HomeViewModel(
         if (_isRunning.value) return
 
         _isRunning.value = true
+        _botStatus.value = BotStatus.SEARCHING
         addLog("Bot started")
 
         viewModelScope.launch {
             while (_isRunning.value) {
                 if (!isOnline.value) {
+                    _botStatus.value = BotStatus.WAITING
+                    _waitSeconds.value = 2
                     addLog("Waiting for connection...")
                     delay(2_000)
                     continue
@@ -182,12 +199,17 @@ class HomeViewModel(
                 val pollSeconds = currentSettings["poll_interval"]?.toLongOrNull() ?: 10L
 
                 if (apiUser.isBlank() || secretKey.isBlank()) {
+                    _botStatus.value = BotStatus.WAITING
+                    _waitSeconds.value = pollSeconds.toInt()
                     addLog("Missing API credentials")
                     delay(pollSeconds * 1000)
                     continue
                 }
 
                 try {
+                    _botStatus.value = BotStatus.SEARCHING
+                    _waitSeconds.value = 0
+
                     val apiPlayers = playerRepository.fetchPlayers(
                         user = apiUser,
                         secretKey = secretKey,
@@ -198,17 +220,20 @@ class HomeViewModel(
                     )
 
                     if (apiPlayers.isNotEmpty()) {
-                        // For now, take the first result and enrich it.
                         val apiPlayer = apiPlayers.first()
                         val domainPlayer = playerEnrichmentRepository.enrich(apiPlayer)
                         onPlayerFound(domainPlayer)
                     } else {
+                        _botStatus.value = BotStatus.NO_PLAYER
                         addLog("No players found")
                     }
                 } catch (e: Exception) {
+                    _botStatus.value = BotStatus.WAITING
                     addLog("Error fetching players: ${e.message ?: "unknown error"}")
                 }
 
+                _botStatus.value = BotStatus.WAITING
+                _waitSeconds.value = pollSeconds.toInt()
                 delay(pollSeconds * 1000)
             }
         }
@@ -217,6 +242,8 @@ class HomeViewModel(
     fun stopBot() {
         if (!_isRunning.value) return
         _isRunning.value = false
+        _botStatus.value = BotStatus.WAITING
+        _waitSeconds.value = 0
         addLog("Bot stopped")
     }
 
