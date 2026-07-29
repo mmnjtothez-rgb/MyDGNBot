@@ -1,227 +1,221 @@
 package com.mydgnbot.ui.components
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.unit.dp
-import com.mydgnbot.domain.model.LogEntry
 import com.mydgnbot.ui.theme.Black1
 import com.mydgnbot.ui.theme.Emerald
-import com.mydgnbot.ui.theme.TextMuted
 import com.mydgnbot.ui.theme.TextPrimary
 import com.mydgnbot.ui.theme.TextSecondary
 
-@Composable
-fun ActivityLogCard(
-    logs: List<LogEntry>
-) {
-    val series = remember {
-        listOf(12f, 14f, 10f, 18f, 16f, 22f, 19f, 26f, 21f, 29f, 24f, 31f)
-    }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Black1),
-        border = BorderStroke(1.dp, Emerald.copy(alpha = 0.14f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Activity Log",
-                        color = TextPrimary,
-                        style = androidx.compose.material3.MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "Live market activity",
-                        color = TextSecondary,
-                        style = androidx.compose.material3.MaterialTheme.typography.bodySmall
-                    )
-                }
-
-                Text(
-                    text = "Last bought: 2s ago",
-                    color = Emerald,
-                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium
-                )
-            }
-
-            SparklineCard(values = series)
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                StatPill(value = "12", label = "Found", modifier = Modifier.weight(1f))
-                StatPill(value = "8", label = "Bought", modifier = Modifier.weight(1f))
-                StatPill(value = "4", label = "Live", modifier = Modifier.weight(1f))
-            }
-
-            Divider(color = Emerald.copy(alpha = 0.08f), thickness = 1.dp)
-
-            if (logs.isNotEmpty()) {
-                logs.takeLast(4).forEachIndexed { index, log ->
-                    ActivityRow(log = log)
-                    if (index != logs.takeLast(4).lastIndex) {
-                        Spacer(modifier = Modifier.size(6.dp))
-                    }
-                }
-            } else {
-                Text(
-                    text = "Market feed is warming up...",
-                    color = TextSecondary,
-                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-    }
+enum class BotStatus {
+    SEARCHING,
+    NO_PLAYER,
+    PLAYER_FOUND,
+    WAITING
 }
 
 @Composable
-private fun SparklineCard(
-    values: List<Float>
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(92.dp)
-            .background(Color(0xFF07110F), RoundedCornerShape(16.dp))
-            .padding(10.dp)
-    ) {
-        Canvas(modifier = Modifier.fillMaxWidth().height(72.dp)) {
-            val min = values.minOrNull() ?: 0f
-            val max = values.maxOrNull() ?: 1f
-            val range = (max - min).takeIf { it != 0f } ?: 1f
-            val step = size.width / (values.size - 1).coerceAtLeast(1)
-
-            val points = values.mapIndexed { i, v ->
-                val x = step * i
-                val y = size.height - ((v - min) / range) * size.height
-                Offset(x, y)
-            }
-
-            val path = Path().apply {
-                if (points.isNotEmpty()) {
-                    moveTo(points.first().x, points.first().y)
-                    for (i in 1 until points.size) {
-                        val prev = points[i - 1]
-                        val curr = points[i]
-                        val midX = (prev.x + curr.x) / 2f
-                        cubicTo(midX, prev.y, midX, curr.y, curr.x, curr.y)
-                    }
-                }
-            }
-
-            drawPath(
-                path = path,
-                color = Emerald,
-                style = androidx.compose.ui.graphics.drawscope.Stroke(
-                    width = 4f,
-                    pathEffect = PathEffect.cornerPathEffect(8f)
-                )
-            )
-
-            drawPath(
-                path = path,
-                color = Emerald.copy(alpha = 0.10f)
-            )
-
-            points.forEach { p ->
-                drawCircle(Emerald, radius = 4f, center = p)
-                drawCircle(Color.White, radius = 1.5f, center = p)
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatPill(
-    value: String,
-    label: String,
+fun BotStatusCard(
+    status: BotStatus,
+    waitSeconds: Int,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    Card(
         modifier = modifier
-            .background(Color(0xFF07110F), RoundedCornerShape(14.dp))
-            .padding(vertical = 12.dp, horizontal = 10.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Black1),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = CardDefaults.outlinedCardBorder(
+            enabled = true,
+            borderColor = Emerald.copy(alpha = 0.14f)
+        )
     ) {
-        Column(horizontalAlignment = Alignment.Start) {
-            Text(
-                text = value,
-                color = TextPrimary,
-                style = androidx.compose.material3.MaterialTheme.typography.titleSmall
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Left: status text
+            StatusColumn(
+                status = status,
+                waitSeconds = waitSeconds,
+                modifier = Modifier.weight(1f)
             )
-            Text(
-                text = label.uppercase(),
-                color = TextSecondary,
-                style = androidx.compose.material3.MaterialTheme.typography.labelSmall
-            )
+
+            // Right: FUT card carousel
+            FutCardCarousel()
         }
     }
 }
 
 @Composable
-private fun ActivityRow(
-    log: LogEntry
+private fun StatusColumn(
+    status: BotStatus,
+    waitSeconds: Int,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Spacer(
-            modifier = Modifier
-                .padding(top = 6.dp)
-                .size(8.dp)
-                .background(Emerald, RoundedCornerShape(999.dp))
+        StatusLine(
+            status = status,
+            waitSeconds = waitSeconds
         )
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = log.message,
-                color = TextPrimary,
-                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
-            )
+        Text(
+            text = subtitleFor(status),
+            style = MaterialTheme.typography.labelSmall,
+            color = TextSecondary
+        )
+    }
+}
 
-            if (log.timestamp.isNotBlank()) {
-                Text(
-                    text = log.timestamp,
-                    color = TextMuted,
-                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall
+@Composable
+private fun StatusLine(
+    status: BotStatus,
+    waitSeconds: Int
+) {
+    val text = when (status) {
+        BotStatus.SEARCHING -> "Searching for player"
+        BotStatus.NO_PLAYER -> "No player found"
+        BotStatus.PLAYER_FOUND -> "Player found"
+        BotStatus.WAITING -> "Waiting… ${waitSeconds}s"
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(8.dp)
+                .height(8.dp)
+                .clip(CircleShape)
+                .background(
+                    when (status) {
+                        BotStatus.PLAYER_FOUND -> Emerald
+                        BotStatus.SEARCHING -> Emerald.copy(alpha = 0.85f)
+                        BotStatus.WAITING -> Emerald.copy(alpha = 0.6f)
+                        BotStatus.NO_PLAYER -> Emerald.copy(alpha = 0.4f)
+                    }
                 )
-            }
+        )
+
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = TextPrimary
+        )
+    }
+}
+
+private fun subtitleFor(status: BotStatus): String {
+    return when (status) {
+        BotStatus.SEARCHING -> "Live market scan"
+        BotStatus.NO_PLAYER -> "No matching listings yet"
+        BotStatus.PLAYER_FOUND -> "Review player or buy"
+        BotStatus.WAITING -> "Cooling down between scans"
+    }
+}
+
+@Composable
+private fun FutCardCarousel() {
+    val cards = remember {
+        listOf("Gold", "TOTW", "TOTS")
+    }
+
+    val transition = rememberInfiniteTransition(label = "futCards")
+    val indexAnim by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = cards.size.toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "cardIndex"
+    )
+    val index = (indexAnim.toInt()) % cards.size
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        cards.forEachIndexed { i, type ->
+            val active = i == index
+            FutMiniCard(type = type, active = active)
+        }
+    }
+}
+
+@Composable
+private fun FutMiniCard(
+    type: String,
+    active: Boolean
+) {
+    val (baseColor, borderColor) = when (type) {
+        "Gold" -> Color(0xFFC8A550) to Color(0xFFEED18A)
+        "TOTW" -> Color(0xFF202020) to Emerald
+        "TOTS" -> Color(0xFF1A2D5A) to Color(0xFF4FC3F7)
+        else -> Black1 to Emerald
+    }
+
+    Box(
+        modifier = Modifier
+            .width(32.dp)
+            .height(48.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(
+                baseColor.copy(alpha = if (active) 1f else 0.75f)
+            )
+            .background(
+                Color.Black.copy(alpha = 0.4f),
+                RoundedCornerShape(10.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        // Simple border effect via overlay
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Transparent)
+        )
+
+        if (active) {
+            Text(
+                text = type,
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White
+            )
         }
     }
 }
