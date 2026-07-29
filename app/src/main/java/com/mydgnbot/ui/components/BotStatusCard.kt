@@ -1,38 +1,33 @@
 package com.mydgnbot.ui.components
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.keyframes
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -52,7 +47,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.Image
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.R
 import com.mydgnbot.ui.theme.Black1
@@ -191,25 +185,15 @@ private fun RotatingFc26CardSlot() {
         AnimatedContent(
             targetState = index,
             transitionSpec = {
-                androidx.compose.animation.core.togetherWith(
-                    androidx.compose.animation.scaleIn(
-                        animationSpec = spring(
-                            dampingRatio = 0.55f,
-                            stiffness = 320f
-                        ),
-                        initialScale = 0.82f
-                    ) + androidx.compose.animation.fadeIn(
-                        animationSpec = tween(180)
-                    )
-                ) + androidx.compose.animation.scaleOut(
-                    animationSpec = spring(
-                        dampingRatio = 0.7f,
-                        stiffness = 380f
-                    ),
+                val enter = scaleIn(
+                    animationSpec = spring(dampingRatio = 0.55f, stiffness = 320f),
+                    initialScale = 0.82f
+                ) + fadeIn(animationSpec = tween(180))
+                val exit = scaleOut(
+                    animationSpec = spring(dampingRatio = 0.7f, stiffness = 380f),
                     targetScale = 1.08f
-                ) + androidx.compose.animation.fadeOut(
-                    animationSpec = tween(120)
-                )
+                ) + fadeOut(animationSpec = tween(120))
+                enter togetherWith exit
             },
             label = "fc26-card-switch"
         ) { current ->
