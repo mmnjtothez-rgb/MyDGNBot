@@ -11,6 +11,7 @@ import com.mydgnbot.data.network.ConnectivityObserver
 import com.mydgnbot.data.network.NetworkConnectivityObserver
 import com.mydgnbot.data.repository.PlayerRepository
 import com.mydgnbot.data.repository.SettingsRepository
+import com.mydgnbot.ui.screens.HistoryScreen
 import com.mydgnbot.ui.screens.HomeScreen
 import com.mydgnbot.ui.screens.PlayerScreen
 import com.mydgnbot.ui.screens.SettingsScreen
@@ -24,18 +25,15 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val context = androidx.compose.ui.platform.LocalContext.current
 
-    // Repositories
     val settingsRepository = remember {
         SettingsRepository(SettingsDataStore(context))
     }
     val playerRepository = remember { PlayerRepository() }
 
-    // Real connectivity observer
     val connectivityObserver: ConnectivityObserver = remember {
         NetworkConnectivityObserver(context)
     }
 
-    // ViewModels
     val settingsViewModel: SettingsViewModel = viewModel(
         factory = SettingsViewModelFactory(settingsRepository)
     )
@@ -58,9 +56,7 @@ fun AppNavigation() {
                 viewModel = homeViewModel,
                 onSettingsClick = { navController.navigate("settings") },
                 onHistoryClick = { navController.navigate("history") },
-                onPlayerFound = {
-                    navController.navigate("player")
-                }
+                onPlayerFound = { navController.navigate("player") }
             )
         }
 
@@ -78,12 +74,14 @@ fun AppNavigation() {
             )
         }
 
-        // Add history route only if you have a HistoryScreen:
-        // composable("history") {
-        //     HistoryScreen(
-        //         viewModel = homeViewModel,
-        //         onBackClick = { navController.popBackStack() }
-        //     )
-        // }
+        composable("history") {
+            HistoryScreen(
+                viewModel = homeViewModel,
+                onBackClick = { navController.popBackStack() },
+                onPlayerClick = { player ->
+                    navController.navigate("player")
+                }
+            )
+        }
     }
 }
