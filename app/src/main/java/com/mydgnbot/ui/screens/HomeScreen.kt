@@ -12,7 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,10 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.components.ActionButtons
+import com.mydgnbot.ui.components.BotActionState
 import com.mydgnbot.ui.components.BotStatus
 import com.mydgnbot.ui.components.BotStatusCard
-import com.mydgnbot.ui.components.BotActionState
 import com.mydgnbot.ui.components.RadarScannerCard
+import com.mydgnbot.ui.components.StatusChipsRow
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,9 +52,7 @@ fun HomeScreen(
     val waitSeconds by viewModel.waitSeconds.collectAsState()
 
     LaunchedEffect(player) {
-        if (player != null) {
-            onPlayerFound()
-        }
+        if (player != null) onPlayerFound()
     }
 
     Scaffold(
@@ -62,105 +65,70 @@ fun HomeScreen(
                     )
                 },
                 actions = {
-                    Text(
-                        text = "Settings",
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(vertical = 8.dp)
-                            .clickableWithNoRipple(onSettingsClick),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "Settings"
+                        )
+                    }
                 }
             )
         }
     ) { padding ->
-        HomeContent(
-            paddingValues = padding,
-            viewModel = viewModel,
-            isRunning = isRunning,
-            isOnline = isOnline,
-            settings = settings,
-            botStatus = botStatus,
-            waitSeconds = waitSeconds,
-            onSettingsClick = onSettingsClick,
-            onHistoryClick = onHistoryClick,
-            onPlayerFound = onPlayerFound
-        )
-    }
-}
+        val scrollState = rememberScrollState()
 
-@Composable
-private fun HomeContent(
-    paddingValues: PaddingValues,
-    viewModel: HomeViewModel,
-    isRunning: Boolean,
-    isOnline: Boolean,
-    settings: Map<String, String>,
-    botStatus: BotStatus,
-    waitSeconds: Int,
-    onSettingsClick: () -> Unit,
-    onHistoryClick: () -> Unit,
-    onPlayerFound: () -> Unit
-) {
-    val scrollState = rememberScrollState()
-    val player by viewModel.player.collectAsState()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 12.dp)
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.Top
+        ) {
+            StatusChipsRow(
+                isOnline = isOnline,
+                isRunning = isRunning,
+                hasPlayer = player != null
+            )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .padding(horizontal = 12.dp)
-            .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.Top
-    ) {
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-        RadarScannerCard(
-            isRunning = isRunning,
-            playerFound = player != null,
-            connected = isOnline,
-            modifier = Modifier.fillMaxWidth()
-        )
+            RadarScannerCard(
+                isRunning = isRunning,
+                playerFound = player != null,
+                connected = isOnline,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        BotStatusCard(
-            status = botStatus,
-            waitSeconds = waitSeconds,
-            modifier = Modifier.fillMaxWidth()
-        )
+            BotStatusCard(
+                status = botStatus,
+                waitSeconds = waitSeconds,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        val actionState = when {
-            isRunning -> BotActionState.SEARCHING
-            player != null -> BotActionState.PLAYER_FOUND
-            else -> BotActionState.IDLE
-        }
-
-        ActionButtons(
-            state = actionState,
-            onStartClick = { viewModel.startBot() },
-            onStopClick = { viewModel.stopBot() },
-            onBoughtClick = { viewModel.markBought() },
-            onCancelClick = { viewModel.cancelPlayer() },
-            onHistoryClick = {
-                viewModel.requestHistory()
-                onHistoryClick()
+            val actionState = when {
+                isRunning -> BotActionState.SEARCHING
+                player != null -> BotActionState.PLAYER_FOUND
+                else -> BotActionState.IDLE
             }
-        )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            ActionButtons(
+                state = actionState,
+                onStartClick = { viewModel.startBot() },
+                onStopClick = { viewModel.stopBot() },
+                onBoughtClick = { viewModel.markBought() },
+                onCancelClick = { viewModel.cancelPlayer() },
+                onHistoryClick = {
+                    viewModel.requestHistory()
+                    onHistoryClick()
+                }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
     }
-}
-
-@Composable
-private fun Modifier.clickableWithNoRipple(onClick: () -> Unit): Modifier {
-    return this.then(
-        clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() },
-            onClick = onClick
-        )
-    )
 }
