@@ -10,47 +10,25 @@ class SettingsRepository(
     val settings: Flow<Map<String, String>> =
         dataStore.settings
 
-
     suspend fun saveSettings(
-
         apiUser: String,
-
         secretKey: String,
-
         eaEmail: String,
-
         platform: String,
-
         minimumPrice: String,
-
         maximumPrice: String,
-
         playerType: String,
-
         pollInterval: String
-
     ) {
-
         dataStore.saveSettings(
-
             apiUser = apiUser,
-
             secretKey = secretKey,
-
             eaEmail = eaEmail,
-
             platform = platform,
-
             minimumPrice = minimumPrice,
-
             maximumPrice = maximumPrice,
-
             playerType = playerType,
-
             pollInterval = pollInterval
-
         )
-
     }
-
 }
