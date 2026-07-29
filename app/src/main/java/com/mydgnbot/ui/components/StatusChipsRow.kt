@@ -31,8 +31,8 @@ fun StatusChipsRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(top = 4.dp, bottom = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         AssistChip(
             onClick = onSettingsClick,
@@ -74,10 +74,7 @@ fun StatusChipsRow(
                 containerColor = Color(0xFF07110F),
                 labelColor = TextPrimary
             ),
-            border = BorderStroke(
-                1.dp,
-                Emerald.copy(alpha = 0.16f)
-            )
+            border = BorderStroke(1.dp, Emerald.copy(alpha = 0.16f))
         )
 
         AssistChip(
@@ -93,10 +90,7 @@ fun StatusChipsRow(
                 containerColor = Color(0xFF07110F),
                 labelColor = TextPrimary
             ),
-            border = BorderStroke(
-                1.dp,
-                Emerald.copy(alpha = 0.16f)
-            )
+            border = BorderStroke(1.dp, Emerald.copy(alpha = 0.16f))
         )
 
         AssistChip(
@@ -112,10 +106,7 @@ fun StatusChipsRow(
                 containerColor = Color(0xFF07110F),
                 labelColor = TextPrimary
             ),
-            border = BorderStroke(
-                1.dp,
-                Emerald.copy(alpha = 0.16f)
-            )
+            border = BorderStroke(1.dp, Emerald.copy(alpha = 0.16f))
         )
     }
 }
