@@ -6,10 +6,7 @@ import com.mydgnbot.ui.theme.MyDGNBotTheme
 
 @Composable
 fun MyDGNApp() {
-
     MyDGNBotTheme {
-
         AppNavigation()
-
     }
 }
