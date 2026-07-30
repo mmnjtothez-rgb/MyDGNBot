@@ -58,7 +58,12 @@ fun AppNavigation() {
                 viewModel = homeViewModel,
                 onSettingsClick = { navController.navigate("settings") },
                 onHistoryClick = { navController.navigate("history") },
-                onPlayerFound = { navController.navigate("player") }
+                onPlayerFound = {
+                    // Only navigate if there is a live player
+                    if (homeViewModel.player.value != null) {
+                        navController.navigate("player")
+                    }
+                }
             )
         }
 
@@ -69,44 +74,44 @@ fun AppNavigation() {
             )
         }
 
-        // Player detail route:
-        // - "player"              -> live player (from viewModel.player)
-        // - "player/history/<id>"  -> historical player by ID
+        // Live player route
+        composable("player") {
+            val player = homeViewModel.player.value
+            if (player == null) {
+                // Safety: go back if no player
+                navController.popBackStack()
+                return@composable
+            }
+
+            PlayerScreen(
+                viewModel = homeViewModel,
+                onBackClick = { navController.popBackStack() },
+                player = player
+            )
+        }
+
+        // History player detail route
         composable(
-            route = "player/{playerSource}/{playerId?}",
+            route = "player/history/{playerId}",
             arguments = listOf(
-                navArgument("playerSource") {
-                    type = NavType.StringType
-                    nullable = false
-                },
                 navArgument("playerId") {
                     type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
+                    nullable = false
                 }
             )
         ) { backStackEntry ->
-            val playerSource = backStackEntry.arguments?.getString("playerSource") ?: "live"
             val playerId = backStackEntry.arguments?.getString("playerId")
 
-            val player = when (playerSource) {
-                "history" -> {
-                    if (playerId == null) {
-                        homeViewModel.player.value
-                    } else {
-                        homeViewModel.recentPlayers.value.find { p ->
-                            p.resourceId.ifBlank { p.transactionId } == playerId
-                        }
-                    }
+            val player = if (playerId != null) {
+                homeViewModel.recentPlayers.value.find { p ->
+                    p.resourceId.ifBlank { p.transactionId } == playerId
                 }
-                else -> {
-                    // live
-                    homeViewModel.player.value
-                }
+            } else {
+                null
             }
 
             if (player == null) {
-                // Should not happen in correct flow; go back.
+                // Safety: go back if player not found
                 navController.popBackStack()
                 return@composable
             }
@@ -124,7 +129,9 @@ fun AppNavigation() {
                 onBackClick = { navController.popBackStack() },
                 onPlayerClick = { player ->
                     val id = player.resourceId.ifBlank { player.transactionId }
-                    navController.navigate("player/history/$id")
+                    if (id.isNotBlank()) {
+                        navController.navigate("player/history/$id")
+                    }
                 }
             )
         }
