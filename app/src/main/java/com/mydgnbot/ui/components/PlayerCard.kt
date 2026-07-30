@@ -38,7 +38,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -88,7 +87,7 @@ fun PlayerCard(
         return
     }
 
-    val lockExpiresMillis = (player.lockExpires ?: 0L) * 1000L
+    val lockExpiresMillis = player.lockExpires * 1000L
     var remainingLockMillis by remember(player.lockExpires) {
         mutableStateOf(lockExpiresMillis - System.currentTimeMillis())
     }
@@ -211,7 +210,7 @@ fun PlayerCard(
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
                         color = lockTimerColor,
-                        modifier = Modifier.clip(RoundedCornerShape(8.dp))
+                        modifier = Modifier.padding(horizontal = 4.dp)
                     )
                 }
             }
@@ -247,16 +246,14 @@ fun PlayerCard(
                                                 emeraldDim.copy(alpha = 0.08f),
                                                 Color.Transparent
                                             )
-                                        ),
-                                        shape = RoundedCornerShape(22.dp)
+                                        )
                                     )
                             )
                             AsyncImage(
                                 model = player.imageUrl,
                                 contentDescription = player.playerName,
                                 modifier = Modifier
-                                    .size(175.dp, 220.dp)
-                                    .padding(top = 4.dp),
+                                    .size(175.dp, 220.dp),
                                 contentScale = ContentScale.Fit
                             )
                             Card(
@@ -326,7 +323,7 @@ fun PlayerCard(
 
                             InfoRow(
                                 title = "Time Remaining",
-                                value = value = formatTime((player.marketExpiry)),
+                                value = formatTime(player.marketExpiry),
                                 valueColor = emerald
                             )
                         }
