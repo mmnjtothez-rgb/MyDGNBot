@@ -8,12 +8,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -52,16 +56,14 @@ fun StatusChipsRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Circle,
-                    contentDescription = null,
-                    tint = if (connected) Emerald else TextSecondary,
-                    modifier = Modifier.width(12.dp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(if (connected) Emerald else TextSecondary)
                 )
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = if (connected) "CONNECTED" else "OFFLINE",
                     style = MaterialTheme.typography.labelLarge,
@@ -82,7 +84,7 @@ fun StatusChipsRow(
             DividerText()
 
             Text(
-                text = method.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                text = method,
                 style = MaterialTheme.typography.labelLarge,
                 color = TextSecondary,
                 fontWeight = FontWeight.Medium
@@ -102,14 +104,10 @@ fun StatusChipsRow(
 
 @Composable
 private fun DividerText() {
-    Row(
-        modifier = Modifier.padding(horizontal = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "|",
-            color = Color(0xFF27302A),
-            style = MaterialTheme.typography.labelLarge
-        )
-    }
+    Text(
+        text = " | ",
+        color = Color(0xFF27302A),
+        style = MaterialTheme.typography.labelLarge,
+        modifier = Modifier.padding(horizontal = 10.dp)
+    )
 }
