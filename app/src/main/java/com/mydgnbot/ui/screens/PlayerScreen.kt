@@ -28,14 +28,13 @@ import com.mydgnbot.ui.viewmodel.HomeViewModel
 fun PlayerScreen(
     viewModel: HomeViewModel,
     onBackClick: () -> Unit,
-    player: Player  // the player passed from navigation
+    player: Player
 ) {
-    // Also watch the live player state; if it becomes null (after cancel), go back
-    val livePlayer by viewModel.player.collectAsState()
+    val livePlayerState = viewModel.player.collectAsState()
+    val livePlayer = livePlayerState.value
 
     LaunchedEffect(livePlayer) {
-        if (livePlayer == null && player == livePlayer) {
-            // The player we were showing was the live one and it got cleared
+        if (livePlayer == null) {
             onBackClick()
         }
     }
@@ -76,7 +75,6 @@ fun PlayerScreen(
                 },
                 onCanceled = {
                     viewModel.cancelPlayer()
-                    // onBackClick will be triggered via LaunchedEffect when livePlayer becomes null
                 }
             )
         }
