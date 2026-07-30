@@ -342,8 +342,9 @@ class HomeViewModel(
             addRecentPlayer(found)
             addLog("Bought player (${found.playerName})")
         }
+        // Ensure bot is not paused
+        _isPaused.value = false
         _player.value = null
-        // Keep bot running; it will resume after cooldown
         _botStatus.value = BotStatus.WAITING
         _waitSeconds.value = 0
     }
@@ -353,8 +354,9 @@ class HomeViewModel(
             addRecentPlayer(found)
             addLog("Cancelled player (${found.playerName})")
         }
+        // Ensure bot is not paused
+        _isPaused.value = false
         _player.value = null
-        // Keep bot running; it will resume after cooldown
         _botStatus.value = BotStatus.WAITING
         _waitSeconds.value = 0
     }
