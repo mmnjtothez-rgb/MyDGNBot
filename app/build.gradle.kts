@@ -54,6 +54,9 @@ dependencies {
 
     debugImplementation("androidx.compose.ui:ui-tooling:1.7.5")
 
+    // Add this for animateColorAsState and infinite transitions
+    implementation("androidx.compose.animation:animation:1.7.5")
+
     implementation("androidx.navigation:navigation-compose:2.8.4")
 
     implementation("androidx.datastore:datastore-preferences:1.1.1")
