@@ -1,52 +1,26 @@
 package com.mydgnbot.ui.screens
 
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
-
-private val emerald = Color(0xFF42E8B4)
-private val darkBg = Color(0xFF0B0F0C)
-private val darkSurface = Color(0xFF060807)
-private val gold = Color(0xFFF5C542)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,8 +29,14 @@ fun PlayerScreen(
     onBackClick: () -> Unit
 ) {
     val player by viewModel.player.collectAsState()
-    val isRunning by viewModel.isRunning.collectAsState()
-    val botStatus by viewModel.botStatus.collectAsState()
+
+    // PlayerScreen is only shown when a player exists.
+    // We don't handle "no player" here; that belongs on the main/bot screen.
+    if (player == null) {
+        // Fallback: just show nothing or a minimal placeholder.
+        // In a correct flow, this branch should never be reached.
+        return
+    }
 
     Scaffold(
         topBar = {
@@ -78,273 +58,25 @@ fun PlayerScreen(
             )
         }
     ) { innerPadding ->
-        when {
-            player != null -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(horizontal = 14.dp)
-                ) {
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    PlayerCard(
-                        player = player,
-                        onBought = {
-                            viewModel.markBought()
-                            onBackClick()
-                        },
-                        onCanceled = {
-                            viewModel.cancelPlayer()
-                            onBackClick()
-                        }
-                    )
-                }
-            }
-
-            isRunning && botStatus.name == "SEARCHING" -> {
-                PremiumLoadingState(modifier = Modifier.padding(innerPadding))
-            }
-
-            else -> {
-                DarkPremiumEmptyState(modifier = Modifier.padding(innerPadding))
-            }
-        }
-    }
-}
-
-@Composable
-private fun PremiumLoadingState(modifier: Modifier = Modifier) {
-    val shimmerTransition = rememberInfiniteTransition(label = "shimmer")
-    val shimmerX by shimmerTransition.animateFloat(
-        initialValue = -0.8f,
-        targetValue = 1.8f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = FastOutLinearInEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "shimmerX"
-    )
-
-    val shimmerBrush = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFF0A0F0B),
-            Color(0xFF1A2A20),
-            Color(0xFF0A0F0B)
-        ),
-        start = androidx.compose.ui.geometry.Offset.Zero,
-        end = androidx.compose.ui.geometry.Offset(
-            x = 1200f * shimmerX,
-            y = 1200f * shimmerX
-        )
-    )
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Card(
-            shape = RoundedCornerShape(26.dp),
-            colors = CardDefaults.cardColors(containerColor = darkBg),
-            border = BorderStroke(1.dp, Color(0xFF163122)),
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 14.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = darkSurface,
-                    border = BorderStroke(1.dp, Color(0xFF163122))
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Searching...",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = emerald
-                        )
-                    }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            PlayerCard(
+                player = player,
+                onBought = {
+                    viewModel.markBought()
+                    onBackClick()
+                },
+                onCanceled = {
+                    viewModel.cancelPlayer()
+                    onBackClick()
                 }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(170.dp)
-                            .height(220.dp)
-                            .background(
-                                brush = shimmerBrush,
-                                shape = RoundedCornerShape(22.dp)
-                            )
-                    )
-
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.85f)
-                                .height(24.dp)
-                                .background(
-                                    brush = shimmerBrush,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.62f)
-                                .height(32.dp)
-                                .background(
-                                    brush = shimmerBrush,
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.52f)
-                                .height(32.dp)
-                                .background(
-                                    brush = shimmerBrush,
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(76.dp)
-                                    .background(
-                                        brush = shimmerBrush,
-                                        shape = RoundedCornerShape(10.dp)
-                                    )
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(76.dp)
-                                    .background(
-                                        brush = shimmerBrush,
-                                        shape = RoundedCornerShape(10.dp)
-                                    )
-                            )
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.7f)
-                                .height(18.dp)
-                                .background(
-                                    brush = shimmerBrush,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.55f)
-                                .height(18.dp)
-                                .background(
-                                    brush = shimmerBrush,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp)
-                            .background(
-                                brush = shimmerBrush,
-                                shape = RoundedCornerShape(10.dp)
-                            )
-                    )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp)
-                            .background(
-                                brush = shimmerBrush,
-                                shape = RoundedCornerShape(10.dp)
-                            )
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DarkPremiumEmptyState(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            shape = RoundedCornerShape(26.dp),
-            colors = CardDefaults.cardColors(containerColor = darkBg),
-            border = BorderStroke(1.dp, Color(0xFF163122)),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "No player loaded yet",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "The bot is waiting for the next match to appear.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFB5B8B8),
-                    textAlign = TextAlign.Center
-                )
-
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF09100B),
-                    border = BorderStroke(1.dp, gold.copy(alpha = 0.55f))
-                ) {
-                    Text(
-                        text = "Keep the bot running to catch new players faster.",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = gold,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+            )
         }
     }
 }
