@@ -242,15 +242,20 @@ class HomeViewModel(
     fun markBought() {
         _player.value?.let { found ->
             addRecentPlayer(found)
-            addLog("Bought player")
+            addLog("Bought player (${found.playerName})")
         }
         _player.value = null
+        _botStatus.value = BotStatus.WAITING
+        _waitSeconds.value = 0
     }
 
     fun cancelPlayer() {
-        _player.value?.let {
-            addLog("Cancelled player")
+        _player.value?.let { found ->
+            addRecentPlayer(found)
+            addLog("Cancelled player (${found.playerName})")
         }
         _player.value = null
+        _botStatus.value = BotStatus.WAITING
+        _waitSeconds.value = 0
     }
 }
