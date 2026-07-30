@@ -41,7 +41,7 @@ fun PlayerScreen(
         }
     }
 
-    // When live player becomes null (after buy/cancel), resume and go back
+    // When live player becomes null (after buy/cancel), ensure unpaused and go back
     LaunchedEffect(livePlayer) {
         if (livePlayer == null) {
             viewModel.setPaused(false)
@@ -49,8 +49,8 @@ fun PlayerScreen(
         }
     }
 
-    // Also resume on back click (e.g., user presses back without buy/cancel)
     val wrappedOnBackClick = {
+        // If user manually goes back without buying/canceling, resume bot
         viewModel.setPaused(false)
         onBackClick()
     }
@@ -87,11 +87,9 @@ fun PlayerScreen(
                 player = player,
                 onBought = {
                     viewModel.markBought()
-                    // Bot will resume when livePlayer becomes null
                 },
                 onCanceled = {
                     viewModel.cancelPlayer()
-                    // Bot will resume when livePlayer becomes null
                 }
             )
         }
