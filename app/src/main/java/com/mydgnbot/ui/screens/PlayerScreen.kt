@@ -48,21 +48,21 @@ fun PlayerScreen(
                     }
                 }
             )
-        },
-        content = { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                Spacer(modifier = Modifier.height(12.dp))
-
-                PlayerCard(
-                    player = player,
-                    onBought = { viewModel.markBought() },
-                    onCanceled = { viewModel.cancelPlayer() }
-                )
-            }
         }
-    )
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 14.dp)
+        ) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            PlayerCard(
+                player = player,
+                onBought = { viewModel.markBought() },
+                onCanceled = { viewModel.cancelPlayer() }
+            )
+        }
+    }
 }
