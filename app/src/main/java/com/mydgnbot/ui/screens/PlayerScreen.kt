@@ -17,15 +17,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,7 +36,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -48,7 +44,6 @@ import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
 private val emerald = Color(0xFF42E8B4)
-private val emeraldDim = Color(0xFF1DD9A2)
 private val darkBg = Color(0xFF0B0F0C)
 private val darkSurface = Color(0xFF060807)
 private val gold = Color(0xFFF5C542)
@@ -322,23 +317,6 @@ private fun DarkPremiumEmptyState(modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Surface(
-                    shape = RoundedCornerShape(999.dp),
-                    color = darkSurface,
-                    border = BorderStroke(1.dp, emerald.copy(alpha = 0.45f))
-                ) {
-                    Box(
-                        modifier = Modifier.padding(14.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Schedule,
-                            contentDescription = null,
-                            tint = emerald
-                        )
-                    }
-                }
-
                 Text(
                     text = "No player loaded yet",
                     style = MaterialTheme.typography.headlineSmall,
