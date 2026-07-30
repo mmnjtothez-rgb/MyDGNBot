@@ -15,6 +15,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.domain.model.Player
@@ -26,8 +28,18 @@ import com.mydgnbot.ui.viewmodel.HomeViewModel
 fun PlayerScreen(
     viewModel: HomeViewModel,
     onBackClick: () -> Unit,
-    player: Player  // required: either live or history player
+    player: Player  // the player passed from navigation
 ) {
+    // Also watch the live player state; if it becomes null (after cancel), go back
+    val livePlayer by viewModel.player.collectAsState()
+
+    LaunchedEffect(livePlayer) {
+        if (livePlayer == null && player == livePlayer) {
+            // The player we were showing was the live one and it got cleared
+            onBackClick()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -64,7 +76,7 @@ fun PlayerScreen(
                 },
                 onCanceled = {
                     viewModel.cancelPlayer()
-                    onBackClick()
+                    // onBackClick will be triggered via LaunchedEffect when livePlayer becomes null
                 }
             )
         }
