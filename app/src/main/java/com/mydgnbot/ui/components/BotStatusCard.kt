@@ -6,8 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -59,37 +58,28 @@ fun BotStatusCard(
 ) {
     val context = LocalContext.current
 
-    // Image loader for Coil (not strictly needed for local drawables, but kept for consistency)
     val imageLoader = remember {
         ImageLoader.Builder(context)
             .build()
     }
 
-    // Current card index (0..13)
     val currentCardIndex = remember { androidx.compose.runtime.mutableStateOf(0) }
-
-    // Scale animation for bounce effect
     val scale = remember { Animatable(1f) }
 
-    // Cycle through cards every ~1.2s with bounce on each change
     LaunchedEffect(Unit) {
         while (true) {
-            // Animate scale down
             scale.animateTo(
                 targetValue = 0.85f,
                 animationSpec = tween(120)
             )
 
-            // Advance card
             currentCardIndex.value = (currentCardIndex.value + 1) % fc26CardDrawables.size
 
-            // Animate scale back up (bounce)
             scale.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(250)
             )
 
-            // Delay before next card
             delay(1200)
         }
     }
@@ -105,15 +95,14 @@ fun BotStatusCard(
             modifier = Modifier.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // FC 26 card image with bounce animation
+            // FC 26 card image sized to ~4 lines of text
             Image(
                 painter = painterResource(id = fc26CardDrawables[currentCardIndex.value]),
                 contentDescription = "FC 26 Card",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(0.8f)
+                    .height(72.dp) // ~4 lines of text
                     .scale(scale.value),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Fit
             )
 
             Text(
