@@ -221,10 +221,14 @@ class HomeViewModel(
                     continue
                 }
 
-                try {
-                    _botStatus.value = BotStatus.SEARCHING
-                    _waitSeconds.value = 0
+                // Ensure a visible "SEARCHING" phase
+                _botStatus.value = BotStatus.SEARCHING
+                _waitSeconds.value = 0
 
+                val searchStart = System.currentTimeMillis()
+                val minSearchMs = 2_000L // show SEARCHING for at least 2s
+
+                try {
                     val apiPlayers = retryQuickly {
                         playerRepository.fetchPlayers(
                             user = apiUser,
@@ -236,6 +240,12 @@ class HomeViewModel(
                         )
                     } ?: emptyList()
 
+                    // Keep SEARCHING until minSearchMs has passed
+                    val elapsed = System.currentTimeMillis() - searchStart
+                    if (elapsed < minSearchMs) {
+                        delay(minSearchMs - elapsed)
+                    }
+
                     if (apiPlayers.isNotEmpty()) {
                         val apiPlayer = apiPlayers.first()
 
@@ -245,6 +255,9 @@ class HomeViewModel(
 
                         if (domainPlayer != null) {
                             onPlayerFound(domainPlayer)
+                            // Stay in PLAYER_FOUND until next loop iteration
+                            delay(pollSeconds * 1000)
+                            continue
                         } else {
                             _botStatus.value = BotStatus.NO_PLAYER
                             addLog("Player found but enrichment failed")
