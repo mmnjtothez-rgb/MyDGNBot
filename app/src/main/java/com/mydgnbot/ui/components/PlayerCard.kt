@@ -1,7 +1,7 @@
 package com.mydgnbot.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,12 +24,10 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -100,8 +98,8 @@ fun PlayerCard(
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 PlayerCardArt(
-                    imageUrl = player.imageUrl,
-                    playerName = player.playerName
+                    imageUrl = player.imageUrl.orEmpty(),
+                    playerName = player.playerName.orEmpty()
                 )
 
                 Column(
@@ -109,14 +107,14 @@ fun PlayerCard(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = player.playerName,
+                        text = player.playerName.orEmpty(),
                         style = MaterialTheme.typography.headlineSmall,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
 
                     MetaPillRow(
-                        chemistryStyle = player.chemistryStyle,
+                        chemistryStyle = player.chemistryStyle.orEmpty(),
                         owners = player.owners
                     )
 
@@ -267,7 +265,7 @@ private fun TinyPill(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            androidx.compose.foundation.Image(
+            Image(
                 painter = painterResource(icon),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp)
