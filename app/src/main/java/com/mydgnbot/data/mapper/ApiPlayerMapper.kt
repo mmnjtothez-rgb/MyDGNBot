@@ -28,7 +28,6 @@ object ApiPlayerMapper {
             marketExpiry = ea_expires_at ?: 0L,
             status = status ?: "",
 
-            // FUT.GG fields (filled later)
             overall = null,
             rarity = null,
             imageUrl = null,
@@ -41,7 +40,6 @@ object ApiPlayerMapper {
             preferredFoot = null,
             position = null,
 
-            // MyDGN fields
             lockExpires = lockExpires
         )
     }
