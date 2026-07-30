@@ -15,10 +15,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.mydgnbot.domain.model.Player
 import com.mydgnbot.ui.components.PlayerCard
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
@@ -26,18 +25,9 @@ import com.mydgnbot.ui.viewmodel.HomeViewModel
 @Composable
 fun PlayerScreen(
     viewModel: HomeViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    player: Player  // required: either live or history player
 ) {
-    val player by viewModel.player.collectAsState()
-
-    // PlayerScreen is only shown when a player exists.
-    // We don't handle "no player" here; that belongs on the main/bot screen.
-    if (player == null) {
-        // Fallback: just show nothing or a minimal placeholder.
-        // In a correct flow, this branch should never be reached.
-        return
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
