@@ -28,12 +28,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mydgnbot.R
 import com.mydgnbot.domain.model.Player
-import com.mydgnbot.ui.util.ChemistryStyleIcon
 import kotlinx.coroutines.delay
 
 @Composable
@@ -63,10 +63,11 @@ fun PlayerCard(
         return
     }
 
+    val playerName = player.playerName ?: "Unknown Player"
+    val chemistryStyle = player.chemistryStyle ?: "None"
+    val imageUrl = player.imageUrl ?: ""
     val remainingTime = remember(player.marketExpiry) {
-        mutableLongStateOf(
-            player.marketExpiry - (System.currentTimeMillis() / 1000)
-        )
+        mutableLongStateOf(player.marketExpiry - (System.currentTimeMillis() / 1000))
     }
 
     LaunchedEffect(player.marketExpiry) {
@@ -98,8 +99,8 @@ fun PlayerCard(
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 PlayerCardArt(
-                    imageUrl = player.imageUrl.orEmpty(),
-                    playerName = player.playerName.orEmpty()
+                    imageUrl = imageUrl,
+                    playerName = playerName
                 )
 
                 Column(
@@ -107,14 +108,14 @@ fun PlayerCard(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = player.playerName.orEmpty(),
+                        text = playerName,
                         style = MaterialTheme.typography.headlineSmall,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
 
                     MetaPillRow(
-                        chemistryStyle = player.chemistryStyle.orEmpty(),
+                        chemistryStyle = chemistryStyle,
                         owners = player.owners
                     )
 
@@ -172,10 +173,10 @@ private fun TopTimerCoinBar(
         ) {
             Text(
                 text = formatCountdown(remainingTime),
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFF62E37A),
-                fontWeight = FontWeight.Bold,
-                fontFeatureSettings = "tnum"
+                style = MaterialTheme.typography.bodyLarge.merge(
+                    TextStyle(fontWeight = FontWeight.Bold)
+                ),
+                color = Color(0xFF62E37A)
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -187,10 +188,10 @@ private fun TopTimerCoinBar(
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = coinValue.toString(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF5C542),
-                    fontWeight = FontWeight.Bold,
-                    fontFeatureSettings = "tnum"
+                    style = MaterialTheme.typography.bodyLarge.merge(
+                        TextStyle(fontWeight = FontWeight.Bold)
+                    ),
+                    color = Color(0xFFF5C542)
                 )
             }
         }
@@ -310,8 +311,7 @@ private fun StatCard(
                 text = value,
                 style = MaterialTheme.typography.titleMedium,
                 color = if (highlightGold) Color(0xFFF5C542) else Color.White,
-                fontWeight = FontWeight.Bold,
-                fontFeatureSettings = "tnum"
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -337,8 +337,7 @@ private fun InfoRow(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             color = valueColor,
-            fontWeight = FontWeight.SemiBold,
-            fontFeatureSettings = "tnum"
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
