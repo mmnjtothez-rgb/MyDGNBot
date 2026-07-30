@@ -60,8 +60,14 @@ fun PlayerScreen(
 
             PlayerCard(
                 player = player,
-                onBought = { viewModel.markBought() },
-                onCanceled = { viewModel.cancelPlayer() }
+                onBought = {
+                    viewModel.markBought()
+                    onBackClick()
+                },
+                onCanceled = {
+                    viewModel.cancelPlayer()
+                    onBackClick()
+                }
             )
         }
     }
