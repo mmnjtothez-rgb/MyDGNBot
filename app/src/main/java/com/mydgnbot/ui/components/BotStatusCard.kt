@@ -6,17 +6,20 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
@@ -92,40 +95,50 @@ fun BotStatusCard(
         border = BorderStroke(1.dp, Emerald.copy(alpha = 0.14f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // FC 26 card image sized to ~4 lines of text
+            // Left: Text content
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = "Bot Status",
+                    color = TextSecondary,
+                    style = MaterialTheme.typography.labelSmall
+                )
+
+                Text(
+                    text = statusText,
+                    color = TextPrimary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+
+                if (waitSeconds > 0) {
+                    Text(
+                        text = "Waiting ${waitSeconds}s",
+                        color = Emerald,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
+            // Right: Animated FC 26 card
             Image(
                 painter = painterResource(id = fc26CardDrawables[currentCardIndex.value]),
                 contentDescription = "FC 26 Card",
                 modifier = Modifier
-                    .height(72.dp) // ~4 lines of text
+                    .width(90.dp)
+                    .height(72.dp)
                     .scale(scale.value),
                 contentScale = ContentScale.Fit
             )
-
-            Text(
-                text = "Bot Status",
-                color = TextSecondary,
-                style = MaterialTheme.typography.labelSmall
-            )
-
-            Text(
-                text = statusText,
-                color = TextPrimary,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
-            )
-
-            if (waitSeconds > 0) {
-                Text(
-                    text = "Waiting ${waitSeconds}s",
-                    color = Emerald,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
         }
     }
 }
