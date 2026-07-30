@@ -104,7 +104,6 @@ fun HomeScreen(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.Top
         ) {
-            // Method and interval chips now reactive to settings changes
             StatusChipsRow(
                 connected = isOnline,
                 platform = platform,
