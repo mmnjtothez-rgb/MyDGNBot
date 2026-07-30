@@ -326,7 +326,7 @@ fun PlayerCard(
 
                             InfoRow(
                                 title = "Time Remaining",
-                                value = formatTime((player.ea_expires_at ?: 0L)),
+                                value = value = formatTime((player.marketExpiry)),
                                 valueColor = emerald
                             )
                         }
