@@ -106,6 +106,9 @@ class HomeViewModel(
     private val _isRunning = MutableStateFlow(false)
     val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
+    private val _isPaused = MutableStateFlow(false)
+    val isPaused: StateFlow<Boolean> = _isPaused.asStateFlow()
+
     private val _botStatus = MutableStateFlow(BotStatus.WAITING)
     val botStatus: StateFlow<BotStatus> = _botStatus.asStateFlow()
 
@@ -131,6 +134,10 @@ class HomeViewModel(
 
     fun setHistoryFilter(filter: HistoryFilter) {
         _historyFilter.value = filter
+    }
+
+    fun setPaused(paused: Boolean) {
+        _isPaused.value = paused
     }
 
     private fun playerKey(player: Player): String {
@@ -190,9 +197,13 @@ class HomeViewModel(
     }
 
     fun startBot() {
-        if (_isRunning.value) return
+        if (_isRunning.value) {
+            addLog("Bot already running")
+            return
+        }
 
         _isRunning.value = true
+        _isPaused.value = false
         _botStatus.value = BotStatus.SEARCHING
         _statusText.value = "Checking players..."
         addLog("Bot started")
@@ -200,6 +211,15 @@ class HomeViewModel(
         botJob?.cancel()
         botJob = viewModelScope.launch {
             while (_isRunning.value) {
+                // Pause handling: skip scanning while paused
+                if (_isPaused.value) {
+                    _botStatus.value = BotStatus.WAITING
+                    _statusText.value = "Paused"
+                    _waitSeconds.value = 0
+                    delay(500)
+                    continue
+                }
+
                 if (!isOnline.value) {
                     _botStatus.value = BotStatus.WAITING
                     _statusText.value = "Waiting for connection..."
@@ -308,6 +328,7 @@ class HomeViewModel(
     fun stopBot() {
         if (!_isRunning.value) return
         _isRunning.value = false
+        _isPaused.value = false
         botJob?.cancel()
         botJob = null
         _botStatus.value = BotStatus.WAITING
@@ -322,11 +343,9 @@ class HomeViewModel(
             addLog("Bought player (${found.playerName})")
         }
         _player.value = null
+        // Keep bot running; it will resume after cooldown
         _botStatus.value = BotStatus.WAITING
         _waitSeconds.value = 0
-        botJob?.cancel()
-        botJob = null
-        _isRunning.value = false
     }
 
     fun cancelPlayer() {
@@ -335,10 +354,8 @@ class HomeViewModel(
             addLog("Cancelled player (${found.playerName})")
         }
         _player.value = null
+        // Keep bot running; it will resume after cooldown
         _botStatus.value = BotStatus.WAITING
         _waitSeconds.value = 0
-        botJob?.cancel()
-        botJob = null
-        _isRunning.value = false
     }
 }
