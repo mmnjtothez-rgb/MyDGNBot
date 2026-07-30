@@ -97,7 +97,7 @@ fun BotStatusCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 14.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
+                .padding(start = 14.dp, end = 2.dp, top = 12.dp, bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
