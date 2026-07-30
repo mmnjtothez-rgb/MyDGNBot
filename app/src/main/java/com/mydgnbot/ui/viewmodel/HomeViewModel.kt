@@ -221,12 +221,11 @@ class HomeViewModel(
                     continue
                 }
 
-                // Ensure a visible "SEARCHING" phase
                 _botStatus.value = BotStatus.SEARCHING
                 _waitSeconds.value = 0
 
                 val searchStart = System.currentTimeMillis()
-                val minSearchMs = 2_000L // show SEARCHING for at least 2s
+                val minSearchMs = 2_000L
 
                 try {
                     val apiPlayers = retryQuickly {
@@ -240,31 +239,46 @@ class HomeViewModel(
                         )
                     } ?: emptyList()
 
-                    // Keep SEARCHING until minSearchMs has passed
+                    // Keep SEARCHING visible for at least minSearchMs
                     val elapsed = System.currentTimeMillis() - searchStart
                     if (elapsed < minSearchMs) {
                         delay(minSearchMs - elapsed)
                     }
 
-                    if (apiPlayers.isNotEmpty()) {
-                        val apiPlayer = apiPlayers.first()
-
-                        val domainPlayer = retryQuickly {
-                            playerEnrichmentRepository.enrich(apiPlayer)
-                        }
-
-                        if (domainPlayer != null) {
-                            onPlayerFound(domainPlayer)
-                            // Stay in PLAYER_FOUND until next loop iteration
-                            delay(pollSeconds * 1000)
-                            continue
-                        } else {
-                            _botStatus.value = BotStatus.NO_PLAYER
-                            addLog("Player found but enrichment failed")
-                        }
-                    } else {
+                    if (apiPlayers.isEmpty()) {
                         _botStatus.value = BotStatus.NO_PLAYER
                         addLog("No players found")
+                    } else {
+                        // Try to claim players in order until one succeeds
+                        var claimed = false
+
+                        for ((index, apiPlayer) in apiPlayers.withIndex()) {
+                            if (!_isRunning.value) break
+
+                            addLog("Trying player #${index + 1} (${apiPlayer.playerName})")
+
+                            val domainPlayer = retryQuickly {
+                                playerEnrichmentRepository.enrich(apiPlayer)
+                            }
+
+                            if (domainPlayer == null) {
+                                addLog("Enrichment failed for player #${index + 1}")
+                                continue
+                            }
+
+                            // At this point, assume enrichment success == claim success.
+                            // If your PlayerEnrichmentRepository or API can signal “already taken”
+                            // via an exception or null, this loop will automatically try the next one.
+                            onPlayerFound(domainPlayer)
+                            claimed = true
+                            addLog("Claimed player #${index + 1} (${domainPlayer.playerName})")
+                            break
+                        }
+
+                        if (!claimed) {
+                            _botStatus.value = BotStatus.NO_PLAYER
+                            addLog("All players on the board were taken or failed")
+                        }
                     }
                 } catch (e: Exception) {
                     _botStatus.value = BotStatus.WAITING
