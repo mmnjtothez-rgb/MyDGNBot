@@ -1,20 +1,46 @@
 package com.mydgnbot.ui.components
 
-import androidx.compose.animation.core.*
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,38 +88,36 @@ fun PlayerCard(
         return
     }
 
-    // MyDGN 5‑minute window: use lockExpires (seconds timestamp)
-    val lockExpiresMillis = (player.lockExpires ?: player.marketExpiry) * 1000L
-    val remainingMillis = remember { mutableStateOf(lockExpiresMillis - System.currentTimeMillis()) }
-    val isRunning = remember { mutableStateOf(true) }
+    val lockExpiresMillis = (player.lockExpires ?: 0L) * 1000L
+    var remainingLockMillis by remember(player.lockExpires) {
+        mutableStateOf(lockExpiresMillis - System.currentTimeMillis())
+    }
 
-    LaunchedEffect(player) {
-        isRunning.value = true
-        while (isRunning.value && remainingMillis.value > 0) {
+    LaunchedEffect(player.lockExpires) {
+        while (remainingLockMillis > 0L) {
             delay(1000)
-            remainingMillis.value = lockExpiresMillis - System.currentTimeMillis()
+            remainingLockMillis = lockExpiresMillis - System.currentTimeMillis()
         }
-        if (remainingMillis.value <= 0) {
+        if (remainingLockMillis <= 0L) {
             onCanceled()
         }
     }
 
-    val remainingSeconds = (remainingMillis.value / 1000).coerceAtLeast(0L).toInt()
+    val lockSeconds = (remainingLockMillis / 1000L).coerceAtLeast(0L).toInt()
 
-    val timerColor: Color by animateColorAsState(
+    val lockTimerColor by animateColorAsState(
         targetValue = when {
-            remainingSeconds > 120 -> emerald
-            remainingSeconds > 30 -> amber
+            lockSeconds > 120 -> emerald
+            lockSeconds > 30 -> amber
             else -> red
         },
-        animationSpec = tween(300),
-        label = "timerColor"
+        label = "lockTimerColor"
     )
 
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val pulseAlpha: Float by infiniteTransition.animateFloat(
+    val pulseTransition = rememberInfiniteTransition(label = "pulse")
+    val pulseAlpha by pulseTransition.animateFloat(
         initialValue = 1f,
-        targetValue = 0.5f,
+        targetValue = 0.55f,
         animationSpec = infiniteRepeatable(
             animation = tween(800, easing = FastOutLinearInEasing),
             repeatMode = RepeatMode.Reverse
@@ -101,15 +125,14 @@ fun PlayerCard(
         label = "pulseAlpha"
     )
 
-    val effectiveTimerAlpha = if (remainingSeconds <= 30) pulseAlpha else 1f
+    val timerAlpha = if (lockSeconds <= 30) pulseAlpha else 1f
 
     Scaffold(
         bottomBar = {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = darkSurface,
-                contentColor = Color.White,
-                tonalElevation = 8.dp
+                contentColor = Color.White
             ) {
                 Row(
                     modifier = Modifier
@@ -134,6 +157,7 @@ fun PlayerCard(
                             fontSize = 15.sp
                         )
                     }
+
                     OutlinedButton(
                         onClick = onCanceled,
                         modifier = Modifier
@@ -157,7 +181,7 @@ fun PlayerCard(
     ) { padding ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(padding)
                 .background(
                     brush = Brush.verticalGradient(
@@ -170,7 +194,6 @@ fun PlayerCard(
                 .padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Timer bar
             Surface(
                 shape = RoundedCornerShape(16.dp),
                 color = darkSurface,
@@ -184,124 +207,163 @@ fun PlayerCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = formatTime(remainingSeconds.toLong()),
+                        text = formatTime(lockSeconds.toLong()),
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
-                        color = timerColor,
-                        modifier = Modifier.graphicsLayer(alpha = effectiveTimerAlpha)
+                        color = lockTimerColor,
+                        modifier = Modifier.clip(RoundedCornerShape(8.dp))
                     )
                 }
             }
 
-            // Hero player card block
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(22.dp),
                 colors = CardDefaults.cardColors(containerColor = darkBg),
-                border = BorderStroke(1.dp, Color(0xFF163122)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+                border = BorderStroke(1.dp, Color(0xFF163122))
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // Floating card image with glow
-                    Box(
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        verticalAlignment = Alignment.Top
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(185.dp, 230.dp)
-                                .background(
-                                    brush = Brush.radialGradient(
-                                        colors = listOf(
-                                            emeraldDim.copy(alpha = 0.35f),
-                                            emeraldDim.copy(alpha = 0.08f),
-                                            Color.Transparent
-                                        )
-                                    ),
-                                    shape = RoundedCornerShape(22.dp)
-                                )
-                        )
-                        AsyncImage(
-                            model = player.imageUrl,
-                            contentDescription = player.playerName,
-                            modifier = Modifier
-                                .size(175.dp, 220.dp)
-                                .offset(y = (-6).dp),
-                            contentScale = ContentScale.Fit
-                        )
-                    }
-
-                    // Player name + chemistry
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = player.playerName,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color(0xFF09100B),
-                            border = BorderStroke(1.dp, emerald.copy(alpha = 0.55f))
+                                .width(170.dp)
+                                .height(220.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            Box(
+                                modifier = Modifier
+                                    .size(185.dp, 230.dp)
+                                    .background(
+                                        brush = Brush.radialGradient(
+                                            colors = listOf(
+                                                emeraldDim.copy(alpha = 0.35f),
+                                                emeraldDim.copy(alpha = 0.08f),
+                                                Color.Transparent
+                                            )
+                                        ),
+                                        shape = RoundedCornerShape(22.dp)
+                                    )
+                            )
+                            AsyncImage(
+                                model = player.imageUrl,
+                                contentDescription = player.playerName,
+                                modifier = Modifier
+                                    .size(175.dp, 220.dp)
+                                    .padding(top = 4.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                            Card(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(6.dp),
+                                shape = RoundedCornerShape(999.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF09100B)),
+                                border = BorderStroke(1.dp, Color(0xFF163122))
                             ) {
-                                Image(
-                                    painter = painterResource(R.drawable.ic_chemistry_flask),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
                                 Text(
-                                    text = "${player.chemistryStyle} Chemistry",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color(0xFFE5E7EB),
-                                    fontWeight = FontWeight.Medium
+                                    text = player.cardValue.toString(),
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                    color = gold,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp
                                 )
                             }
                         }
-                    }
 
-                    // Starting Bid / Buy Now
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        StatCard(
+                        Column(
                             modifier = Modifier.weight(1f),
-                            title = "Starting Bid",
-                            value = player.startPrice.toString(),
-                            highlightGold = false
-                        )
-                        StatCard(
-                            modifier = Modifier.weight(1f),
-                            title = "Buy Now",
-                            value = player.buyNowPrice.toString(),
-                            highlightGold = true
-                        )
-                    }
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Text(
+                                text = player.playerName,
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
 
-                    InfoRow(
-                        title = "Payment",
-                        value = "$${player.payment}",
-                        valueColor = gold
-                    )
-                    InfoRow(
-                        title = "Expires In",
-                        value = formatTime(remainingSeconds.toLong()),
-                        valueColor = timerColor
-                    )
+                            PremiumPill(
+                                iconRes = R.drawable.ic_chemistry_flask,
+                                text = "${player.chemistryStyle} Chemistry",
+                                borderColor = emerald.copy(alpha = 0.55f)
+                            )
+
+                            PremiumPill(
+                                iconRes = R.drawable.ic_owner,
+                                text = "Owners: ${player.owners}",
+                                borderColor = emerald.copy(alpha = 0.55f)
+                            )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                StatCard(
+                                    modifier = Modifier.weight(1f),
+                                    title = "Starting Bid",
+                                    value = player.startPrice.toString(),
+                                    highlightGold = false
+                                )
+                                StatCard(
+                                    modifier = Modifier.weight(1f),
+                                    title = "Buy Now",
+                                    value = player.buyNowPrice.toString(),
+                                    highlightGold = true
+                                )
+                            }
+
+                            InfoRow(
+                                title = "You Earn",
+                                value = "$${player.payment}",
+                                valueColor = gold
+                            )
+
+                            InfoRow(
+                                title = "Time Remaining",
+                                value = formatTime((player.ea_expires_at ?: 0L)),
+                                valueColor = emerald
+                            )
+                        }
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PremiumPill(
+    iconRes: Int,
+    text: String,
+    borderColor: Color
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0xFF09100B),
+        border = BorderStroke(1.dp, borderColor)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Image(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFFE5E7EB),
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
@@ -366,8 +428,9 @@ private fun InfoRow(
     }
 }
 
-private fun formatTime(totalSeconds: Long): String {
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return String.format("%02d:%02d", minutes, seconds)
+private fun formatTime(seconds: Long): String {
+    if (seconds <= 0L) return "Expired"
+    val minutes = seconds / 60
+    val remainingSeconds = seconds % 60
+    return String.format("%02d:%02d", minutes, remainingSeconds)
 }
