@@ -58,7 +58,8 @@ fun PlayerScreen(
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            PlayerCard(player = player)
-        }
-    }
-}
+            PlayerCard(
+    player = player,
+    onBought = { viewModel.markBought() },
+    onCanceled = { viewModel.cancelPlayer() }
+)
