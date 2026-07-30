@@ -62,7 +62,7 @@ fun PlayerCard(
     }
 
     // MyDGN 5‑minute window: use lockExpires (seconds timestamp)
-    val lockExpiresMillis = player.lockExpires * 1000L
+    val lockExpiresMillis = (player.lockExpires ?: player.marketExpiry) * 1000L
     val remainingMillis = remember { mutableStateOf(lockExpiresMillis - System.currentTimeMillis()) }
     val isRunning = remember { mutableStateOf(true) }
 
@@ -79,7 +79,7 @@ fun PlayerCard(
 
     val remainingSeconds = (remainingMillis.value / 1000).coerceAtLeast(0L).toInt()
 
-    val timerColor by animateColorAsState(
+    val timerColor: Color by animateColorAsState(
         targetValue = when {
             remainingSeconds > 120 -> emerald
             remainingSeconds > 30 -> amber
@@ -90,7 +90,7 @@ fun PlayerCard(
     )
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val pulseAlpha by infiniteTransition.animateFloat(
+    val pulseAlpha: Float by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 0.5f,
         animationSpec = infiniteRepeatable(
