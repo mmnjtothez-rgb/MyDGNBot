@@ -11,7 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -62,28 +61,24 @@ fun PlayerCard(
         return
     }
 
-    // Expiry is receivedAt + 5 minutes
-    val expiresAt = remember(player) {
-        player.receivedAt + 5 * 60 * 1000L
-    }
-    val remainingMillis = remember { mutableStateOf(expiresAt - System.currentTimeMillis()) }
+    // MyDGN already gives us the exact expiry timestamp in marketExpiry.
+    val expiresAtMillis = player.marketExpiry * 1000L
+    val remainingMillis = remember { mutableStateOf(expiresAtMillis - System.currentTimeMillis()) }
     val isRunning = remember { mutableStateOf(true) }
 
     LaunchedEffect(player) {
         isRunning.value = true
         while (isRunning.value && remainingMillis.value > 0) {
             delay(1000)
-            remainingMillis.value = expiresAt - System.currentTimeMillis()
+            remainingMillis.value = expiresAtMillis - System.currentTimeMillis()
         }
         if (remainingMillis.value <= 0) {
-            // Time's up: auto‑cancel visually
             onCanceled()
         }
     }
 
-    val remainingSeconds = (remainingMillis.value / 1000).coerceAtLeast(0)
+    val remainingSeconds = (remainingMillis.value / 1000).coerceAtLeast(0L).toInt()
 
-    // Color + pulse logic
     val timerColor by animateColorAsState(
         targetValue = when {
             remainingSeconds > 120 -> emerald
@@ -188,7 +183,7 @@ fun PlayerCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = formatTime(remainingSeconds),
+                        text = formatTime(remainingSeconds.toLong()),
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
                         color = timerColor,
@@ -214,7 +209,6 @@ fun PlayerCard(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Emerald glow behind
                         Box(
                             modifier = Modifier
                                 .size(185.dp, 230.dp)
@@ -229,7 +223,6 @@ fun PlayerCard(
                                     shape = RoundedCornerShape(22.dp)
                                 )
                         )
-                        // Card image
                         AsyncImage(
                             model = player.imageUrl,
                             contentDescription = player.playerName,
@@ -252,7 +245,6 @@ fun PlayerCard(
                             fontWeight = FontWeight.Bold
                         )
 
-                        // Chemistry premium pill
                         Surface(
                             shape = RoundedCornerShape(12.dp),
                             color = Color(0xFF09100B),
@@ -297,7 +289,6 @@ fun PlayerCard(
                         )
                     }
 
-                    // Payment / Expires left-aligned
                     InfoRow(
                         title = "Payment",
                         value = "$${player.payment}",
@@ -305,7 +296,7 @@ fun PlayerCard(
                     )
                     InfoRow(
                         title = "Expires In",
-                        value = formatTime(remainingSeconds),
+                        value = formatTime(remainingSeconds.toLong()),
                         valueColor = timerColor
                     )
                 }
