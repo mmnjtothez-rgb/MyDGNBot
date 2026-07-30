@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
+import com.mydgnbot.R
 import com.mydgnbot.ui.theme.Black1
 import com.mydgnbot.ui.theme.Emerald
 import com.mydgnbot.ui.theme.TextPrimary
@@ -32,7 +33,7 @@ import com.mydgnbot.ui.theme.TextSecondary
 import kotlinx.coroutines.delay
 
 // Drawable resource IDs for the 14 FC 26 cards
-private val fc26CardDrawables = listOf(
+private val fc26CardDrawables: List<Int> = listOf(
     R.drawable.fc26_captains_card,
     R.drawable.fc26_futbirthday_card,
     R.drawable.fc26_gold_card,
@@ -110,7 +111,7 @@ fun BotStatusCard(
                 contentDescription = "FC 26 Card",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(0.8f) // adjust ratio if needed
+                    .aspectRatio(0.8f)
                     .scale(scale.value),
                 contentScale = ContentScale.Crop
             )
