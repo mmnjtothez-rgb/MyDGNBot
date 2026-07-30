@@ -1,15 +1,24 @@
 package com.mydgnbot.ui.screens
 
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -30,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -98,62 +108,196 @@ fun PlayerScreen(
             }
 
             isRunning && botStatus.name == "SEARCHING" -> {
-                LoadingPlayerState(
-                    modifier = Modifier.padding(innerPadding)
-                )
+                PremiumLoadingState(modifier = Modifier.padding(innerPadding))
             }
 
             else -> {
-                DarkPremiumEmptyState(
-                    modifier = Modifier.padding(innerPadding)
-                )
+                DarkPremiumEmptyState(modifier = Modifier.padding(innerPadding))
             }
         }
     }
 }
 
 @Composable
-private fun LoadingPlayerState(modifier: Modifier = Modifier) {
-    Box(
+private fun PremiumLoadingState(modifier: Modifier = Modifier) {
+    val shimmerTransition = rememberInfiniteTransition(label = "shimmer")
+    val shimmerX by shimmerTransition.animateFloat(
+        initialValue = -0.8f,
+        targetValue = 1.8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutLinearInEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmerX"
+    )
+
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(
+            Color(0xFF0A0F0B),
+            Color(0xFF1A2A20),
+            Color(0xFF0A0F0B)
+        ),
+        start = androidx.compose.ui.geometry.Offset.Zero,
+        end = androidx.compose.ui.geometry.Offset(
+            x = 1200f * shimmerX,
+            y = 1200f * shimmerX
+        )
+    )
+
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF050806),
-                        Color(0xFF0B0F0C)
-                    )
-                )
-            )
             .padding(24.dp),
-        contentAlignment = Alignment.Center
+        verticalArrangement = Arrangement.Center
     ) {
         Card(
-            shape = RoundedCornerShape(22.dp),
+            shape = RoundedCornerShape(26.dp),
             colors = CardDefaults.cardColors(containerColor = darkBg),
             border = BorderStroke(1.dp, Color(0xFF163122)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                CircularProgressIndicator(color = emerald)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Searching for players...",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "The bot is actively checking MyDGN.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFB5B8B8),
-                    textAlign = TextAlign.Center
-                )
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = darkSurface,
+                    border = BorderStroke(1.dp, Color(0xFF163122))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Searching...",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = emerald
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(170.dp)
+                            .height(220.dp)
+                            .background(
+                                brush = shimmerBrush,
+                                shape = RoundedCornerShape(22.dp)
+                            )
+                    )
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.85f)
+                                .height(24.dp)
+                                .background(
+                                    brush = shimmerBrush,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.62f)
+                                .height(32.dp)
+                                .background(
+                                    brush = shimmerBrush,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.52f)
+                                .height(32.dp)
+                                .background(
+                                    brush = shimmerBrush,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(76.dp)
+                                    .background(
+                                        brush = shimmerBrush,
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(76.dp)
+                                    .background(
+                                        brush = shimmerBrush,
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.7f)
+                                .height(18.dp)
+                                .background(
+                                    brush = shimmerBrush,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.55f)
+                                .height(18.dp)
+                                .background(
+                                    brush = shimmerBrush,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
+                            .background(
+                                brush = shimmerBrush,
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
+                            .background(
+                                brush = shimmerBrush,
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                    )
+                }
             }
         }
     }
@@ -164,14 +308,6 @@ private fun DarkPremiumEmptyState(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF050806),
-                        Color(0xFF0B0F0C)
-                    )
-                )
-            )
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
