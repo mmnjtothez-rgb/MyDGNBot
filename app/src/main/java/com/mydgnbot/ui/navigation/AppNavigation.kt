@@ -3,9 +3,11 @@ package com.mydgnbot.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.mydgnbot.data.datastore.SettingsDataStore
 import com.mydgnbot.data.network.ConnectivityObserver
 import com.mydgnbot.data.network.NetworkConnectivityObserver
@@ -67,10 +69,52 @@ fun AppNavigation() {
             )
         }
 
-        composable("player") {
+        // Player detail route:
+        // - "player"              -> live player (from viewModel.player)
+        // - "player/history/<id>"  -> historical player by ID
+        composable(
+            route = "player/{playerSource}/{playerId?}",
+            arguments = listOf(
+                navArgument("playerSource") {
+                    type = NavType.StringType
+                    nullable = false
+                },
+                navArgument("playerId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val playerSource = backStackEntry.arguments?.getString("playerSource") ?: "live"
+            val playerId = backStackEntry.arguments?.getString("playerId")
+
+            val player = when (playerSource) {
+                "history" -> {
+                    if (playerId == null) {
+                        homeViewModel.player.value
+                    } else {
+                        homeViewModel.recentPlayers.value.find { p ->
+                            p.resourceId.ifBlank { p.transactionId } == playerId
+                        }
+                    }
+                }
+                else -> {
+                    // live
+                    homeViewModel.player.value
+                }
+            }
+
+            if (player == null) {
+                // Should not happen in correct flow; go back.
+                navController.popBackStack()
+                return@composable
+            }
+
             PlayerScreen(
                 viewModel = homeViewModel,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                player = player
             )
         }
 
@@ -78,8 +122,9 @@ fun AppNavigation() {
             HistoryScreen(
                 viewModel = homeViewModel,
                 onBackClick = { navController.popBackStack() },
-                onPlayerClick = {
-                    navController.navigate("player")
+                onPlayerClick = { player ->
+                    val id = player.resourceId.ifBlank { player.transactionId }
+                    navController.navigate("player/history/$id")
                 }
             )
         }
