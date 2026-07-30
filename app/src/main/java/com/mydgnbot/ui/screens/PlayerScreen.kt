@@ -17,6 +17,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.domain.model.Player
@@ -30,13 +31,28 @@ fun PlayerScreen(
     onBackClick: () -> Unit,
     player: Player
 ) {
-    val livePlayerState = viewModel.player.collectAsState()
-    val livePlayer = livePlayerState.value
+    val livePlayer by viewModel.player.collectAsState()
+    val isPaused by viewModel.isPaused.collectAsState()
 
+    // Pause bot when entering player screen
+    LaunchedEffect(Unit) {
+        if (!isPaused) {
+            viewModel.setPaused(true)
+        }
+    }
+
+    // When live player becomes null (after buy/cancel), resume and go back
     LaunchedEffect(livePlayer) {
         if (livePlayer == null) {
+            viewModel.setPaused(false)
             onBackClick()
         }
+    }
+
+    // Also resume on back click (e.g., user presses back without buy/cancel)
+    val wrappedOnBackClick = {
+        viewModel.setPaused(false)
+        onBackClick()
     }
 
     Scaffold(
@@ -49,7 +65,7 @@ fun PlayerScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = wrappedOnBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
@@ -71,10 +87,11 @@ fun PlayerScreen(
                 player = player,
                 onBought = {
                     viewModel.markBought()
-                    onBackClick()
+                    // Bot will resume when livePlayer becomes null
                 },
                 onCanceled = {
                     viewModel.cancelPlayer()
+                    // Bot will resume when livePlayer becomes null
                 }
             )
         }
