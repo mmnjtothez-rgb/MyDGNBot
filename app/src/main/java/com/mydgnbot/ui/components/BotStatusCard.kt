@@ -35,7 +35,6 @@ import com.mydgnbot.ui.theme.TextPrimary
 import com.mydgnbot.ui.theme.TextSecondary
 import kotlinx.coroutines.delay
 
-// Drawable resource IDs for the 14 FC 26 cards
 private val fc26CardDrawables: List<Int> = listOf(
     R.drawable.fc26_captains_card,
     R.drawable.fc26_futbirthday_card,
@@ -98,11 +97,10 @@ fun BotStatusCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(start = 14.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left: Text content
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -129,7 +127,6 @@ fun BotStatusCard(
                 }
             }
 
-            // Right: Animated FC 26 card
             Image(
                 painter = painterResource(id = fc26CardDrawables[currentCardIndex.value]),
                 contentDescription = "FC 26 Card",
