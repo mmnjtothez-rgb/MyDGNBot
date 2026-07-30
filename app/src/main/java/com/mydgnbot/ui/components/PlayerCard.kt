@@ -61,16 +61,16 @@ fun PlayerCard(
         return
     }
 
-    // MyDGN already gives us the exact expiry timestamp in marketExpiry.
-    val expiresAtMillis = player.marketExpiry * 1000L
-    val remainingMillis = remember { mutableStateOf(expiresAtMillis - System.currentTimeMillis()) }
+    // MyDGN 5‑minute window: use lockExpires (seconds timestamp)
+    val lockExpiresMillis = player.lockExpires * 1000L
+    val remainingMillis = remember { mutableStateOf(lockExpiresMillis - System.currentTimeMillis()) }
     val isRunning = remember { mutableStateOf(true) }
 
     LaunchedEffect(player) {
         isRunning.value = true
         while (isRunning.value && remainingMillis.value > 0) {
             delay(1000)
-            remainingMillis.value = expiresAtMillis - System.currentTimeMillis()
+            remainingMillis.value = lockExpiresMillis - System.currentTimeMillis()
         }
         if (remainingMillis.value <= 0) {
             onCanceled()
