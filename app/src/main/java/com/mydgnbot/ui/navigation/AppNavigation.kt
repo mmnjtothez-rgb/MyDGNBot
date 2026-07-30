@@ -1,6 +1,7 @@
 package com.mydgnbot.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -59,7 +60,6 @@ fun AppNavigation() {
                 onSettingsClick = { navController.navigate("settings") },
                 onHistoryClick = { navController.navigate("history") },
                 onPlayerFound = {
-                    // Only navigate if there is a live player
                     if (homeViewModel.player.value != null) {
                         navController.navigate("player")
                     }
@@ -76,9 +76,9 @@ fun AppNavigation() {
 
         // Live player route
         composable("player") {
-            val player = homeViewModel.player.value
+            val player by homeViewModel.player.collectAsState()
+
             if (player == null) {
-                // Safety: go back if no player
                 navController.popBackStack()
                 return@composable
             }
@@ -111,7 +111,6 @@ fun AppNavigation() {
             }
 
             if (player == null) {
-                // Safety: go back if player not found
                 navController.popBackStack()
                 return@composable
             }
