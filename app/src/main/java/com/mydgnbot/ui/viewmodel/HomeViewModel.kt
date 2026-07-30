@@ -112,6 +112,9 @@ class HomeViewModel(
     private val _waitSeconds = MutableStateFlow(0)
     val waitSeconds: StateFlow<Int> = _waitSeconds.asStateFlow()
 
+    private val _statusText = MutableStateFlow("Idle")
+    val statusText: StateFlow<String> = _statusText.asStateFlow()
+
     private var botJob: Job? = null
 
     fun requestHistory() {
@@ -191,6 +194,7 @@ class HomeViewModel(
 
         _isRunning.value = true
         _botStatus.value = BotStatus.SEARCHING
+        _statusText.value = "Checking players..."
         addLog("Bot started")
 
         botJob?.cancel()
@@ -198,6 +202,7 @@ class HomeViewModel(
             while (_isRunning.value) {
                 if (!isOnline.value) {
                     _botStatus.value = BotStatus.WAITING
+                    _statusText.value = "Waiting for connection..."
                     _waitSeconds.value = 2
                     addLog("Waiting for connection...")
                     delay(2_000)
@@ -215,6 +220,7 @@ class HomeViewModel(
 
                 if (apiUser.isBlank() || secretKey.isBlank()) {
                     _botStatus.value = BotStatus.WAITING
+                    _statusText.value = "Missing API credentials"
                     _waitSeconds.value = pollSeconds.toInt()
                     addLog("Missing API credentials")
                     delay(pollSeconds * 1000)
@@ -222,12 +228,15 @@ class HomeViewModel(
                 }
 
                 _botStatus.value = BotStatus.SEARCHING
+                _statusText.value = "Checking players..."
                 _waitSeconds.value = 0
 
                 val searchStart = System.currentTimeMillis()
                 val minSearchMs = 2_000L
 
                 try {
+                    addLog("Scanning board for players...")
+
                     val apiPlayers = retryQuickly {
                         playerRepository.fetchPlayers(
                             user = apiUser,
@@ -239,7 +248,6 @@ class HomeViewModel(
                         )
                     } ?: emptyList()
 
-                    // Keep SEARCHING visible for at least minSearchMs
                     val elapsed = System.currentTimeMillis() - searchStart
                     if (elapsed < minSearchMs) {
                         delay(minSearchMs - elapsed)
@@ -247,46 +255,51 @@ class HomeViewModel(
 
                     if (apiPlayers.isEmpty()) {
                         _botStatus.value = BotStatus.NO_PLAYER
-                        addLog("No players found")
+                        _statusText.value = "No players on the board"
+                        addLog("No players found on the board")
                     } else {
-                        // Try to claim players in order until one succeeds
                         var claimed = false
 
                         for ((index, apiPlayer) in apiPlayers.withIndex()) {
                             if (!_isRunning.value) break
 
-                            addLog("Trying player #${index + 1} (${apiPlayer.playerName})")
+                            _statusText.value = "Checking player #${index + 1}..."
+                            addLog("Checking player #${index + 1} (${apiPlayer.playerName})")
 
                             val domainPlayer = retryQuickly {
                                 playerEnrichmentRepository.enrich(apiPlayer)
                             }
 
                             if (domainPlayer == null) {
-                                addLog("Enrichment failed for player #${index + 1}")
+                                _statusText.value = "Player #${index + 1} already taken"
+                                addLog("Player #${index + 1} already taken or unavailable")
                                 continue
                             }
 
-                            // At this point, assume enrichment success == claim success.
-                            // If your PlayerEnrichmentRepository or API can signal “already taken”
-                            // via an exception or null, this loop will automatically try the next one.
                             onPlayerFound(domainPlayer)
                             claimed = true
+                            _statusText.value = "Claimed player #${index + 1}"
                             addLog("Claimed player #${index + 1} (${domainPlayer.playerName})")
                             break
                         }
 
                         if (!claimed) {
                             _botStatus.value = BotStatus.NO_PLAYER
+                            _statusText.value = "All players on the board were taken"
                             addLog("All players on the board were taken or failed")
                         }
                     }
                 } catch (e: Exception) {
                     _botStatus.value = BotStatus.WAITING
-                    addLog("Error fetching players: ${e.message ?: "unknown error"}")
+                    _statusText.value = "Error while scanning board"
+                    addLog("Error while scanning board: ${e.message ?: "unknown error"}")
                 }
 
                 _botStatus.value = BotStatus.WAITING
+                _statusText.value = "Cooling down between scans (${pollSeconds.toInt()}s)"
                 _waitSeconds.value = pollSeconds.toInt()
+                addLog("Cooling down between scans (${pollSeconds.toInt()}s)")
+
                 delay(pollSeconds * 1000)
             }
         }
@@ -298,6 +311,7 @@ class HomeViewModel(
         botJob?.cancel()
         botJob = null
         _botStatus.value = BotStatus.WAITING
+        _statusText.value = "Bot stopped"
         _waitSeconds.value = 0
         addLog("Bot stopped")
     }
