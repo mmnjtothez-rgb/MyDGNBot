@@ -16,9 +16,9 @@ data class Player(
     val chemistryStyle: String,
     val owners: Int,
     val marketExpiry: Long,
+    val lockExpires: Long,
     val status: String,
 
-    // ---------- FUT.GG ----------
     val overall: Int? = null,
     val rarity: String? = null,
     val imageUrl: String? = null,
@@ -29,8 +29,5 @@ data class Player(
     val skillMoves: Int? = null,
     val weakFoot: Int? = null,
     val preferredFoot: Int? = null,
-    val position: Int? = null,
-
-    // ---------- MyDGN ----------
-    val lockExpires: Long? = null
+    val position: Int? = null
 )
