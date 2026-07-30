@@ -9,6 +9,7 @@ import com.mydgnbot.data.repository.SettingsRepository
 import com.mydgnbot.domain.model.LogEntry
 import com.mydgnbot.domain.model.Player
 import com.mydgnbot.ui.components.BotStatus
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -111,6 +112,8 @@ class HomeViewModel(
     private val _waitSeconds = MutableStateFlow(0)
     val waitSeconds: StateFlow<Int> = _waitSeconds.asStateFlow()
 
+    private var botJob: Job? = null
+
     fun requestHistory() {
         _showHistory.value = true
     }
@@ -157,6 +160,25 @@ class HomeViewModel(
         }
     }
 
+    private suspend fun <T> retryQuickly(
+        attempts: Int = 3,
+        delayMs: Long = 1200,
+        block: suspend () -> T
+    ): T? {
+        repeat(attempts - 1) {
+            try {
+                return block()
+            } catch (_: Exception) {
+                delay(delayMs)
+            }
+        }
+        return try {
+            block()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     fun onPlayerFound(found: Player) {
         _player.value = found
         addRecentPlayer(found)
@@ -171,7 +193,8 @@ class HomeViewModel(
         _botStatus.value = BotStatus.SEARCHING
         addLog("Bot started")
 
-        viewModelScope.launch {
+        botJob?.cancel()
+        botJob = viewModelScope.launch {
             while (_isRunning.value) {
                 if (!isOnline.value) {
                     _botStatus.value = BotStatus.WAITING
@@ -188,7 +211,7 @@ class HomeViewModel(
                 val minPrice = currentSettings["minimum_price"]?.toIntOrNull() ?: 4000
                 val maxPrice = currentSettings["maximum_price"]?.toIntOrNull() ?: 300000
                 val playerType = currentSettings["player_type"]?.toIntOrNull() ?: 2
-                val pollSeconds = currentSettings["poll_interval"]?.toLongOrNull() ?: 10L
+                val pollSeconds = (currentSettings["poll_interval"]?.toLongOrNull() ?: 10L).coerceAtLeast(10L)
 
                 if (apiUser.isBlank() || secretKey.isBlank()) {
                     _botStatus.value = BotStatus.WAITING
@@ -202,19 +225,30 @@ class HomeViewModel(
                     _botStatus.value = BotStatus.SEARCHING
                     _waitSeconds.value = 0
 
-                    val apiPlayers = playerRepository.fetchPlayers(
-                        user = apiUser,
-                        secretKey = secretKey,
-                        platform = platform,
-                        playerType = playerType,
-                        minimumPrice = minPrice,
-                        maximumPrice = maxPrice
-                    )
+                    val apiPlayers = retryQuickly {
+                        playerRepository.fetchPlayers(
+                            user = apiUser,
+                            secretKey = secretKey,
+                            platform = platform,
+                            playerType = playerType,
+                            minimumPrice = minPrice,
+                            maximumPrice = maxPrice
+                        )
+                    } ?: emptyList()
 
                     if (apiPlayers.isNotEmpty()) {
                         val apiPlayer = apiPlayers.first()
-                        val domainPlayer = playerEnrichmentRepository.enrich(apiPlayer)
-                        onPlayerFound(domainPlayer)
+
+                        val domainPlayer = retryQuickly {
+                            playerEnrichmentRepository.enrich(apiPlayer)
+                        }
+
+                        if (domainPlayer != null) {
+                            onPlayerFound(domainPlayer)
+                        } else {
+                            _botStatus.value = BotStatus.NO_PLAYER
+                            addLog("Player found but enrichment failed")
+                        }
                     } else {
                         _botStatus.value = BotStatus.NO_PLAYER
                         addLog("No players found")
@@ -234,6 +268,8 @@ class HomeViewModel(
     fun stopBot() {
         if (!_isRunning.value) return
         _isRunning.value = false
+        botJob?.cancel()
+        botJob = null
         _botStatus.value = BotStatus.WAITING
         _waitSeconds.value = 0
         addLog("Bot stopped")
@@ -247,6 +283,9 @@ class HomeViewModel(
         _player.value = null
         _botStatus.value = BotStatus.WAITING
         _waitSeconds.value = 0
+        botJob?.cancel()
+        botJob = null
+        _isRunning.value = false
     }
 
     fun cancelPlayer() {
@@ -257,5 +296,8 @@ class HomeViewModel(
         _player.value = null
         _botStatus.value = BotStatus.WAITING
         _waitSeconds.value = 0
+        botJob?.cancel()
+        botJob = null
+        _isRunning.value = false
     }
 }
