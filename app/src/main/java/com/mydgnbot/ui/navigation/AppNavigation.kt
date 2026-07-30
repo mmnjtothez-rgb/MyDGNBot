@@ -79,6 +79,7 @@ fun AppNavigation() {
             val player by homeViewModel.player.collectAsState()
 
             if (player == null) {
+                // After cancel / no live player -> go back to main screen
                 navController.popBackStack()
                 return@composable
             }
@@ -111,6 +112,7 @@ fun AppNavigation() {
             }
 
             if (player == null) {
+                // Player not found in history -> go back
                 navController.popBackStack()
                 return@composable
             }
