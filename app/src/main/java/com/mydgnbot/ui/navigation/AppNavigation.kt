@@ -1,8 +1,8 @@
 package com.mydgnbot.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -75,12 +75,11 @@ fun AppNavigation() {
             )
         }
 
-        // Live player route
         composable("player") {
-            val player by homeViewModel.player.collectAsState()
+            val playerState = homeViewModel.player.collectAsState()
+            val player = playerState.value
 
             if (player == null) {
-                // After cancel / no live player -> go back to main screen
                 navController.popBackStack()
                 return@composable
             }
@@ -92,7 +91,6 @@ fun AppNavigation() {
             )
         }
 
-        // History player detail route
         composable(
             route = "player/history/{playerId}",
             arguments = listOf(
@@ -113,7 +111,6 @@ fun AppNavigation() {
             }
 
             if (player == null) {
-                // Player not found in history -> go back
                 navController.popBackStack()
                 return@composable
             }
