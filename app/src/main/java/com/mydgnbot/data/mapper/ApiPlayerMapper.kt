@@ -26,8 +26,8 @@ object ApiPlayerMapper {
             chemistryStyle = chemistry_style ?: "None",
             owners = owners ?: 0,
             marketExpiry = ea_expires_at ?: 0L,
+            lockExpires = lockExpires ?: 0L,
             status = status ?: "",
-
             overall = null,
             rarity = null,
             imageUrl = null,
@@ -38,9 +38,7 @@ object ApiPlayerMapper {
             skillMoves = null,
             weakFoot = null,
             preferredFoot = null,
-            position = null,
-
-            lockExpires = lockExpires
+            position = null
         )
     }
 }
