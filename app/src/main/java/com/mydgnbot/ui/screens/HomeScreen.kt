@@ -84,7 +84,7 @@ fun HomeScreen(
     val isOnline by viewModel.isOnline.collectAsState()
     val settings by viewModel.settings.collectAsState()
     val logs by viewModel.logs.collectAsState()
-    val latestPlayer by viewModel.latestPlayer.collectAsState()
+    val activePlayer by viewModel.player.collectAsState()
 
     val platform = settings["platform"] ?: "CONSOLE"
     val playerType = settings["player_type"] ?: "2"
@@ -92,7 +92,6 @@ fun HomeScreen(
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
 
-    // Background Gradient with Top Radial Glow
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -153,7 +152,7 @@ fun HomeScreen(
                     .padding(horizontal = 14.dp, vertical = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // 1. RADAR STATUS CARD (Live pulsing radar ring)
+                // 1. RADAR STATUS CARD
                 GlassmorphicCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -184,7 +183,7 @@ fun HomeScreen(
                     }
                 }
 
-                // 2. STATUS CHIPS ROW
+                // 2. STATUS CHIPS
                 AnimatedStatusChipsRow(
                     connected = isOnline,
                     platform = platform,
@@ -193,7 +192,7 @@ fun HomeScreen(
                     onSettingsClick = onSettingsClick
                 )
 
-                // 3. LIVE ACTIVITY LOG & PLAYER SLOT SECTION
+                // 3. LIVE ACTIVITY LOG & PLAYER CARD SLOT
                 Text(
                     text = "Live Activity Log",
                     fontSize = 15.sp,
@@ -230,7 +229,7 @@ fun HomeScreen(
                                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                     logs.takeLast(6).forEach { log ->
                                         Text(
-                                            text = log,
+                                            text = log.message,
                                             fontSize = 11.sp,
                                             color = Color(0xFFD1D5DB)
                                         )
@@ -245,18 +244,19 @@ fun HomeScreen(
                         modifier = Modifier
                             .width(115.dp)
                             .fillMaxSize()
-                            .clickable(enabled = latestPlayer != null) {
-                                latestPlayer?.let { onPlayerClick(it) }
+                            .clickable(enabled = activePlayer != null) {
+                                activePlayer?.let { onPlayerClick(it) }
                             }
                     ) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            if (latestPlayer?.imageUrl != null) {
+                            val imgUrl = activePlayer?.imageUrl
+                            if (!imgUrl.isNullOrEmpty()) {
                                 AsyncImage(
-                                    model = latestPlayer!!.imageUrl,
-                                    contentDescription = latestPlayer!!.playerName,
+                                    model = imgUrl,
+                                    contentDescription = activePlayer?.playerName ?: "Player Image",
                                     contentScale = ContentScale.Fit,
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -264,12 +264,12 @@ fun HomeScreen(
                                 )
                             } else {
                                 Image(
-                                    painter = painterResource(id = R.drawable.card_placeholder),
+                                    painter = painterResource(id = R.drawable.valuebadge),
                                     contentDescription = "Card Placeholder",
                                     contentScale = ContentScale.Fit,
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(6.dp)
+                                        .padding(12.dp)
                                 )
                             }
                         }
@@ -278,9 +278,11 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // 4. METALLIC "START BOT" CTA BUTTON
+                // 4. METALLIC "START / STOP BOT" BUTTON
                 Button(
-                    onClick = { viewModel.toggleBot() },
+                    onClick = {
+                        if (isRunning) viewModel.stopBot() else viewModel.startBot()
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
