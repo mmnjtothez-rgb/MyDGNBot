@@ -110,11 +110,18 @@ fun HomeScreen(
     val settings by viewModel.settings.collectAsState()
 
     val platform = settings["platform"] ?: "Console"
-    
-    // Check mode settings for 'Safe' or 'Quicksell'
-    val rawMode = settings["mode"] ?: settings["method"] ?: "Safe"
-    val modeText = rawMode.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-    
+
+    // Dynamically query common keys used for method selection
+    val rawMode = settings["method"] 
+        ?: settings["buy_method"] 
+        ?: settings["mode"] 
+        ?: settings["execution_mode"] 
+        ?: "Safe"
+        
+    val modeText = rawMode.replaceFirstChar { 
+        if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() 
+    }
+
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
 
@@ -176,7 +183,7 @@ fun HomeScreen(
                     )
                 )
                 .padding(horizontal = 14.dp, vertical = 6.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             // Radar Scanner Component
             AnimatedRadarScannerCard(
@@ -193,56 +200,6 @@ fun HomeScreen(
                 interval = interval,
                 onSettingsClick = onSettingsClick
             )
-
-            // Start Bot Action Buttons (Pushed higher up)
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (activePlayer != null) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Button(
-                            onClick = { viewModel.markBought() },
-                            modifier = Modifier.weight(1f).height(42.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = emerald, contentColor = Color.Black)
-                        ) {
-                            Text("Bought", fontWeight = FontWeight.Bold)
-                        }
-                        Button(
-                            onClick = { viewModel.cancelPlayer() },
-                            modifier = Modifier.weight(1f).height(42.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E2923), contentColor = Color.White)
-                        ) {
-                            Text("Cancel", fontWeight = FontWeight.SemiBold)
-                        }
-                    }
-                }
-
-                Button(
-                    onClick = { if (isRunning) viewModel.stopBot() else viewModel.startBot() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(46.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isRunning) red else emerald,
-                        contentColor = Color.Black
-                    )
-                ) {
-                    Text(
-                        text = if (isRunning) "STOP BOT" else "START BOT",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
-                        color = if (isRunning) Color.White else Color.Black
-                    )
-                }
-            }
 
             Text(
                 text = "Live Activity Log",
@@ -299,6 +256,58 @@ fun HomeScreen(
                         .fillMaxSize()
                 )
             }
+
+            // Start Bot Action Buttons (Placed directly beneath Live Activity Log)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+            ) {
+                if (activePlayer != null) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Button(
+                            onClick = { viewModel.markBought() },
+                            modifier = Modifier.weight(1f).height(42.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = emerald, contentColor = Color.Black)
+                        ) {
+                            Text("Bought", fontWeight = FontWeight.Bold)
+                        }
+                        Button(
+                            onClick = { viewModel.cancelPlayer() },
+                            modifier = Modifier.weight(1f).height(42.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E2923), contentColor = Color.White)
+                        ) {
+                            Text("Cancel", fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
+
+                Button(
+                    onClick = { if (isRunning) viewModel.stopBot() else viewModel.startBot() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isRunning) red else emerald,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text(
+                        text = if (isRunning) "STOP BOT" else "START BOT",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = if (isRunning) Color.White else Color.Black
+                    )
+                }
+            }
         }
     }
 }
@@ -339,14 +348,20 @@ private fun AnimatedStatusChipsRow(
             horizontalArrangement = Arrangement.Start
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // Centered container box to align dot precisely with text baseline
                 Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(
-                            if (connected) emerald.copy(alpha = dotAlpha) else Color.Gray
-                        )
-                )
+                    modifier = Modifier.size(10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(
+                                if (connected) emerald.copy(alpha = dotAlpha) else Color.Gray
+                            )
+                    )
+                }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = if (connected) "CONNECTED" else "OFFLINE",
