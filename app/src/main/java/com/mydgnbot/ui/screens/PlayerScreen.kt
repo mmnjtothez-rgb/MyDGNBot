@@ -95,27 +95,27 @@ fun PlayerScreen(
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
 
-    // 1. MyDGN Lock Timer (Handles Unix Timestamps & Relative Second Durations)
+    // 1. MyDGN Lock Timer (Handles Epoch Timestamp or Relative Seconds)
     var lockRemainingSeconds by remember(player) {
         val now = System.currentTimeMillis() / 1000
-        val rawLock = player.lockExpires
+        val targetLock = player.lockExpires
         
         val secondsLeft = when {
-            rawLock > 1_000_000_000L -> rawLock - now // Absolute Epoch Timestamp
-            rawLock > 0L -> rawLock                  // Relative Remaining Seconds (e.g. 300)
+            targetLock > 1_000_000_000L -> targetLock - now // Unix Epoch Timestamp
+            targetLock > 0L -> targetLock                  // Relative Remaining Seconds
             else -> 300L                             // 5-minute fallback
         }
         mutableLongStateOf(secondsLeft.coerceAtLeast(0L))
     }
 
-    // 2. EA Market Expiry Timer
+    // 2. EA Market Expiry Timer (marketExpiry / ea_expires_at)
     var marketRemainingSeconds by remember(player) {
         val now = System.currentTimeMillis() / 1000
-        val rawMarket = player.marketExpiry
+        val targetMarket = player.marketExpiry
         
         val secondsLeft = when {
-            rawMarket > 1_000_000_000L -> rawMarket - now
-            rawMarket > 0L -> rawMarket
+            targetMarket > 1_000_000_000L -> targetMarket - now
+            targetMarket > 0L -> targetMarket
             else -> 3600L
         }
         mutableLongStateOf(secondsLeft.coerceAtLeast(0L))
@@ -336,7 +336,7 @@ fun PlayerScreen(
                                     .padding(top = 22.dp)
                             )
 
-                            // CardValue Badge - Shifted 12dp down onto card top
+                            // CardValue Badge shifted 12dp down onto card top
                             Surface(
                                 modifier = Modifier.offset(y = 12.dp),
                                 shape = RoundedCornerShape(12.dp),
@@ -396,7 +396,7 @@ fun PlayerScreen(
                         }
                     }
 
-                    // Starting Bid & Buy Now Buttons
+                    // Starting Bid & Buy Now Cards
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
