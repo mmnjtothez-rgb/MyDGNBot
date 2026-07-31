@@ -15,6 +15,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,6 +56,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -67,8 +70,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mydgnbot.domain.model.LogEntry
-import com.mydgnbot.ui.components.StatusChipsRow
 import com.mydgnbot.ui.viewmodel.HomeViewModel
+import java.util.Locale
 
 private val emerald = Color(0xFF42E8B4)
 private val darkBg = Color(0xFF0B0F0C)
@@ -107,7 +110,11 @@ fun HomeScreen(
     val settings by viewModel.settings.collectAsState()
 
     val platform = settings["platform"] ?: "Console"
-    val method = settings["method"] ?: "API"
+    
+    // Check mode settings for 'Safe' or 'Quicksell'
+    val rawMode = settings["mode"] ?: settings["method"] ?: "Safe"
+    val modeText = rawMode.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
+    
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
 
@@ -157,59 +164,6 @@ fun HomeScreen(
                     containerColor = darkSurface
                 )
             )
-        },
-        bottomBar = {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = darkSurface,
-                border = BorderStroke(1.dp, Color(0xFF163122))
-            ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                ) {
-                    if (activePlayer != null) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Button(
-                                onClick = { viewModel.markBought() },
-                                modifier = Modifier.weight(1f).height(44.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = emerald, contentColor = Color.Black)
-                            ) {
-                                Text("Bought", fontWeight = FontWeight.Bold)
-                            }
-                            Button(
-                                onClick = { viewModel.cancelPlayer() },
-                                modifier = Modifier.weight(1f).height(44.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E2923), contentColor = Color.White)
-                            ) {
-                                Text("Cancel", fontWeight = FontWeight.SemiBold)
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(6.dp))
-                    }
-
-                    Button(
-                        onClick = { if (isRunning) viewModel.stopBot() else viewModel.startBot() },
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isRunning) red else emerald,
-                            contentColor = Color.Black
-                        )
-                    ) {
-                        Text(
-                            text = if (isRunning) "STOP BOT" else "START BOT",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
-                            color = if (isRunning) Color.White else Color.Black
-                        )
-                    }
-                }
-            }
         }
     ) { innerPadding ->
         Column(
@@ -221,8 +175,8 @@ fun HomeScreen(
                         colors = listOf(darkSurface, darkBg)
                     )
                 )
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(horizontal = 14.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Radar Scanner Component
             AnimatedRadarScannerCard(
@@ -231,14 +185,64 @@ fun HomeScreen(
                 playerFound = activePlayer != null
             )
 
-            // Status Chips Row Component
-            StatusChipsRow(
+            // Status Chips Row Component with Pulsing Connected Dot
+            AnimatedStatusChipsRow(
                 connected = isOnline,
                 platform = platform,
-                method = method,
+                modeText = modeText,
                 interval = interval,
                 onSettingsClick = onSettingsClick
             )
+
+            // Start Bot Action Buttons (Pushed higher up)
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (activePlayer != null) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Button(
+                            onClick = { viewModel.markBought() },
+                            modifier = Modifier.weight(1f).height(42.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = emerald, contentColor = Color.Black)
+                        ) {
+                            Text("Bought", fontWeight = FontWeight.Bold)
+                        }
+                        Button(
+                            onClick = { viewModel.cancelPlayer() },
+                            modifier = Modifier.weight(1f).height(42.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E2923), contentColor = Color.White)
+                        ) {
+                            Text("Cancel", fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
+
+                Button(
+                    onClick = { if (isRunning) viewModel.stopBot() else viewModel.startBot() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(46.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isRunning) red else emerald,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text(
+                        text = if (isRunning) "STOP BOT" else "START BOT",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = if (isRunning) Color.White else Color.Black
+                    )
+                }
+            }
 
             Text(
                 text = "Live Activity Log",
@@ -297,6 +301,99 @@ fun HomeScreen(
             }
         }
     }
+}
+
+@Composable
+private fun AnimatedStatusChipsRow(
+    connected: Boolean,
+    platform: String,
+    modeText: String,
+    interval: String,
+    onSettingsClick: () -> Unit
+) {
+    val shape = RoundedCornerShape(20.dp)
+
+    val infiniteTransition = rememberInfiniteTransition(label = "connectedPulse")
+    val dotAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(900, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "dotPulse"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(Color(0xFF050805))
+            .border(1.dp, Color(0xFF141A16), shape)
+            .padding(horizontal = 14.dp, vertical = 10.dp)
+            .clickable(onClick = onSettingsClick)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(
+                            if (connected) emerald.copy(alpha = dotAlpha) else Color.Gray
+                        )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (connected) "CONNECTED" else "OFFLINE",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (connected) emerald else Color.Gray,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            DividerText()
+
+            Text(
+                text = platform.uppercase(Locale.ROOT),
+                style = MaterialTheme.typography.labelLarge,
+                color = Color.White,
+                fontWeight = FontWeight.Medium
+            )
+
+            DividerText()
+
+            Text(
+                text = modeText,
+                style = MaterialTheme.typography.labelLarge,
+                color = emerald,
+                fontWeight = FontWeight.Medium
+            )
+
+            DividerText()
+
+            Text(
+                text = interval,
+                style = MaterialTheme.typography.labelLarge,
+                color = Color(0xFF9CA3AF),
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
+private fun DividerText() {
+    Text(
+        text = " | ",
+        color = Color(0xFF27302A),
+        style = MaterialTheme.typography.labelLarge,
+        modifier = Modifier.padding(horizontal = 6.dp)
+    )
 }
 
 @Composable
