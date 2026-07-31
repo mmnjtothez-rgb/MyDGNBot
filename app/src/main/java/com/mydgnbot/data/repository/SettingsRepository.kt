@@ -10,6 +10,10 @@ class SettingsRepository(
     val settings: Flow<Map<String, String>> =
         dataStore.settings
 
+    suspend fun saveSingleSetting(key: String, value: String) {
+        dataStore.saveSingleSetting(key, value)
+    }
+
     suspend fun saveSettings(
         apiUser: String,
         secretKey: String,
