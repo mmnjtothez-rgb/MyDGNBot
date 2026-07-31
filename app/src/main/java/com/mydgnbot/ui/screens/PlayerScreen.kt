@@ -3,6 +3,7 @@ package com.mydgnbot.ui.screens
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mydgnbot.domain.model.Player
 import com.mydgnbot.ui.components.PlayerCard
+import com.mydgnbot.ui.components.PlayerCardBottomBar
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,26 +33,16 @@ fun PlayerScreen(
     onBackClick: () -> Unit,
     player: Player
 ) {
-    val livePlayer by viewModel.player.collectAsState()
     val isPaused by viewModel.isPaused.collectAsState()
 
-    // Pause bot when entering player screen
     LaunchedEffect(Unit) {
         if (!isPaused) {
             viewModel.setPaused(true)
         }
     }
 
-    // When live player becomes null (after buy/cancel), ensure unpaused and go back
-    LaunchedEffect(livePlayer) {
-        if (livePlayer == null) {
-            viewModel.setPaused(false)
-            onBackClick()
-        }
-    }
-
-    val wrappedOnBackClick = {
-        // If user manually goes back without buying/canceling, resume bot
+    val handleActionAndReturn = { action: () -> Unit ->
+        action()
         viewModel.setPaused(false)
         onBackClick()
     }
@@ -60,17 +52,27 @@ fun PlayerScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Player",
+                        text = "Player Details",
                         style = MaterialTheme.typography.titleMedium
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = wrappedOnBackClick) {
+                    IconButton(onClick = { handleActionAndReturn {} }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
+                }
+            )
+        },
+        bottomBar = {
+            PlayerCardBottomBar(
+                onBought = {
+                    handleActionAndReturn { viewModel.markBought() }
+                },
+                onCanceled = {
+                    handleActionAndReturn { viewModel.cancelPlayer() }
                 }
             )
         }
@@ -81,15 +83,12 @@ fun PlayerScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 14.dp)
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             PlayerCard(
                 player = player,
-                onBought = {
-                    viewModel.markBought()
-                },
                 onCanceled = {
-                    viewModel.cancelPlayer()
+                    handleActionAndReturn { viewModel.cancelPlayer() }
                 }
             )
         }
