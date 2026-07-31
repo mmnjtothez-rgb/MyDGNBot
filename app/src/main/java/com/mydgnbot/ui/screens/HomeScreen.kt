@@ -36,8 +36,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -45,7 +43,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -113,15 +110,11 @@ fun HomeScreen(
     val logs by viewModel.logs.collectAsState()
     val activePlayer by viewModel.player.collectAsState()
 
-    val platform = settings["platform"] ?: "CONSOLE"
-    val playerType = settings["player_type"] ?: "2"
-    val modeText = if (playerType == "1") "Safe" else "Quick Sell"
-    val pollSeconds = settings["poll_interval"] ?: "10"
-    val interval = "${pollSeconds}s"
-
-    // Local state for Quick Settings Controls
-    var selectedInterval by remember { mutableStateOf(pollSeconds) }
-    var autoStopEnabled by remember { mutableStateOf(false) }
+    val currentPlatform = settings["platform"] ?: "CONSOLE"
+    val currentPlayerType = settings["player_type"] ?: "2" // "1" = Safe, "2" = Quick Sell
+    val modeText = if (currentPlayerType == "1") "Safe" else "Quick Sell"
+    val currentPollInterval = settings["poll_interval"] ?: "10"
+    val intervalText = "${currentPollInterval}s"
 
     var bgIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
@@ -248,9 +241,9 @@ fun HomeScreen(
                 // 2. STATUS CHIPS
                 AnimatedStatusChipsRow(
                     connected = isOnline,
-                    platform = platform,
+                    platform = currentPlatform,
                     modeText = modeText,
-                    interval = interval,
+                    interval = intervalText,
                     onSettingsClick = onSettingsClick
                 )
 
@@ -269,7 +262,7 @@ fun HomeScreen(
                         .height(161.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // LEFT: Scrollable Activity Log Box with Timestamps
+                    // LEFT: Scrollable Activity Log Box with Fixed Timestamp Formatting
                     GlassmorphicCard(
                         modifier = Modifier
                             .weight(1f)
@@ -297,12 +290,15 @@ fun HomeScreen(
                                     verticalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     logs.forEach { log ->
-                                        val timestamp = remember(log.timestamp) {
-                                            SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(log.timestamp))
+                                        // Safe timestamp parsing (handles String millis or raw numbers)
+                                        val formattedTime = remember(log.timestamp) {
+                                            val millis = log.timestamp.toLongOrNull() ?: System.currentTimeMillis()
+                                            SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(millis))
                                         }
+
                                         Row(verticalAlignment = Alignment.Top) {
                                             Text(
-                                                text = "[$timestamp] ",
+                                                text = "[$formattedTime] ",
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Emerald
@@ -319,7 +315,7 @@ fun HomeScreen(
                         }
                     }
 
-                    // RIGHT: Cycling Player Card Frame with Tap Prompt (161 dp height)
+                    // RIGHT: Cycling Player Card Frame with Tap Prompt
                     val isPlayerActive = activePlayer != null
                     val shape = RoundedCornerShape(18.dp)
 
@@ -439,7 +435,7 @@ fun HomeScreen(
                     )
                 }
 
-                // 5. QUICK SETTINGS & ACTION BAR (Filling Bottom Layout Space)
+                // 5. FUNCTIONAL QUICK CONTROLS (Directly wired to ViewModel)
                 Text(
                     text = "Quick Controls",
                     fontSize = 14.sp,
@@ -457,7 +453,103 @@ fun HomeScreen(
                             .padding(14.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        // Rapid Interval Stepper / Selector
+                        // A. Platform Switcher (CONSOLE / PC)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Target Platform",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "Active market ecosystem",
+                                    fontSize = 11.sp,
+                                    color = TextMuted
+                                )
+                            }
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                listOf("CONSOLE", "PC").forEach { platform ->
+                                    val isSelected = currentPlatform.equals(platform, ignoreCase = true)
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(if (isSelected) Emerald else Color(0xFF141A16))
+                                            .border(
+                                                1.dp,
+                                                if (isSelected) Emerald else Color(0xFF27302A),
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                            .clickable {
+                                                viewModel.saveSetting("platform", platform)
+                                            }
+                                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    ) {
+                                        Text(
+                                            text = platform,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isSelected) Color.Black else Color.White
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // B. Strategy Mode Switcher (Safe / Quick Sell)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Player Strategy",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "Safe filtering vs quick sell",
+                                    fontSize = 11.sp,
+                                    color = TextMuted
+                                )
+                            }
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                listOf("Safe" to "1", "Quick Sell" to "2").forEach { (label, modeCode) ->
+                                    val isSelected = currentPlayerType == modeCode
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(if (isSelected) Emerald else Color(0xFF141A16))
+                                            .border(
+                                                1.dp,
+                                                if (isSelected) Emerald else Color(0xFF27302A),
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                            .clickable {
+                                                viewModel.saveSetting("player_type", modeCode)
+                                            }
+                                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                                    ) {
+                                        Text(
+                                            text = label,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isSelected) Color.Black else Color.White
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // C. Scan Interval Switcher (10s / 15s / 20s)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -478,8 +570,9 @@ fun HomeScreen(
                             }
 
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                listOf("5s", "10s", "15s").forEach { opt ->
-                                    val isSelected = selectedInterval == opt.replace("s", "")
+                                listOf("10s", "15s", "20s").forEach { opt ->
+                                    val seconds = opt.replace("s", "")
+                                    val isSelected = currentPollInterval == seconds
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(8.dp))
@@ -489,7 +582,9 @@ fun HomeScreen(
                                                 if (isSelected) Emerald else Color(0xFF27302A),
                                                 RoundedCornerShape(8.dp)
                                             )
-                                            .clickable { selectedInterval = opt.replace("s", "") }
+                                            .clickable {
+                                                viewModel.saveSetting("poll_interval", seconds)
+                                            }
                                             .padding(horizontal = 10.dp, vertical = 6.dp)
                                     ) {
                                         Text(
@@ -501,38 +596,6 @@ fun HomeScreen(
                                     }
                                 }
                             }
-                        }
-
-                        // Auto-Stop Trigger Toggle
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = "Auto-Stop Safeguard",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                                Text(
-                                    text = "Pause automatically on market buy",
-                                    fontSize = 11.sp,
-                                    color = TextMuted
-                                )
-                            }
-
-                            Switch(
-                                checked = autoStopEnabled,
-                                onCheckedChange = { autoStopEnabled = it },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color.Black,
-                                    checkedTrackColor = Emerald,
-                                    uncheckedThumbColor = Color.Gray,
-                                    uncheckedTrackColor = Color(0xFF141A16)
-                                )
-                            )
                         }
                     }
                 }
