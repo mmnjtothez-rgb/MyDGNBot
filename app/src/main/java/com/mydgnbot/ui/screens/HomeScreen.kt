@@ -16,7 +16,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,7 +55,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -77,6 +75,24 @@ private val emerald = Color(0xFF42E8B4)
 private val darkBg = Color(0xFF0B0F0C)
 private val darkSurface = Color(0xFF060807)
 private val red = Color(0xFFFF5C5C)
+
+// Specific list of all 14 card resource names in res/drawable
+private val CARD_DRAWABLE_NAMES = listOf(
+    "fc26_captains_card",
+    "fc26_futbirthday_card",
+    "fc26_gold_card",
+    "fc26_hero_card",
+    "fc26_icon_card",
+    "fc26_ratingreload_card",
+    "fc26_scream_card",
+    "fc26_thunderstruck_card",
+    "fc26_tots_card",
+    "fc26_totw_card",
+    "fc26_toty_card",
+    "fc26_trophyicon_card",
+    "fc26_ucl_card",
+    "fc26_winter_card"
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -152,8 +168,7 @@ fun HomeScreen(
                 border = BorderStroke(1.dp, Color(0xFF163122))
             ) {
                 Column(
-                    modifier = Modifier
-                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                 ) {
                     if (activePlayer != null) {
                         Row(
@@ -325,7 +340,6 @@ private fun AnimatedRadarScannerCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Interactive Radar Circle
             Box(
                 modifier = Modifier.size(56.dp),
                 contentAlignment = Alignment.Center
@@ -334,12 +348,10 @@ private fun AnimatedRadarScannerCard(
                     val radius = size.minDimension / 2
                     val centerOffset = Offset(size.width / 2, size.height / 2)
 
-                    // Concentric Radar Rings
                     drawCircle(color = Color(0xFF1B3D2B), radius = radius, style = Stroke(width = 1.5dp.toPx()))
                     drawCircle(color = Color(0xFF1B3D2B), radius = radius * 0.65f, style = Stroke(width = 1dp.toPx()))
                     drawCircle(color = Color(0xFF1B3D2B), radius = radius * 0.35f, style = Stroke(width = 1dp.toPx()))
 
-                    // Radar Sweep Line when running
                     if (isRunning) {
                         rotate(rotationAngle, pivot = centerOffset) {
                             drawLine(
@@ -355,7 +367,6 @@ private fun AnimatedRadarScannerCard(
                         }
                     }
 
-                    // Center Status Dot
                     drawCircle(
                         color = if (isRunning) emerald.copy(alpha = pulseAlpha) else Color.Gray,
                         radius = 4.dp.toPx()
@@ -363,7 +374,6 @@ private fun AnimatedRadarScannerCard(
                 }
             }
 
-            // Radar Status Details
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = when {
@@ -389,17 +399,17 @@ private fun AnimatedRadarScannerCard(
 @Composable
 private fun CardShowcaseBox(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    var currentCardIndex by remember { mutableIntStateOf(1) }
+    var currentCardIndex by remember { mutableIntStateOf(0) }
 
-    // Auto-cycle through cards 1 through 14 every 3 seconds
+    // Auto-cycle through the 14 card drawables every 3 seconds
     LaunchedEffect(Unit) {
         while (true) {
             kotlinx.coroutines.delay(3000)
-            currentCardIndex = (currentCardIndex % 14) + 1
+            currentCardIndex = (currentCardIndex + 1) % CARD_DRAWABLE_NAMES.size
         }
     }
 
-    val resName = "card_$currentCardIndex"
+    val resName = CARD_DRAWABLE_NAMES[currentCardIndex]
     val resId = remember(currentCardIndex) {
         context.resources.getIdentifier(resName, "drawable", context.packageName)
     }
@@ -427,7 +437,7 @@ private fun CardShowcaseBox(modifier: Modifier = Modifier) {
                 }
             } else {
                 Text(
-                    text = "CARD\n#$currentCardIndex",
+                    text = "FC26\nCARD",
                     style = MaterialTheme.typography.labelSmall,
                     color = emerald,
                     fontWeight = FontWeight.Bold
