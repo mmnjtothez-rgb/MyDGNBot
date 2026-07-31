@@ -30,8 +30,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,6 +45,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
@@ -60,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.mydgnbot.domain.model.Player
+import com.mydgnbot.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.delay
 import java.util.Locale
 
@@ -72,25 +74,30 @@ private val textMuted = Color(0xFF9CA3AF)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlayerDetailsScreen(
+fun PlayerScreen(
+    viewModel: HomeViewModel,
+    onBackClick: () -> Unit,
     player: Player,
-    connected: Boolean = true,
-    platform: String = "Console",
-    modeText: String = "Quick Sell",
-    interval: String = "10s",
-    onBoughtClick: () -> Unit,
-    onCancelClick: () -> Unit,
     onSettingsClick: () -> Unit = {},
     onHistoryClick: () -> Unit = {}
 ) {
-    // 5-minute countdown timer (MM:ss)
+    val isOnline by viewModel.isOnline.collectAsState()
+    val settings by viewModel.settings.collectAsState()
+
+    val platform = settings["platform"] ?: player.platform.name
+    val playerType = settings["player_type"] ?: "2"
+    val modeText = if (playerType == "1") "Safe" else "Quick Sell"
+    val pollSeconds = settings["poll_interval"] ?: "10"
+    val interval = "${pollSeconds}s"
+
+    // 5-minute countdown calculation (MM:ss format)
     var remainingSeconds by remember(player) {
         val now = System.currentTimeMillis() / 1000
-        val rawExpiry = player.marketExpiry.toLongOrNull() ?: 0L
-        val secondsLeft = if (rawExpiry > now) {
-            rawExpiry - now
-        } else if (rawExpiry in 1..300) {
-            rawExpiry
+        val targetExpiry = player.marketExpiry
+        val secondsLeft = if (targetExpiry > now) {
+            targetExpiry - now
+        } else if (targetExpiry in 1..300) {
+            targetExpiry
         } else {
             300L
         }
@@ -148,7 +155,6 @@ fun PlayerDetailsScreen(
             )
         },
         bottomBar = {
-            // Action Buttons Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -157,7 +163,10 @@ fun PlayerDetailsScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Button(
-                    onClick = onBoughtClick,
+                    onClick = {
+                        viewModel.markBought()
+                        onBackClick()
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .height(52.dp),
@@ -181,7 +190,10 @@ fun PlayerDetailsScreen(
                 }
 
                 Button(
-                    onClick = onCancelClick,
+                    onClick = {
+                        viewModel.cancelPlayer()
+                        onBackClick()
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .height(52.dp),
@@ -211,9 +223,9 @@ fun PlayerDetailsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Status Chips Row Component above player details
+            // Status Chips Row Component
             AnimatedStatusChipsRow(
-                connected = connected,
+                connected = isOnline,
                 platform = platform,
                 modeText = modeText,
                 interval = interval,
@@ -254,7 +266,7 @@ fun PlayerDetailsScreen(
                     modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Resource ID Badge (Top Right)
+                    // Resource ID Badge
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
@@ -276,7 +288,7 @@ fun PlayerDetailsScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // Real Enriched EA FC Player Card Image
+                    // Player Card Graphic
                     Box(
                         modifier = Modifier
                             .height(200.dp)
@@ -284,7 +296,7 @@ fun PlayerDetailsScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         AsyncImage(
-                            model = player.cardImage,
+                            model = player.imageUrl,
                             contentDescription = player.playerName,
                             contentScale = ContentScale.Fit,
                             modifier = Modifier.fillMaxSize()
@@ -318,7 +330,7 @@ fun PlayerDetailsScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Science,
+                                    imageVector = Icons.Default.Star,
                                     contentDescription = null,
                                     tint = emerald,
                                     modifier = Modifier.size(14.dp)
@@ -381,7 +393,7 @@ fun PlayerDetailsScreen(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "${player.startingBid}",
+                                    text = "${player.startPrice}",
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
@@ -415,7 +427,7 @@ fun PlayerDetailsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Time Remaining Bottom Label
+                    // Time Remaining Bottom Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
