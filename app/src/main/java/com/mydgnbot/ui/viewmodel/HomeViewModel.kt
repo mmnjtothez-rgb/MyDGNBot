@@ -120,6 +120,12 @@ class HomeViewModel(
 
     private var botJob: Job? = null
 
+    fun saveSetting(key: String, value: String) {
+        viewModelScope.launch {
+            settingsRepository.saveSingleSetting(key, value)
+        }
+    }
+
     fun requestHistory() {
         _showHistory.value = true
     }
