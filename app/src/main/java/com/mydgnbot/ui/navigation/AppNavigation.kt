@@ -85,13 +85,24 @@ fun AppNavigation() {
 
         composable("player") {
             val playerState by homeViewModel.player.collectAsState()
+            val settingsState by homeViewModel.settings.collectAsState()
             val player = playerState
 
             if (player != null) {
                 PlayerScreen(
-                    viewModel = homeViewModel,
-                    onBackClick = { navigateBackToHome() },
-                    player = player
+                    player = player,
+                    platform = settingsState["platform"] ?: "Console",
+                    playerType = settingsState["player_type"] ?: "2",
+                    pollInterval = settingsState["poll_interval"] ?: "10",
+                    timeRemainingText = player.marketExpiry.toString().ifEmpty { "59:22" },
+                    onBoughtClick = {
+                        homeViewModel.markBought()
+                        navigateBackToHome()
+                    },
+                    onCancelClick = {
+                        homeViewModel.cancelPlayer()
+                        navigateBackToHome()
+                    }
                 )
             }
         }
@@ -106,6 +117,7 @@ fun AppNavigation() {
             )
         ) { backStackEntry ->
             val playerId = backStackEntry.arguments?.getString("playerId")
+            val settingsState by homeViewModel.settings.collectAsState()
             val player = if (playerId != null) {
                 homeViewModel.recentPlayers.value.find { p ->
                     p.resourceId.ifBlank { p.transactionId } == playerId
@@ -116,9 +128,19 @@ fun AppNavigation() {
 
             if (player != null) {
                 PlayerScreen(
-                    viewModel = homeViewModel,
-                    onBackClick = { navigateBackToHome() },
-                    player = player
+                    player = player,
+                    platform = settingsState["platform"] ?: "Console",
+                    playerType = settingsState["player_type"] ?: "2",
+                    pollInterval = settingsState["poll_interval"] ?: "10",
+                    timeRemainingText = player.marketExpiry.toString().ifEmpty { "59:22" },
+                    onBoughtClick = {
+                        homeViewModel.markBought()
+                        navigateBackToHome()
+                    },
+                    onCancelClick = {
+                        homeViewModel.cancelPlayer()
+                        navigateBackToHome()
+                    }
                 )
             }
         }
