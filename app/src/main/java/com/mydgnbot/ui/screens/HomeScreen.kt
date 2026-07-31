@@ -63,11 +63,15 @@ fun HomeScreen(
     onPlayerFound: () -> Unit
 ) {
     val isRunning by viewModel.isRunning.collectAsState()
-    val isPaused by viewModel.isPaused.collectAsState()
     val logs by viewModel.logs.collectAsState()
     val activePlayer by viewModel.player.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
-    // Trigger navigation immediately when a player is caught by the bot
+    // Collect settings data from ViewModel for StatusChipsRow
+    val platform by viewModel.platform.collectAsState()
+    val method by viewModel.method.collectAsState()
+    val interval by viewModel.interval.collectAsState()
+
     LaunchedEffect(activePlayer) {
         if (activePlayer != null) {
             onPlayerFound()
@@ -123,9 +127,10 @@ fun HomeScreen(
             ) {
                 Box(modifier = Modifier.padding(16.dp)) {
                     ActionButtons(
-                        isRunning = isRunning,
-                        onStartClick = { viewModel.startBot() },
-                        onStopClick = { viewModel.stopBot() }
+                        state = uiState,
+                        onBoughtClick = { viewModel.buyPlayer() },
+                        onCancelClick = { viewModel.cancelPlayer() },
+                        onHistoryClick = onHistoryClick
                     )
                 }
             }
@@ -147,13 +152,17 @@ fun HomeScreen(
 
             // Radar Scanner Component
             ScannerStatusCard(
-                isRunning = isRunning,
-                isPaused = isPaused
+                playerFound = activePlayer != null,
+                connected = isRunning
             )
 
             // Status Chips Row Component
             StatusChipsRow(
-                viewModel = viewModel
+                connected = isRunning,
+                platform = platform,
+                method = method,
+                interval = interval,
+                onSettingsClick = onSettingsClick
             )
 
             // Live Activity Log Feed
@@ -178,7 +187,7 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No bot activity yet. Tap 'Start Bot' to listen.",
+                            text = "No bot activity yet. Waiting for incoming data...",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF6B7280)
                         )
