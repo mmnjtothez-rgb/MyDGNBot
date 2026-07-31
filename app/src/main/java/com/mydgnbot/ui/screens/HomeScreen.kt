@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mydgnbot.domain.model.LogEntry
 import com.mydgnbot.ui.components.ActionButtons
+import com.mydgnbot.ui.components.BotActionState
 import com.mydgnbot.ui.components.ScannerStatusCard
 import com.mydgnbot.ui.components.StatusChipsRow
 import com.mydgnbot.ui.viewmodel.HomeViewModel
@@ -63,15 +64,25 @@ fun HomeScreen(
     onPlayerFound: () -> Unit
 ) {
     val isRunning by viewModel.isRunning.collectAsState()
+    val isOnline by viewModel.isOnline.collectAsState()
     val logs by viewModel.logs.collectAsState()
     val activePlayer by viewModel.player.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
+    val settings by viewModel.settings.collectAsState()
 
-    // Collect settings data from ViewModel for StatusChipsRow
-    val platform by viewModel.platform.collectAsState()
-    val method by viewModel.method.collectAsState()
-    val interval by viewModel.interval.collectAsState()
+    // Read settings directly from HomeViewModel settings state
+    val platform = settings["platform"] ?: "Console"
+    val method = settings["method"] ?: "API"
+    val pollSeconds = settings["poll_interval"] ?: "10"
+    val interval = "${pollSeconds}s"
 
+    // Derive BotActionState for ActionButtons
+    val actionState = when {
+        activePlayer != null -> BotActionState.PLAYER_FOUND
+        isRunning -> BotActionState.SEARCHING
+        else -> BotActionState.IDLE
+    }
+
+    // Trigger navigation immediately when a player is caught
     LaunchedEffect(activePlayer) {
         if (activePlayer != null) {
             onPlayerFound()
@@ -127,8 +138,10 @@ fun HomeScreen(
             ) {
                 Box(modifier = Modifier.padding(16.dp)) {
                     ActionButtons(
-                        state = uiState,
-                        onBoughtClick = { viewModel.buyPlayer() },
+                        state = actionState,
+                        onStartClick = { viewModel.startBot() },
+                        onStopClick = { viewModel.stopBot() },
+                        onBoughtClick = { viewModel.markBought() },
                         onCancelClick = { viewModel.cancelPlayer() },
                         onHistoryClick = onHistoryClick
                     )
@@ -152,13 +165,14 @@ fun HomeScreen(
 
             // Radar Scanner Component
             ScannerStatusCard(
+                isRunning = isRunning,
                 playerFound = activePlayer != null,
-                connected = isRunning
+                connected = isOnline
             )
 
             // Status Chips Row Component
             StatusChipsRow(
-                connected = isRunning,
+                connected = isOnline,
                 platform = platform,
                 method = method,
                 interval = interval,
@@ -187,7 +201,7 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No bot activity yet. Waiting for incoming data...",
+                            text = "No bot activity yet. Tap 'Start Bot' to listen.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF6B7280)
                         )
