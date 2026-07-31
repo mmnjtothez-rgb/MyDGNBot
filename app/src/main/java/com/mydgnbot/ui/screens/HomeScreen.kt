@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -112,7 +113,6 @@ fun HomeScreen(
 
     val platform = settings["platform"] ?: "Console"
 
-    // Map player_type key accurately ("1" -> Safe, "2" -> Quick Sell)
     val playerType = settings["player_type"] ?: "2"
     val modeText = if (playerType == "1") "Safe" else "Quick Sell"
 
@@ -249,7 +249,7 @@ fun HomeScreen(
                 )
             }
 
-            // Start Bot Action Buttons (Placed directly below Live Activity Log)
+            // Start Bot Action Buttons
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -343,9 +343,10 @@ private fun AnimatedStatusChipsRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
-                // Precise vertical centering for the green dot relative to font line
+                // Shifted -1.dp upward to align perfectly with text baseline
                 Box(
                     modifier = Modifier
+                        .offset(y = (-1).dp)
                         .size(8.dp)
                         .clip(CircleShape)
                         .background(
