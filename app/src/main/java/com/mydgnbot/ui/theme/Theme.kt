@@ -1,46 +1,33 @@
 package com.mydgnbot.ui.theme
 
-import android.os.Build
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+
+val Emerald = Color(0xFF42E8B4)
+val EmeraldDark = Color(0xFF28C795)
+val EmeraldGlow = Color(0xFF0A2417)
+val DarkBg = Color(0xFF020503)
+val ContainerBgTop = Color(0xFF0B1711)
+val ContainerBgBottom = Color(0xFF040A07)
+val BorderTop = Color(0xFF1E4230)
+val BorderBottom = Color(0xFF0A160F)
+val TextMuted = Color(0xFF9CA3AF)
 
 private val DarkColorScheme = darkColorScheme(
     primary = Emerald,
-    secondary = EmeraldSoft,
-    tertiary = Gold,
-    background = Black0,
-    surface = Black1,
-    surfaceVariant = Titanium,
-    onPrimary = Black0,
-    onSecondary = Black0,
-    onTertiary = Black0,
-    onBackground = TextPrimary,
-    onSurface = TextPrimary,
-    onSurfaceVariant = TextSecondary
+    background = DarkBg,
+    surface = ContainerBgTop,
+    onPrimary = Color.Black,
+    onBackground = Color.White,
+    onSurface = Color.White
 )
 
 @Composable
-fun MyDGNBotTheme(
-    darkTheme: Boolean = true,
-    dynamicColor: Boolean = false,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        else -> DarkColorScheme
-    }
-
+fun MyDGNBotTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        shapes = Shapes,
+        colorScheme = DarkColorScheme,
         content = content
     )
 }
