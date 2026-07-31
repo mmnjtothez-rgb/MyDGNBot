@@ -262,14 +262,12 @@ fun HomeScreen(
                         .height(161.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // LEFT: Scrollable Activity Log Box with Fixed Timestamp Formatting
+                    // LEFT: Non-Scrollable Activity Log Box with Fixed Timestamp Formatting
                     GlassmorphicCard(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxSize()
                     ) {
-                        val logScrollState = rememberScrollState()
-                        
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -284,9 +282,7 @@ fun HomeScreen(
                                 )
                             } else {
                                 Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .verticalScroll(logScrollState),
+                                    modifier = Modifier.fillMaxSize(),
                                     verticalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     logs.forEach { log ->
