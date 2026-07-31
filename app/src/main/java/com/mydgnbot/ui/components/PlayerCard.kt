@@ -88,30 +88,41 @@ fun PlayerCard(
         return
     }
 
-    val lockExpiresMillis = player.lockExpires * 1000L
-    var remainingLockMillis by remember(player.lockExpires) {
-        mutableStateOf(lockExpiresMillis - System.currentTimeMillis())
+    // 5-minute local countdown timer (300 seconds default, or lockExpires duration)
+    val totalDurationSeconds = if (player.lockExpires > 0) player.lockExpires else 300L
+
+    var remainingLockSeconds by remember(player.transactionId) {
+        mutableStateOf(totalDurationSeconds)
     }
 
-    LaunchedEffect(player.lockExpires) {
-        while (remainingLockMillis > 0L) {
+    LaunchedEffect(player.transactionId) {
+        while (remainingLockSeconds > 0L) {
             delay(1000)
-            remainingLockMillis = lockExpiresMillis - System.currentTimeMillis()
+            remainingLockSeconds--
         }
-        if (remainingLockMillis <= 0L) {
+        if (remainingLockSeconds <= 0L) {
             onCanceled()
         }
     }
 
-    val lockSeconds = (remainingLockMillis / 1000L).coerceAtLeast(0L).toInt()
-
     val lockTimerColor by animateColorAsState(
         targetValue = when {
-            lockSeconds > 120 -> emerald
-            lockSeconds > 30 -> amber
+            remainingLockSeconds > 120 -> emerald
+            remainingLockSeconds > 30 -> amber
             else -> red
         },
         label = "lockTimerColor"
+    )
+
+    val pulseTransition = rememberInfiniteTransition(label = "pulse")
+    val pulseAlpha by pulseTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0.55f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = FastOutLinearInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseAlpha"
     )
 
     Column(
@@ -120,7 +131,7 @@ fun PlayerCard(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Timer Container
+        // Countdown Banner Header
         Surface(
             shape = RoundedCornerShape(16.dp),
             color = darkSurface,
@@ -134,7 +145,7 @@ fun PlayerCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = formatTime(lockSeconds.toLong()),
+                    text = formatTime(remainingLockSeconds),
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
                     color = lockTimerColor,
@@ -155,7 +166,7 @@ fun PlayerCard(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Top Header Section (Player Image + Name)
+                // Player Card Image + Overall Rating
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -208,7 +219,7 @@ fun PlayerCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                // Pills Row
+                // Chemistry & Owner Status Badges
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
@@ -225,7 +236,7 @@ fun PlayerCard(
                     )
                 }
 
-                // Stats Section
+                // Transfer Bidding Details
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
