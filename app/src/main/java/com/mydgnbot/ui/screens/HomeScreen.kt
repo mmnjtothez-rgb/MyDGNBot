@@ -48,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -76,22 +77,22 @@ import com.mydgnbot.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.delay
 import java.util.Locale
 
-// List of your 14 card background drawables
+// List mapping your exact 14 card background drawables
 private val CARD_BACKGROUNDS = listOf(
-    R.drawable.card_bg_1,
-    R.drawable.card_bg_2,
-    R.drawable.card_bg_3,
-    R.drawable.card_bg_4,
-    R.drawable.card_bg_5,
-    R.drawable.card_bg_6,
-    R.drawable.card_bg_7,
-    R.drawable.card_bg_8,
-    R.drawable.card_bg_9,
-    R.drawable.card_bg_10,
-    R.drawable.card_bg_11,
-    R.drawable.card_bg_12,
-    R.drawable.card_bg_13,
-    R.drawable.card_bg_14
+    R.drawable.fc26_captains_card,
+    R.drawable.fc26_futbirthday_card,
+    R.drawable.fc26_gold_card,
+    R.drawable.fc26_hero_card,
+    R.drawable.fc26_icon_card,
+    R.drawable.fc26_ratingreload_card,
+    R.drawable.fc26_scream_card,
+    R.drawable.fc26_thunderstruck_card,
+    R.drawable.fc26_tots_card,
+    R.drawable.fc26_totw_card,
+    R.drawable.fc26_toty_card,
+    R.drawable.fc26_trophyicon_card,
+    R.drawable.fc26_ucl_card,
+    R.drawable.fc26_winter_card
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,12 +115,13 @@ fun HomeScreen(
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
 
-    // Timer logic to cycle through the 14 card backgrounds every 3 seconds
     var bgIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
-        while (true) {
-            delay(3000)
-            bgIndex = (bgIndex + 1) % CARD_BACKGROUNDS.size
+        if (CARD_BACKGROUNDS.isNotEmpty()) {
+            while (true) {
+                delay(3000)
+                bgIndex = (bgIndex + 1) % CARD_BACKGROUNDS.size
+            }
         }
     }
 
@@ -294,7 +296,6 @@ fun HomeScreen(
                                         .padding(6.dp)
                                 )
                             } else {
-                                // Animated transition between the 14 backgrounds
                                 Crossfade(
                                     targetState = CARD_BACKGROUNDS[bgIndex],
                                     animationSpec = tween(durationMillis = 800),
@@ -306,7 +307,8 @@ fun HomeScreen(
                                         contentScale = ContentScale.Fit,
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .padding(6.dp)
+                                            .padding(8.dp)
+                                            .alpha(0.9f)
                                     )
                                 }
                             }
