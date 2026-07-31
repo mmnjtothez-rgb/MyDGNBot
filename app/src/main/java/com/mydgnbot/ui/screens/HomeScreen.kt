@@ -1,10 +1,22 @@
 package com.mydgnbot.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +34,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,24 +51,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mydgnbot.domain.model.LogEntry
-import com.mydgnbot.ui.components.ActionButtons
-import com.mydgnbot.ui.components.BotActionState
-import com.mydgnbot.ui.components.ScannerStatusCard
 import com.mydgnbot.ui.components.StatusChipsRow
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 
 private val emerald = Color(0xFF42E8B4)
 private val darkBg = Color(0xFF0B0F0C)
 private val darkSurface = Color(0xFF060807)
+private val red = Color(0xFFFF5C5C)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,20 +92,11 @@ fun HomeScreen(
     val activePlayer by viewModel.player.collectAsState()
     val settings by viewModel.settings.collectAsState()
 
-    // Read settings directly from HomeViewModel settings state
     val platform = settings["platform"] ?: "Console"
     val method = settings["method"] ?: "API"
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
 
-    // Derive BotActionState for ActionButtons
-    val actionState = when {
-        activePlayer != null -> BotActionState.PLAYER_FOUND
-        isRunning -> BotActionState.SEARCHING
-        else -> BotActionState.IDLE
-    }
-
-    // Trigger navigation immediately when a player is caught
     LaunchedEffect(activePlayer) {
         if (activePlayer != null) {
             onPlayerFound()
@@ -131,20 +145,57 @@ fun HomeScreen(
             )
         },
         bottomBar = {
+            // Compact bottom action bar
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = darkSurface,
                 border = BorderStroke(1.dp, Color(0xFF163122))
             ) {
-                Box(modifier = Modifier.padding(16.dp)) {
-                    ActionButtons(
-                        state = actionState,
-                        onStartClick = { viewModel.startBot() },
-                        onStopClick = { viewModel.stopBot() },
-                        onBoughtClick = { viewModel.markBought() },
-                        onCancelClick = { viewModel.cancelPlayer() },
-                        onHistoryClick = onHistoryClick
-                    )
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    if (activePlayer != null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Button(
+                                onClick = { viewModel.markBought() },
+                                modifier = Modifier.weight(1f).height(44.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = emerald, contentColor = Color.Black)
+                            ) {
+                                Text("Bought", fontWeight = FontWeight.Bold)
+                            }
+                            Button(
+                                onClick = { viewModel.cancelPlayer() },
+                                modifier = Modifier.weight(1f).height(44.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E2923), contentColor = Color.White)
+                            ) {
+                                Text("Cancel", fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+
+                    Button(
+                        onClick = { if (isRunning) viewModel.stopBot() else viewModel.startBot() },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isRunning) red else emerald,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text(
+                            text = if (isRunning) "STOP BOT" else "START BOT",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            color = if (isRunning) Color.White else Color.Black
+                        )
+                    }
                 }
             }
         }
@@ -158,16 +209,14 @@ fun HomeScreen(
                         colors = listOf(darkSurface, darkBg)
                     )
                 )
-                .padding(horizontal = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Spacer(modifier = Modifier.height(4.dp))
-
             // Radar Scanner Component
-            ScannerStatusCard(
+            AnimatedRadarScannerCard(
                 isRunning = isRunning,
-                playerFound = activePlayer != null,
-                connected = isOnline
+                connected = isOnline,
+                playerFound = activePlayer != null
             )
 
             // Status Chips Row Component
@@ -179,7 +228,6 @@ fun HomeScreen(
                 onSettingsClick = onSettingsClick
             )
 
-            // Live Activity Log Feed
             Text(
                 text = "Live Activity Log",
                 style = MaterialTheme.typography.titleSmall,
@@ -187,42 +235,203 @@ fun HomeScreen(
                 fontWeight = FontWeight.SemiBold
             )
 
-            Card(
+            // Live Log Feed (4 lines height) + Card Showcase Side-by-Side
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = darkBg),
-                border = BorderStroke(1.dp, Color(0xFF163122))
+                    .height(132.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                if (logs.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No bot activity yet. Tap 'Start Bot' to listen.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF6B7280)
-                        )
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(logs.reversed()) { log ->
-                            AnimatedVisibility(
-                                visible = true,
-                                enter = fadeIn() + slideInVertically()
-                            ) {
+                // Scrollable 4-line Activity Log Box
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = darkBg),
+                    border = BorderStroke(1.dp, Color(0xFF163122))
+                ) {
+                    if (logs.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No bot activity yet.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF6B7280)
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            items(logs.reversed()) { log ->
                                 LogItemRow(log = log)
                             }
                         }
                     }
                 }
+
+                // Animated Card Image Showcase (Right Side)
+                CardShowcaseBox(
+                    modifier = Modifier
+                        .width(96.dp)
+                        .fillMaxSize()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnimatedRadarScannerCard(
+    isRunning: Boolean,
+    connected: Boolean,
+    playerFound: Boolean
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "radar")
+    val rotationAngle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation"
+    )
+
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutLinearInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse"
+    )
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = Color(0xFF070B08),
+        border = BorderStroke(1.dp, Color(0xFF163122))
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // Interactive Radar Circle
+            Box(
+                modifier = Modifier.size(56.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val radius = size.minDimension / 2
+                    val centerOffset = Offset(size.width / 2, size.height / 2)
+
+                    // Concentric Radar Rings
+                    drawCircle(color = Color(0xFF1B3D2B), radius = radius, style = Stroke(width = 1.5dp.toPx()))
+                    drawCircle(color = Color(0xFF1B3D2B), radius = radius * 0.65f, style = Stroke(width = 1dp.toPx()))
+                    drawCircle(color = Color(0xFF1B3D2B), radius = radius * 0.35f, style = Stroke(width = 1dp.toPx()))
+
+                    // Radar Sweep Line when running
+                    if (isRunning) {
+                        rotate(rotationAngle, pivot = centerOffset) {
+                            drawLine(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(emerald.copy(alpha = 0.9f), Color.Transparent),
+                                    center = centerOffset,
+                                    radius = radius
+                                ),
+                                start = centerOffset,
+                                end = Offset(size.width / 2, 0f),
+                                strokeWidth = 2.dp.toPx()
+                            )
+                        }
+                    }
+
+                    // Center Status Dot
+                    drawCircle(
+                        color = if (isRunning) emerald.copy(alpha = pulseAlpha) else Color.Gray,
+                        radius = 4.dp.toPx()
+                    )
+                }
+            }
+
+            // Radar Status Details
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = when {
+                        !connected -> "RADAR OFFLINE"
+                        playerFound -> "TARGET DETECTED"
+                        isRunning -> "SCANNING MYDGN BOARD"
+                        else -> "RADAR READY"
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (playerFound || isRunning) emerald else Color.White
+                )
+                Text(
+                    text = if (isRunning) "Actively polling transfer market" else "Tap Start Bot to launch scanner",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFF9CA3AF)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CardShowcaseBox(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    var currentCardIndex by remember { mutableIntStateOf(1) }
+
+    // Auto-cycle through cards 1 through 14 every 3 seconds
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(3000)
+            currentCardIndex = (currentCardIndex % 14) + 1
+        }
+    }
+
+    val resName = "card_$currentCardIndex"
+    val resId = remember(currentCardIndex) {
+        context.resources.getIdentifier(resName, "drawable", context.packageName)
+    }
+
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(14.dp),
+        color = Color(0xFF060907),
+        border = BorderStroke(1.dp, Color(0xFF163122))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (resId != 0) {
+                Crossfade(targetState = resId, label = "cardCrossfade") { targetRes ->
+                    Image(
+                        painter = painterResource(id = targetRes),
+                        contentDescription = "Card Showcase",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            } else {
+                Text(
+                    text = "CARD\n#$currentCardIndex",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = emerald,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
@@ -232,27 +441,27 @@ fun HomeScreen(
 private fun LogItemRow(log: LogEntry) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(6.dp),
         color = Color(0xFF060907),
         border = BorderStroke(1.dp, Color(0xFF122218))
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = log.message,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.labelSmall,
                 color = Color(0xFFE5E7EB),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = log.timestamp,
-                style = MaterialTheme.typography.labelSmall,
+                fontSize = 10.sp,
                 color = Color(0xFF6B7280)
             )
         }
