@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
@@ -111,16 +112,9 @@ fun HomeScreen(
 
     val platform = settings["platform"] ?: "Console"
 
-    // Dynamically query common keys used for method selection
-    val rawMode = settings["method"] 
-        ?: settings["buy_method"] 
-        ?: settings["mode"] 
-        ?: settings["execution_mode"] 
-        ?: "Safe"
-        
-    val modeText = rawMode.replaceFirstChar { 
-        if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() 
-    }
+    // Map player_type key accurately ("1" -> Safe, "2" -> Quick Sell)
+    val playerType = settings["player_type"] ?: "2"
+    val modeText = if (playerType == "1") "Safe" else "Quick Sell"
 
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
@@ -192,7 +186,7 @@ fun HomeScreen(
                 playerFound = activePlayer != null
             )
 
-            // Status Chips Row Component with Pulsing Connected Dot
+            // Status Chips Row Component
             AnimatedStatusChipsRow(
                 connected = isOnline,
                 platform = platform,
@@ -208,14 +202,13 @@ fun HomeScreen(
                 fontWeight = FontWeight.SemiBold
             )
 
-            // Live Log Feed (4 lines height) + Card Showcase Side-by-Side
+            // Live Log Feed + Card Showcase Side-by-Side
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(132.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Scrollable 4-line Activity Log Box
                 Card(
                     modifier = Modifier
                         .weight(1f)
@@ -249,7 +242,6 @@ fun HomeScreen(
                     }
                 }
 
-                // Animated Card Image Showcase (Right Side)
                 CardShowcaseBox(
                     modifier = Modifier
                         .width(96.dp)
@@ -257,11 +249,11 @@ fun HomeScreen(
                 )
             }
 
-            // Start Bot Action Buttons (Placed directly beneath Live Activity Log)
+            // Start Bot Action Buttons (Placed directly below Live Activity Log)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp)
+                    .padding(top = 2.dp)
             ) {
                 if (activePlayer != null) {
                     Row(
@@ -347,22 +339,20 @@ private fun AnimatedStatusChipsRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // Centered container box to align dot precisely with text baseline
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                // Precise vertical centering for the green dot relative to font line
                 Box(
-                    modifier = Modifier.size(10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(
-                                if (connected) emerald.copy(alpha = dotAlpha) else Color.Gray
-                            )
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (connected) emerald.copy(alpha = dotAlpha) else Color.Gray
+                        )
+                )
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = if (connected) "CONNECTED" else "OFFLINE",
                     style = MaterialTheme.typography.labelLarge,
