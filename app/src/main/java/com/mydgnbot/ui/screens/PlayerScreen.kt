@@ -55,7 +55,7 @@ import com.mydgnbot.ui.theme.TextMuted
 import java.util.Locale
 
 @Composable
-fun PlayerDetailsScreen(
+fun PlayerScreen(
     player: Player,
     platform: String,
     playerType: String,
@@ -116,7 +116,7 @@ fun PlayerDetailsScreen(
                     }
                 }
 
-                // 3. MAIN PLAYER DETAILS CARD CONTAINER (Includes Action Buttons)
+                // 3. MAIN PLAYER DETAILS CARD CONTAINER
                 GlassmorphicCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -152,7 +152,7 @@ fun PlayerDetailsScreen(
                                     .border(1.dp, Color(0xFF1E2822), RoundedCornerShape(16.dp)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                if (player.imageUrl.isNotEmpty()) {
+                                if (!player.imageUrl.isNullOrEmpty()) {
                                     AsyncImage(
                                         model = player.imageUrl,
                                         contentDescription = player.playerName,
@@ -163,7 +163,7 @@ fun PlayerDetailsScreen(
                                     )
                                 } else {
                                     Text(
-                                        text = "${player.rating}\n${player.position}",
+                                        text = "${player.rating}\n${player.position ?: ""}",
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Emerald,
@@ -179,7 +179,7 @@ fun PlayerDetailsScreen(
                             ) {
                                 SpecItemCard(
                                     label = "Chem",
-                                    value = player.chemistryStyle.ifEmpty { "Basic" },
+                                    value = if (player.chemistryStyle.isEmpty()) "Basic" else player.chemistryStyle,
                                     icon = Icons.Default.Star
                                 )
                                 SpecItemCard(
@@ -189,12 +189,12 @@ fun PlayerDetailsScreen(
                                 )
                                 SpecItemCard(
                                     label = "You Earn",
-                                    value = "$${String.format(Locale.US, "%.3f", player.profit)}",
+                                    value = "$${String.format(Locale.US, "%.2f", player.payment)}",
                                     valueColor = Emerald
                                 )
                                 SpecItemCard(
                                     label = "Time Left",
-                                    value = player.marketExpiry.ifEmpty { "59:22" },
+                                    value = timeRemainingText,
                                     valueColor = Emerald
                                 )
                             }
@@ -225,7 +225,7 @@ fun PlayerDetailsScreen(
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = String.format(Locale.US, "%,d", player.startBidPrice),
+                                        text = String.format(Locale.US, "%,d", player.startPrice),
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White
@@ -264,7 +264,7 @@ fun PlayerDetailsScreen(
 
                         Spacer(modifier = Modifier.height(4.dp))
 
-                        // Moved Action Buttons directly below prices inside the main container border
+                        // Action Buttons Inside Container
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
