@@ -36,6 +36,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -43,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -75,6 +78,8 @@ import com.mydgnbot.ui.theme.EmeraldGlow
 import com.mydgnbot.ui.theme.TextMuted
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 private val CARD_BACKGROUNDS = listOf(
@@ -114,6 +119,10 @@ fun HomeScreen(
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
 
+    // Local state for Quick Settings Controls
+    var selectedInterval by remember { mutableStateOf(pollSeconds) }
+    var autoStopEnabled by remember { mutableStateOf(false) }
+
     var bgIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
         if (CARD_BACKGROUNDS.isNotEmpty()) {
@@ -124,7 +133,6 @@ fun HomeScreen(
         }
     }
 
-    // Animation for active player hint pulse
     val infiniteTransition = rememberInfiniteTransition(label = "TapHintTransition")
     val pulseAlpha by infiniteTransition.animateFloat(
         initialValue = 0.4f,
@@ -246,7 +254,7 @@ fun HomeScreen(
                     onSettingsClick = onSettingsClick
                 )
 
-                // 3. LIVE ACTIVITY LOG & CYCLING CARD SLOT
+                // 3. LIVE ACTIVITY LOG & CYCLING CARD SLOT (161 dp height)
                 Text(
                     text = "Live Activity Log",
                     fontSize = 14.sp,
@@ -258,15 +266,17 @@ fun HomeScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(160.dp),
+                        .height(161.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // LEFT: Activity Log Box
+                    // LEFT: Scrollable Activity Log Box with Timestamps
                     GlassmorphicCard(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxSize()
                     ) {
+                        val logScrollState = rememberScrollState()
+                        
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -280,20 +290,36 @@ fun HomeScreen(
                                     color = TextMuted
                                 )
                             } else {
-                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    logs.takeLast(5).forEach { log ->
-                                        Text(
-                                            text = log.message,
-                                            fontSize = 11.sp,
-                                            color = Color(0xFFD1D5DB)
-                                        )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .verticalScroll(logScrollState),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    logs.forEach { log ->
+                                        val timestamp = remember(log.timestamp) {
+                                            SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(log.timestamp))
+                                        }
+                                        Row(verticalAlignment = Alignment.Top) {
+                                            Text(
+                                                text = "[$timestamp] ",
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Emerald
+                                            )
+                                            Text(
+                                                text = log.message,
+                                                fontSize = 11.sp,
+                                                color = Color(0xFFD1D5DB)
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
 
-                    // RIGHT: Cycling Player Card Frame with Tap Prompt
+                    // RIGHT: Cycling Player Card Frame with Tap Prompt (161 dp height)
                     val isPlayerActive = activePlayer != null
                     val shape = RoundedCornerShape(18.dp)
 
@@ -334,7 +360,6 @@ fun HomeScreen(
                                             .padding(bottom = 20.dp, top = 6.dp, start = 6.dp, end = 6.dp)
                                     )
 
-                                    // Floating "TAP TO VIEW" badge overlay
                                     Box(
                                         modifier = Modifier
                                             .align(Alignment.BottomCenter)
@@ -378,7 +403,7 @@ fun HomeScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 // 4. START / STOP BOT BUTTON
                 val buttonShape = RoundedCornerShape(14.dp)
@@ -412,6 +437,104 @@ fun HomeScreen(
                         color = if (isRunning) Color.White else Color.Black,
                         letterSpacing = 1.sp
                     )
+                }
+
+                // 5. QUICK SETTINGS & ACTION BAR (Filling Bottom Layout Space)
+                Text(
+                    text = "Quick Controls",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    modifier = Modifier.padding(start = 2.dp)
+                )
+
+                GlassmorphicCard(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        // Rapid Interval Stepper / Selector
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Scan Interval",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "Delay between requests",
+                                    fontSize = 11.sp,
+                                    color = TextMuted
+                                )
+                            }
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                listOf("5s", "10s", "15s").forEach { opt ->
+                                    val isSelected = selectedInterval == opt.replace("s", "")
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(if (isSelected) Emerald else Color(0xFF141A16))
+                                            .border(
+                                                1.dp,
+                                                if (isSelected) Emerald else Color(0xFF27302A),
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                            .clickable { selectedInterval = opt.replace("s", "") }
+                                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                                    ) {
+                                        Text(
+                                            text = opt,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isSelected) Color.Black else Color.White
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Auto-Stop Trigger Toggle
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Auto-Stop Safeguard",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "Pause automatically on market buy",
+                                    fontSize = 11.sp,
+                                    color = TextMuted
+                                )
+                            }
+
+                            Switch(
+                                checked = autoStopEnabled,
+                                onCheckedChange = { autoStopEnabled = it },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.Black,
+                                    checkedTrackColor = Emerald,
+                                    uncheckedThumbColor = Color.Gray,
+                                    uncheckedTrackColor = Color(0xFF141A16)
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
