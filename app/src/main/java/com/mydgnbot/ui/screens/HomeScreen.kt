@@ -15,7 +15,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,7 +75,6 @@ private val darkBg = Color(0xFF0B0F0C)
 private val darkSurface = Color(0xFF060807)
 private val red = Color(0xFFFF5C5C)
 
-// Specific list of all 14 card resource names in res/drawable
 private val CARD_DRAWABLE_NAMES = listOf(
     "fc26_captains_card",
     "fc26_futbirthday_card",
@@ -161,7 +159,6 @@ fun HomeScreen(
             )
         },
         bottomBar = {
-            // Compact bottom action bar
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = darkSurface,
@@ -345,12 +342,17 @@ private fun AnimatedRadarScannerCard(
                 contentAlignment = Alignment.Center
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
-                    val radius = size.minDimension / 2
-                    val centerOffset = Offset(size.width / 2, size.height / 2)
+                    val radius = size.minDimension / 2f
+                    val centerOffset = Offset(size.width / 2f, size.height / 2f)
 
-                    drawCircle(color = Color(0xFF1B3D2B), radius = radius, style = Stroke(width = 1.5dp.toPx()))
-                    drawCircle(color = Color(0xFF1B3D2B), radius = radius * 0.65f, style = Stroke(width = 1dp.toPx()))
-                    drawCircle(color = Color(0xFF1B3D2B), radius = radius * 0.35f, style = Stroke(width = 1dp.toPx()))
+                    val outerStroke = 1.5f.dp.toPx()
+                    val innerStroke = 1f.dp.toPx()
+                    val lineStroke = 2f.dp.toPx()
+                    val dotRadius = 4f.dp.toPx()
+
+                    drawCircle(color = Color(0xFF1B3D2B), radius = radius, style = Stroke(width = outerStroke))
+                    drawCircle(color = Color(0xFF1B3D2B), radius = radius * 0.65f, style = Stroke(width = innerStroke))
+                    drawCircle(color = Color(0xFF1B3D2B), radius = radius * 0.35f, style = Stroke(width = innerStroke))
 
                     if (isRunning) {
                         rotate(rotationAngle, pivot = centerOffset) {
@@ -361,15 +363,15 @@ private fun AnimatedRadarScannerCard(
                                     radius = radius
                                 ),
                                 start = centerOffset,
-                                end = Offset(size.width / 2, 0f),
-                                strokeWidth = 2.dp.toPx()
+                                end = Offset(size.width / 2f, 0f),
+                                strokeWidth = lineStroke
                             )
                         }
                     }
 
                     drawCircle(
                         color = if (isRunning) emerald.copy(alpha = pulseAlpha) else Color.Gray,
-                        radius = 4.dp.toPx()
+                        radius = dotRadius
                     )
                 }
             }
@@ -401,7 +403,6 @@ private fun CardShowcaseBox(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var currentCardIndex by remember { mutableIntStateOf(0) }
 
-    // Auto-cycle through the 14 card drawables every 3 seconds
     LaunchedEffect(Unit) {
         while (true) {
             kotlinx.coroutines.delay(3000)
