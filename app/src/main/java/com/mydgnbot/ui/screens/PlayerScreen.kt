@@ -71,9 +71,9 @@ import java.text.NumberFormat
 import java.util.Locale
 
 private val emerald = Color(0xFF42E8B4)
-private val darkBg = Color(0xFF000000)
-private val containerBg = Color(0xFF07120B)
-private val borderGreen = Color(0xFF163122)
+private val darkBg = Color(0xFF020503)
+private val containerBg = Color(0xFF060E09)
+private val borderGreen = Color(0xFF11261B)
 private val yellowGold = Color(0xFFFBBF24)
 private val textMuted = Color(0xFF9CA3AF)
 
@@ -95,20 +95,20 @@ fun PlayerScreen(
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
 
-    // 1. MyDGN Lock Timer (Handles Epoch Timestamp or Relative Seconds)
+    // 1. Fixed MyDGN Lock Timer (Defaults to 300 seconds / 5:00 min)
     var lockRemainingSeconds by remember(player) {
         val now = System.currentTimeMillis() / 1000
         val targetLock = player.lockExpires
         
         val secondsLeft = when {
-            targetLock > 1_000_000_000L -> targetLock - now // Unix Epoch Timestamp
-            targetLock > 0L -> targetLock                  // Relative Remaining Seconds
-            else -> 300L                             // 5-minute fallback
+            targetLock > 1_000_000_000L && (targetLock - now) in 1..300 -> targetLock - now
+            targetLock in 1L..300L -> targetLock
+            else -> 300L // Guaranteed 5-minute initial start
         }
         mutableLongStateOf(secondsLeft.coerceAtLeast(0L))
     }
 
-    // 2. EA Market Expiry Timer (marketExpiry / ea_expires_at)
+    // 2. EA Market Expiry Timer
     var marketRemainingSeconds by remember(player) {
         val now = System.currentTimeMillis() / 1000
         val targetMarket = player.marketExpiry
@@ -116,7 +116,7 @@ fun PlayerScreen(
         val secondsLeft = when {
             targetMarket > 1_000_000_000L -> targetMarket - now
             targetMarket > 0L -> targetMarket
-            else -> 3600L
+            else -> 3110L // e.g. 51:50
         }
         mutableLongStateOf(secondsLeft.coerceAtLeast(0L))
     }
@@ -151,7 +151,7 @@ fun PlayerScreen(
     }
 
     val formattedPayment = remember(player.payment) {
-        if (player.payment > 0) "$${player.payment}" else "$0.00"
+        if (player.payment > 0) String.format(Locale.US, "$%.3f", player.payment) else "$0.00"
     }
 
     Scaffold(
@@ -209,7 +209,7 @@ fun PlayerScreen(
                     modifier = Modifier
                         .weight(1f)
                         .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = emerald,
                         contentColor = Color.Black
@@ -236,10 +236,10 @@ fun PlayerScreen(
                     modifier = Modifier
                         .weight(1f)
                         .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color(0xFF27352B)),
+                    shape = RoundedCornerShape(14.dp),
+                    border = BorderStroke(1.dp, Color(0xFF233529)),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF0F1712),
+                        containerColor = Color(0xFF0D1510),
                         contentColor = Color.White
                     )
                 ) {
@@ -270,11 +270,11 @@ fun PlayerScreen(
                 onSettingsClick = onSettingsClick
             )
 
-            // Top Header MyDGN Lock Countdown Pill
+            // Top Header Countdown Pill
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
-                color = Color(0xFF040A06),
+                color = Color(0xFF050D08),
                 border = BorderStroke(1.dp, borderGreen)
             ) {
                 Box(
@@ -285,7 +285,7 @@ fun PlayerScreen(
                 ) {
                     Text(
                         text = formattedLockTimer,
-                        fontSize = 28.sp,
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.Black,
                         color = emerald,
                         letterSpacing = 1.sp
@@ -293,10 +293,10 @@ fun PlayerScreen(
                 }
             }
 
-            // Main Container Card
+            // Main Player Info Card
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(22.dp),
                 color = containerBg,
                 border = BorderStroke(1.dp, borderGreen)
             ) {
@@ -304,27 +304,27 @@ fun PlayerScreen(
                     modifier = Modifier.padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Player Header Title
+                    // Player Name Title
                     Text(
                         text = player.playerName,
-                        fontSize = 20.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center
                     )
 
-                    // Side-by-Side Main Content Layout
+                    // Card & Metadata Layout
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // LEFT: Player Card Frame
+                        // LEFT: Player Card Frame + CardValue Badge
                         Box(
                             modifier = Modifier
-                                .width(155.dp)
-                                .height(210.dp),
+                                .width(165.dp)
+                                .height(225.dp),
                             contentAlignment = Alignment.TopCenter
                         ) {
                             AsyncImage(
@@ -333,18 +333,18 @@ fun PlayerScreen(
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(top = 22.dp)
+                                    .padding(top = 18.dp)
                             )
 
-                            // CardValue Badge shifted 12dp down onto card top
+                            // CardValue Badge - Shifted 22dp down so it rests inside card crest
                             Surface(
-                                modifier = Modifier.offset(y = 12.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color(0xFF0C1D13),
+                                modifier = Modifier.offset(y = 22.dp),
+                                shape = RoundedCornerShape(14.dp),
+                                color = Color(0xFF141004),
                                 border = BorderStroke(1.dp, yellowGold)
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                                 ) {
@@ -355,15 +355,15 @@ fun PlayerScreen(
                                     )
                                     Text(
                                         text = formattedCardValue,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.ExtraBold,
                                         color = yellowGold
                                     )
                                 }
                             }
                         }
 
-                        // RIGHT: Specs Stack
+                        // RIGHT: Spec Detail Stack
                         Column(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -372,7 +372,7 @@ fun PlayerScreen(
                                 icon = Icons.Default.Star,
                                 iconColor = emerald,
                                 label = "Chem",
-                                value = player.chemistryStyle.ifEmpty { "Basic Chem" }
+                                value = player.chemistryStyle.ifEmpty { "Basic" }
                             )
 
                             DetailRowTile(
@@ -396,7 +396,7 @@ fun PlayerScreen(
                         }
                     }
 
-                    // Starting Bid & Buy Now Cards
+                    // Starting Bid & Buy Now Action Tiles
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -404,14 +404,14 @@ fun PlayerScreen(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(14.dp))
+                                .clip(RoundedCornerShape(16.dp))
                                 .background(
                                     Brush.verticalGradient(
-                                        colors = listOf(Color(0xFF09140D), Color(0xFF030805))
+                                        colors = listOf(Color(0xFF0B1710), Color(0xFF040A07))
                                     )
                                 )
-                                .border(1.dp, Color(0xFF163122), RoundedCornerShape(14.dp))
-                                .padding(12.dp),
+                                .border(1.dp, borderGreen, RoundedCornerShape(16.dp))
+                                .padding(14.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -425,7 +425,7 @@ fun PlayerScreen(
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = NumberFormat.getNumberInstance(Locale.US).format(player.startPrice),
-                                    fontSize = 18.sp,
+                                    fontSize = 19.sp,
                                     fontWeight = FontWeight.Black,
                                     color = Color.White
                                 )
@@ -435,14 +435,14 @@ fun PlayerScreen(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(14.dp))
+                                .clip(RoundedCornerShape(16.dp))
                                 .background(
                                     Brush.verticalGradient(
-                                        colors = listOf(Color(0xFF1C1A09), Color(0xFF070601))
+                                        colors = listOf(Color(0xFF241F0A), Color(0xFF0A0802))
                                     )
                                 )
-                                .border(1.dp, yellowGold.copy(alpha = 0.8f), RoundedCornerShape(14.dp))
-                                .padding(12.dp),
+                                .border(1.dp, yellowGold.copy(alpha = 0.8f), RoundedCornerShape(16.dp))
+                                .padding(14.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -456,7 +456,7 @@ fun PlayerScreen(
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = NumberFormat.getNumberInstance(Locale.US).format(player.buyNowPrice),
-                                    fontSize = 18.sp,
+                                    fontSize = 19.sp,
                                     fontWeight = FontWeight.Black,
                                     color = yellowGold
                                 )
@@ -479,12 +479,12 @@ private fun DetailRowTile(
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(12.dp),
         color = Color(0xFF0A160F),
         border = BorderStroke(1.dp, borderGreen)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
