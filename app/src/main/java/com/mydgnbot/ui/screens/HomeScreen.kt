@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -262,7 +263,15 @@ fun HomeScreen(
                         .height(161.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // LEFT: Non-Scrollable Activity Log Box with Fixed Timestamp Formatting
+                    // LEFT: Auto-Scrollable Activity Log Box
+                    val logScrollState = rememberScrollState()
+
+                    LaunchedEffect(logs.size) {
+                        if (logs.isNotEmpty()) {
+                            logScrollState.animateScrollTo(logScrollState.maxValue)
+                        }
+                    }
+
                     GlassmorphicCard(
                         modifier = Modifier
                             .weight(1f)
@@ -282,7 +291,9 @@ fun HomeScreen(
                                 )
                             } else {
                                 Column(
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .verticalScroll(logScrollState),
                                     verticalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     logs.forEach { log ->
@@ -731,6 +742,7 @@ private fun AnimatedStatusChipsRow(
             ) {
                 Box(
                     modifier = Modifier
+                        .offset(y = (-1).dp)
                         .size(8.dp)
                         .clip(CircleShape)
                         .background(
