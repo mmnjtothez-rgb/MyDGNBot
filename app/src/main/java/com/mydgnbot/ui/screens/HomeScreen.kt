@@ -77,7 +77,6 @@ import com.mydgnbot.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.delay
 import java.util.Locale
 
-// List mapping your exact 14 card background drawables
 private val CARD_BACKGROUNDS = listOf(
     R.drawable.fc26_captains_card,
     R.drawable.fc26_futbirthday_card,
@@ -124,6 +123,28 @@ fun HomeScreen(
             }
         }
     }
+
+    // Animation for active player hint pulse
+    val infiniteTransition = rememberInfiniteTransition(label = "TapHintTransition")
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseAlpha"
+    )
+
+    val cardGlowScale by infiniteTransition.animateFloat(
+        initialValue = 0.98f,
+        targetValue = 1.03f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cardGlowScale"
+    )
 
     Box(
         modifier = Modifier
@@ -272,44 +293,85 @@ fun HomeScreen(
                         }
                     }
 
-                    // RIGHT: Cycling Player Card Frame
-                    GlassmorphicCard(
+                    // RIGHT: Cycling Player Card Frame with Tap Prompt
+                    val isPlayerActive = activePlayer != null
+                    val shape = RoundedCornerShape(18.dp)
+
+                    Box(
                         modifier = Modifier
                             .width(110.dp)
                             .fillMaxSize()
-                            .clickable(enabled = activePlayer != null) {
-                                activePlayer?.let { onPlayerClick(it) }
-                            }
+                            .scale(if (isPlayerActive) cardGlowScale else 1f)
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            val imgUrl = activePlayer?.imageUrl
-                            if (!imgUrl.isNullOrEmpty()) {
-                                AsyncImage(
-                                    model = imgUrl,
-                                    contentDescription = activePlayer?.playerName ?: "Player Image",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(6.dp)
+                        GlassmorphicCard(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable(enabled = isPlayerActive) {
+                                    activePlayer?.let { onPlayerClick(it) }
+                                }
+                                .then(
+                                    if (isPlayerActive) {
+                                        Modifier.border(
+                                            width = 1.5.dp,
+                                            color = Emerald.copy(alpha = pulseAlpha),
+                                            shape = shape
+                                        )
+                                    } else Modifier
                                 )
-                            } else {
-                                Crossfade(
-                                    targetState = CARD_BACKGROUNDS[bgIndex],
-                                    animationSpec = tween(durationMillis = 800),
-                                    label = "CardBgTransition"
-                                ) { resId ->
-                                    Image(
-                                        painter = painterResource(id = resId),
-                                        contentDescription = "Card Background",
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                val imgUrl = activePlayer?.imageUrl
+                                if (!imgUrl.isNullOrEmpty()) {
+                                    AsyncImage(
+                                        model = imgUrl,
+                                        contentDescription = activePlayer?.playerName ?: "Player Image",
                                         contentScale = ContentScale.Fit,
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .padding(8.dp)
-                                            .alpha(0.9f)
+                                            .padding(bottom = 20.dp, top = 6.dp, start = 6.dp, end = 6.dp)
                                     )
+
+                                    // Floating "TAP TO VIEW" badge overlay
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .padding(bottom = 6.dp)
+                                            .clip(RoundedCornerShape(20.dp))
+                                            .background(Color(0xFF0A2016).copy(alpha = 0.9f))
+                                            .border(
+                                                width = 1.dp,
+                                                color = Emerald.copy(alpha = pulseAlpha),
+                                                shape = RoundedCornerShape(20.dp)
+                                            )
+                                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                                    ) {
+                                        Text(
+                                            text = "TAP TO VIEW",
+                                            fontSize = 8.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Emerald.copy(alpha = pulseAlpha),
+                                            letterSpacing = 0.5.sp
+                                        )
+                                    }
+                                } else {
+                                    Crossfade(
+                                        targetState = CARD_BACKGROUNDS[bgIndex],
+                                        animationSpec = tween(durationMillis = 800),
+                                        label = "CardBgTransition"
+                                    ) { resId ->
+                                        Image(
+                                            painter = painterResource(id = resId),
+                                            contentDescription = "Card Background",
+                                            contentScale = ContentScale.Fit,
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(8.dp)
+                                                .alpha(0.9f)
+                                        )
+                                    }
                                 }
                             }
                         }
