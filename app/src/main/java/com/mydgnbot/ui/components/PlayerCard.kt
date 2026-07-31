@@ -20,14 +20,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -61,7 +63,6 @@ private val red = Color(0xFFFF5C5C)
 @Composable
 fun PlayerCard(
     player: Player?,
-    onBought: () -> Unit,
     onCanceled: () -> Unit
 ) {
     if (player == null) {
@@ -113,222 +114,202 @@ fun PlayerCard(
         label = "lockTimerColor"
     )
 
-    val pulseTransition = rememberInfiniteTransition(label = "pulse")
-    val pulseAlpha by pulseTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 0.55f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = FastOutLinearInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulseAlpha"
-    )
-
-    val timerAlpha = if (lockSeconds <= 30) pulseAlpha else 1f
-
-    Scaffold(
-        bottomBar = {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = darkSurface,
-                contentColor = Color.White
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        // Timer Container
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = darkSurface,
+            border = BorderStroke(1.dp, Color(0xFF163122))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(14.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Button(
-                        onClick = onBought,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = emerald,
-                            contentColor = Color.Black
-                        )
-                    ) {
-                        Text(
-                            text = "✓ Bought Player",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp
-                        )
-                    }
-
-                    OutlinedButton(
-                        onClick = onCanceled,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color.White
-                        ),
-                        border = BorderStroke(1.dp, Color(0xFF3A4A42))
-                    ) {
-                        Text(
-                            text = "Cancel",
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 15.sp
-                        )
-                    }
-                }
+                Text(
+                    text = formatTime(lockSeconds.toLong()),
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = lockTimerColor,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
             }
         }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(padding)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF050806),
-                            Color(0xFF0B0F0C)
-                        )
-                    )
-                )
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+
+        // Main Player Details Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(22.dp),
+            colors = CardDefaults.cardColors(containerColor = darkBg),
+            border = BorderStroke(1.dp, Color(0xFF163122))
         ) {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = darkSurface,
-                border = BorderStroke(1.dp, Color(0xFF163122))
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
+                // Top Header Section (Player Image + Name)
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = formatTime(lockSeconds.toLong()),
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = lockTimerColor,
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    )
-                }
-            }
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = darkBg),
-                border = BorderStroke(1.dp, Color(0xFF163122))
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .width(170.dp)
-                                .height(220.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(185.dp, 230.dp)
-                                    .background(
-                                        brush = Brush.radialGradient(
-                                            colors = listOf(
-                                                emeraldDim.copy(alpha = 0.35f),
-                                                emeraldDim.copy(alpha = 0.08f),
-                                                Color.Transparent
-                                            )
-                                        )
+                    Box(
+                        modifier = Modifier
+                            .size(170.dp, 200.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        emeraldDim.copy(alpha = 0.35f),
+                                        emeraldDim.copy(alpha = 0.08f),
+                                        Color.Transparent
                                     )
-                            )
-                            AsyncImage(
-                                model = player.imageUrl,
-                                contentDescription = player.playerName,
-                                modifier = Modifier
-                                    .size(175.dp, 220.dp),
-                                contentScale = ContentScale.Fit
-                            )
-                            Card(
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(6.dp),
-                                shape = RoundedCornerShape(999.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFF09100B)),
-                                border = BorderStroke(1.dp, Color(0xFF163122))
-                            ) {
-                                Text(
-                                    text = player.cardValue.toString(),
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                    color = gold,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp
                                 )
-                            }
-                        }
-
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Text(
-                                text = player.playerName,
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
                             )
-
-                            PremiumPill(
-                                iconRes = R.drawable.ic_chemistry_flask,
-                                text = "${player.chemistryStyle} Chemistry",
-                                borderColor = emerald.copy(alpha = 0.55f)
-                            )
-
-                            PremiumPill(
-                                iconRes = R.drawable.ic_owner,
-                                text = "Owners: ${player.owners}",
-                                borderColor = emerald.copy(alpha = 0.55f)
-                            )
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                StatCard(
-                                    modifier = Modifier.weight(1f),
-                                    title = "Starting Bid",
-                                    value = player.startPrice.toString(),
-                                    highlightGold = false
-                                )
-                                StatCard(
-                                    modifier = Modifier.weight(1f),
-                                    title = "Buy Now",
-                                    value = player.buyNowPrice.toString(),
-                                    highlightGold = true
-                                )
-                            }
-
-                            InfoRow(
-                                title = "You Earn",
-                                value = "$${player.payment}",
-                                valueColor = gold
-                            )
-
-                            InfoRow(
-                                title = "Time Remaining",
-                                value = formatTime(player.marketExpiry),
-                                valueColor = emerald
-                            )
-                        }
+                    )
+                    AsyncImage(
+                        model = player.imageUrl,
+                        contentDescription = player.playerName,
+                        modifier = Modifier.size(160.dp, 200.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                    Card(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp),
+                        shape = RoundedCornerShape(999.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF09100B)),
+                        border = BorderStroke(1.dp, Color(0xFF163122))
+                    ) {
+                        Text(
+                            text = player.cardValue.toString(),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            color = gold,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
                     }
                 }
+
+                Text(
+                    text = player.playerName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                // Pills Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+                ) {
+                    PremiumPill(
+                        iconRes = R.drawable.ic_chemistry_flask,
+                        text = "${player.chemistryStyle} Chem",
+                        borderColor = emerald.copy(alpha = 0.55f)
+                    )
+                    PremiumPill(
+                        iconRes = R.drawable.ic_owner,
+                        text = "Owners: ${player.owners}",
+                        borderColor = emerald.copy(alpha = 0.55f)
+                    )
+                }
+
+                // Stats Section
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        title = "Starting Bid",
+                        value = player.startPrice.toString(),
+                        highlightGold = false
+                    )
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        title = "Buy Now",
+                        value = player.buyNowPrice.toString(),
+                        highlightGold = true
+                    )
+                }
+
+                InfoRow(
+                    title = "You Earn",
+                    value = "$${player.payment}",
+                    valueColor = gold
+                )
+
+                InfoRow(
+                    title = "Time Remaining",
+                    value = formatTime(player.marketExpiry),
+                    valueColor = emerald
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PlayerCardBottomBar(
+    onBought: () -> Unit,
+    onCanceled: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = darkSurface,
+        contentColor = Color.White
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Button(
+                onClick = onBought,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(52.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = emerald,
+                    contentColor = Color.Black
+                )
+            ) {
+                Text(
+                    text = "✓ Bought Player",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
+                )
+            }
+
+            OutlinedButton(
+                onClick = onCanceled,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(52.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color.White
+                ),
+                border = BorderStroke(1.dp, Color(0xFF3A4A42))
+            ) {
+                Text(
+                    text = "Cancel",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 15.sp
+                )
             }
         }
     }
@@ -346,9 +327,9 @@ private fun PremiumPill(
         border = BorderStroke(1.dp, borderColor)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Image(
                 painter = painterResource(iconRes),
@@ -373,7 +354,7 @@ private fun StatCard(
     highlightGold: Boolean
 ) {
     Surface(
-        modifier = modifier.height(76.dp),
+        modifier = modifier.height(72.dp),
         shape = RoundedCornerShape(10.dp),
         color = Color(0xFF090D0A),
         border = BorderStroke(
@@ -382,7 +363,7 @@ private fun StatCard(
         )
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(10.dp),
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             Text(
@@ -392,7 +373,7 @@ private fun StatCard(
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 color = if (highlightGold) gold else Color.White,
                 fontWeight = FontWeight.Bold
             )
