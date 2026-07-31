@@ -87,6 +87,39 @@ class SettingsDataStore(
         }
 
 
+    suspend fun saveSingleSetting(key: String, value: String) {
+
+        context.dataStore.edit { preferences ->
+
+            val prefKey = when (key) {
+
+                "api_user" -> Keys.API_USER
+
+                "secret_key" -> Keys.SECRET_KEY
+
+                "ea_email" -> Keys.EA_EMAIL
+
+                "platform" -> Keys.PLATFORM
+
+                "minimum_price" -> Keys.MINIMUM_PRICE
+
+                "maximum_price" -> Keys.MAXIMUM_PRICE
+
+                "player_type" -> Keys.PLAYER_TYPE
+
+                "poll_interval" -> Keys.POLL_INTERVAL
+
+                else -> null
+
+            }
+
+            prefKey?.let { preferences[it] = value }
+
+        }
+
+    }
+
+
     suspend fun saveSettings(
 
         apiUser: String,
