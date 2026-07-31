@@ -13,6 +13,7 @@ import androidx.navigation.navArgument
 import com.mydgnbot.data.datastore.SettingsDataStore
 import com.mydgnbot.data.network.ConnectivityObserver
 import com.mydgnbot.data.network.NetworkConnectivityObserver
+import com.mydgnbot.data.repository.PlayerEnrichmentRepository
 import com.mydgnbot.data.repository.PlayerRepository
 import com.mydgnbot.data.repository.SettingsRepository
 import com.mydgnbot.ui.screens.HistoryScreen
@@ -33,6 +34,9 @@ fun AppNavigation() {
         SettingsRepository(SettingsDataStore(context))
     }
     val playerRepository = remember { PlayerRepository() }
+    val playerEnrichmentRepository = remember {
+        PlayerEnrichmentRepository(context.cacheDir)
+    }
 
     val connectivityObserver: ConnectivityObserver = remember {
         NetworkConnectivityObserver(context)
@@ -46,8 +50,8 @@ fun AppNavigation() {
         factory = HomeViewModelFactory(
             playerRepository = playerRepository,
             settingsRepository = settingsRepository,
-            connectivityObserver = connectivityObserver,
-            cacheDir = context.cacheDir
+            playerEnrichmentRepository = playerEnrichmentRepository,
+            connectivityObserver = connectivityObserver
         )
     )
 
@@ -68,7 +72,7 @@ fun AppNavigation() {
                 viewModel = homeViewModel,
                 onSettingsClick = { navController.navigate("settings") },
                 onHistoryClick = { navController.navigate("history") },
-                onPlayerFound = {
+                onPlayerClick = {
                     if (homeViewModel.player.value != null) {
                         navController.navigate("player")
                     }
