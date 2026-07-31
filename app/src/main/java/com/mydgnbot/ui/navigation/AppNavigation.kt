@@ -51,6 +51,14 @@ fun AppNavigation() {
         )
     )
 
+    fun navigateBackToHome() {
+        if (!navController.popBackStack()) {
+            navController.navigate("home") {
+                popUpTo("home") { inclusive = true }
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = "home"
@@ -70,41 +78,22 @@ fun AppNavigation() {
 
         composable("settings") {
             SettingsScreen(
-                onBackClick = {
-                    if (!navController.popBackStack()) {
-                        navController.navigate("home") {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
-                },
+                onBackClick = { navigateBackToHome() },
                 viewModel = settingsViewModel
             )
         }
 
         composable("player") {
-            val playerState = homeViewModel.player.collectAsState()
-            val player = playerState.value
+            val playerState by homeViewModel.player.collectAsState()
+            val player = playerState
 
-            if (player == null) {
-                if (!navController.popBackStack()) {
-                    navController.navigate("home") {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-                return@composable
+            if (player != null) {
+                PlayerScreen(
+                    viewModel = homeViewModel,
+                    onBackClick = { navigateBackToHome() },
+                    player = player
+                )
             }
-
-            PlayerScreen(
-                viewModel = homeViewModel,
-                onBackClick = {
-                    if (!navController.popBackStack()) {
-                        navController.navigate("home") {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
-                },
-                player = player
-            )
         }
 
         composable(
@@ -117,7 +106,6 @@ fun AppNavigation() {
             )
         ) { backStackEntry ->
             val playerId = backStackEntry.arguments?.getString("playerId")
-
             val player = if (playerId != null) {
                 homeViewModel.recentPlayers.value.find { p ->
                     p.resourceId.ifBlank { p.transactionId } == playerId
@@ -126,38 +114,19 @@ fun AppNavigation() {
                 null
             }
 
-            if (player == null) {
-                if (!navController.popBackStack()) {
-                    navController.navigate("home") {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-                return@composable
+            if (player != null) {
+                PlayerScreen(
+                    viewModel = homeViewModel,
+                    onBackClick = { navigateBackToHome() },
+                    player = player
+                )
             }
-
-            PlayerScreen(
-                viewModel = homeViewModel,
-                onBackClick = {
-                    if (!navController.popBackStack()) {
-                        navController.navigate("home") {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
-                },
-                player = player
-            )
         }
 
         composable("history") {
             HistoryScreen(
                 viewModel = homeViewModel,
-                onBackClick = {
-                    if (!navController.popBackStack()) {
-                        navController.navigate("home") {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
-                },
+                onBackClick = { navigateBackToHome() },
                 onPlayerClick = { player ->
                     val id = player.resourceId.ifBlank { player.transactionId }
                     if (id.isNotBlank()) {
