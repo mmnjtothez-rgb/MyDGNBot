@@ -63,6 +63,7 @@ import coil.compose.AsyncImage
 import com.mydgnbot.domain.model.Player
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.delay
+import java.text.NumberFormat
 import java.util.Locale
 
 private val emerald = Color(0xFF42E8B4)
@@ -90,30 +91,59 @@ fun PlayerScreen(
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
 
-    // 5-minute countdown calculation (MM:ss format)
-    var remainingSeconds by remember(player) {
+    // 1. MyDGN Lock Timer (Top Header Bar)
+    var lockRemainingSeconds by remember(player) {
         val now = System.currentTimeMillis() / 1000
-        val targetExpiry = player.marketExpiry
-        val secondsLeft = if (targetExpiry > now) {
-            targetExpiry - now
-        } else if (targetExpiry in 1..300) {
-            targetExpiry
+        val targetLockExpiry = player.lockExpires
+        val secondsLeft = if (targetLockExpiry > now) {
+            targetLockExpiry - now
+        } else if (targetLockExpiry in 1..300) {
+            targetLockExpiry
         } else {
             300L
         }
         mutableLongStateOf(secondsLeft.coerceAtLeast(0L))
     }
 
+    // 2. EA Market Expiry Timer (Right Column Metadata)
+    var marketRemainingSeconds by remember(player) {
+        val now = System.currentTimeMillis() / 1000
+        val targetMarketExpiry = player.marketExpiry
+        val secondsLeft = if (targetMarketExpiry > now) {
+            targetMarketExpiry - now
+        } else if (targetMarketExpiry in 1..3600) {
+            targetMarketExpiry
+        } else {
+            3600L // 1-hour fallback if unix timestamp is missing
+        }
+        mutableLongStateOf(secondsLeft.coerceAtLeast(0L))
+    }
+
     LaunchedEffect(player) {
-        while (remainingSeconds > 0) {
+        while (lockRemainingSeconds > 0 || marketRemainingSeconds > 0) {
             delay(1000L)
-            remainingSeconds -= 1
+            if (lockRemainingSeconds > 0) lockRemainingSeconds -= 1
+            if (marketRemainingSeconds > 0) marketRemainingSeconds -= 1
         }
     }
 
-    val minutes = remainingSeconds / 60
-    val seconds = remainingSeconds % 60
-    val formattedTime = String.format(Locale.US, "%02d:%02d", minutes, seconds)
+    val lockMinutes = lockRemainingSeconds / 60
+    val lockSecs = lockRemainingSeconds % 60
+    val formattedLockTimer = String.format(Locale.US, "%02d:%02d", lockMinutes, lockSecs)
+
+    val marketMinutes = marketRemainingSeconds / 60
+    val marketSecs = marketRemainingSeconds % 60
+    val formattedMarketTimer = String.format(Locale.US, "%02d:%02d", marketMinutes, marketSecs)
+
+    // Formatted card value with commas (e.g. 134,000)
+    val formattedCardValue = remember(player.cardValue) {
+        NumberFormat.getNumberInstance(Locale.US).format(player.cardValue)
+    }
+
+    // Payment formatting ("You Earn")
+    val formattedPayment = remember(player.payment) {
+        if (player.payment > 0) "$${player.payment}" else "$0.00"
+    }
 
     Scaffold(
         topBar = {
@@ -232,21 +262,21 @@ fun PlayerScreen(
                 onSettingsClick = onSettingsClick
             )
 
-            // Countdown Pill Header
+            // Top MyDGN Lock Timer Bar
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(18.dp),
                 color = Color(0xFF040A06),
                 border = BorderStroke(1.dp, borderGreen)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 12.dp),
+                        .padding(vertical = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = formattedTime,
+                        text = formattedLockTimer,
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Black,
                         color = emerald,
@@ -255,7 +285,7 @@ fun PlayerScreen(
                 }
             }
 
-            // Main Player Details Card
+            // Main Container (Side-by-side layout)
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -263,190 +293,197 @@ fun PlayerScreen(
                 border = BorderStroke(1.dp, borderGreen)
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Resource ID Badge
+                    // Player Header Title
+                    Text(
+                        text = player.playerName,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+
+                    // Side-by-Side Content Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = Color(0xFF142419),
-                            border = BorderStroke(1.dp, yellowGold.copy(alpha = 0.6f))
+                        // LEFT: Player Card Image with CardValue Badge etched inside top
+                        Box(
+                            modifier = Modifier
+                                .width(135.dp)
+                                .height(185.dp),
+                            contentAlignment = Alignment.TopCenter
                         ) {
-                            Text(
-                                text = player.resourceId.ifEmpty { "850" },
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = yellowGold
+                            AsyncImage(
+                                model = player.imageUrl,
+                                contentDescription = player.playerName,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(top = 10.dp)
+                            )
+
+                            // Formatted Card Value Badge etched into top of image
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color(0xFF142419),
+                                border = BorderStroke(1.dp, yellowGold)
+                            ) {
+                                Text(
+                                    text = formattedCardValue,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = yellowGold
+                                )
+                            }
+                        }
+
+                        // RIGHT: Metadata Column
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Chemistry Style Row
+                            DetailRowTile(
+                                icon = Icons.Default.Star,
+                                iconColor = emerald,
+                                label = "Chem",
+                                value = player.chemistryStyle.ifEmpty { "Basic Chem" }
+                            )
+
+                            // Owners Row
+                            DetailRowTile(
+                                icon = Icons.Default.Person,
+                                iconColor = emerald,
+                                label = "Owners",
+                                value = "${player.owners}"
+                            )
+
+                            // Payment ("You Earn") Row
+                            DetailRowTile(
+                                label = "You Earn",
+                                value = formattedPayment,
+                                valueColor = emerald
+                            )
+
+                            // EA Market Time Remaining Row (marketExpiry)
+                            DetailRowTile(
+                                label = "Time Left",
+                                value = formattedMarketTimer,
+                                valueColor = emerald
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    // Player Card Graphic
-                    Box(
-                        modifier = Modifier
-                            .height(200.dp)
-                            .width(145.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        AsyncImage(
-                            model = player.imageUrl,
-                            contentDescription = player.playerName,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // Player Full Name
-                    Text(
-                        text = player.playerName,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Badges (Chem & Owners)
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = Color(0xFF0B1710),
-                            border = BorderStroke(1.dp, borderGreen)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = null,
-                                    tint = emerald,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = player.chemistryStyle.ifEmpty { "Basic Chem" },
-                                    fontSize = 13.sp,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = Color(0xFF0B1710),
-                            border = BorderStroke(1.dp, borderGreen)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = null,
-                                    tint = emerald,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "Owners: ${player.owners}",
-                                    fontSize = 13.sp,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(18.dp))
-
-                    // Starting Bid & Buy Now Boxes
+                    // Centered Starting Bid and Buy Now Cards
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        // Starting Bid Tile
                         Surface(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp),
                             color = Color(0xFF030905),
                             border = BorderStroke(1.dp, borderGreen)
                         ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
                                 Text(
                                     text = "Starting Bid",
-                                    fontSize = 12.sp,
+                                    fontSize = 11.sp,
                                     color = textMuted
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "${player.startPrice}",
-                                    fontSize = 18.sp,
+                                    fontSize = 17.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
                                 )
                             }
                         }
 
-                        // Buy Now Tile
                         Surface(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp),
                             color = Color(0xFF030905),
                             border = BorderStroke(1.dp, yellowGold)
                         ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
                                 Text(
                                     text = "Buy Now",
-                                    fontSize = 12.sp,
+                                    fontSize = 11.sp,
                                     color = yellowGold
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "${player.buyNowPrice}",
-                                    fontSize = 18.sp,
+                                    fontSize = 17.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = yellowGold
                                 )
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Time Remaining Bottom Row
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Time Remaining",
-                            fontSize = 14.sp,
-                            color = textMuted
-                        )
-                        Text(
-                            text = formattedTime,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = emerald
-                        )
-                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun DetailRowTile(
+    label: String,
+    value: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    iconColor: Color = emerald,
+    valueColor: Color = Color.White
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        color = Color(0xFF0A160F),
+        border = BorderStroke(1.dp, borderGreen)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (icon != null) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+                Text(
+                    text = label,
+                    fontSize = 11.sp,
+                    color = textMuted,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            Text(
+                text = value,
+                fontSize = 12.sp,
+                color = valueColor,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
