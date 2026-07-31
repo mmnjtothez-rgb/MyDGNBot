@@ -1,5 +1,6 @@
 package com.mydgnbot.ui.screens
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,8 +30,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,8 +40,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +62,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.mydgnbot.R
 import com.mydgnbot.domain.model.Player
+import com.mydgnbot.ui.theme.Black1
 import com.mydgnbot.ui.theme.BorderBottom
 import com.mydgnbot.ui.theme.BorderTop
 import com.mydgnbot.ui.theme.ContainerBgBottom
@@ -70,7 +73,26 @@ import com.mydgnbot.ui.theme.EmeraldDark
 import com.mydgnbot.ui.theme.EmeraldGlow
 import com.mydgnbot.ui.theme.TextMuted
 import com.mydgnbot.ui.viewmodel.HomeViewModel
+import kotlinx.coroutines.delay
 import java.util.Locale
+
+// List of your 14 card background drawables
+private val CARD_BACKGROUNDS = listOf(
+    R.drawable.card_bg_1,
+    R.drawable.card_bg_2,
+    R.drawable.card_bg_3,
+    R.drawable.card_bg_4,
+    R.drawable.card_bg_5,
+    R.drawable.card_bg_6,
+    R.drawable.card_bg_7,
+    R.drawable.card_bg_8,
+    R.drawable.card_bg_9,
+    R.drawable.card_bg_10,
+    R.drawable.card_bg_11,
+    R.drawable.card_bg_12,
+    R.drawable.card_bg_13,
+    R.drawable.card_bg_14
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,6 +113,15 @@ fun HomeScreen(
     val modeText = if (playerType == "1") "Safe" else "Quick Sell"
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
+
+    // Timer logic to cycle through the 14 card backgrounds every 3 seconds
+    var bgIndex by remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(3000)
+            bgIndex = (bgIndex + 1) % CARD_BACKGROUNDS.size
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -149,8 +180,8 @@ fun HomeScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 14.dp, vertical = 6.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // 1. RADAR STATUS CARD
                 GlassmorphicCard(
@@ -169,7 +200,7 @@ fun HomeScreen(
                         Column {
                             Text(
                                 text = if (isRunning) "RADAR ACTIVE" else "RADAR READY",
-                                fontSize = 17.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
@@ -192,10 +223,10 @@ fun HomeScreen(
                     onSettingsClick = onSettingsClick
                 )
 
-                // 3. LIVE ACTIVITY LOG & PLAYER CARD SLOT
+                // 3. LIVE ACTIVITY LOG & CYCLING CARD SLOT
                 Text(
                     text = "Live Activity Log",
-                    fontSize = 15.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.White,
                     modifier = Modifier.padding(start = 2.dp)
@@ -204,7 +235,7 @@ fun HomeScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp),
+                        .height(160.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // LEFT: Activity Log Box
@@ -227,7 +258,7 @@ fun HomeScreen(
                                 )
                             } else {
                                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    logs.takeLast(6).forEach { log ->
+                                    logs.takeLast(5).forEach { log ->
                                         Text(
                                             text = log.message,
                                             fontSize = 11.sp,
@@ -239,10 +270,10 @@ fun HomeScreen(
                         }
                     }
 
-                    // RIGHT: Player Card Preview Frame
+                    // RIGHT: Cycling Player Card Frame
                     GlassmorphicCard(
                         modifier = Modifier
-                            .width(115.dp)
+                            .width(110.dp)
                             .fillMaxSize()
                             .clickable(enabled = activePlayer != null) {
                                 activePlayer?.let { onPlayerClick(it) }
@@ -263,57 +294,60 @@ fun HomeScreen(
                                         .padding(6.dp)
                                 )
                             } else {
-                                Image(
-                                    painter = painterResource(id = R.drawable.valuebadge),
-                                    contentDescription = "Card Placeholder",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(12.dp)
-                                )
+                                // Animated transition between the 14 backgrounds
+                                Crossfade(
+                                    targetState = CARD_BACKGROUNDS[bgIndex],
+                                    animationSpec = tween(durationMillis = 800),
+                                    label = "CardBgTransition"
+                                ) { resId ->
+                                    Image(
+                                        painter = painterResource(id = resId),
+                                        contentDescription = "Card Background",
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(6.dp)
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                // 4. METALLIC "START / STOP BOT" BUTTON
-                Button(
-                    onClick = {
-                        if (isRunning) viewModel.stopBot() else viewModel.startBot()
-                    },
+                // 4. START / STOP BOT BUTTON
+                val buttonShape = RoundedCornerShape(14.dp)
+                val buttonBg = if (isRunning) {
+                    Brush.horizontalGradient(listOf(Color(0xFFDC2626), Color(0xFF991B1B)))
+                } else {
+                    Brush.horizontalGradient(listOf(Emerald, EmeraldDark))
+                }
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
+                        .height(52.dp)
                         .shadow(
-                            elevation = if (isRunning) 0.dp else 10.dp,
-                            shape = RoundedCornerShape(16.dp),
+                            elevation = if (isRunning) 0.dp else 12.dp,
+                            shape = buttonShape,
                             ambientColor = Emerald,
                             spotColor = Emerald
-                        ),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.horizontalGradient(
-                                    if (isRunning) listOf(Color(0xFFDC2626), Color(0xFF991B1B))
-                                    else listOf(Emerald, EmeraldDark)
-                                )
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = if (isRunning) "STOP BOT" else "START BOT",
-                            fontWeight = FontWeight.Black,
-                            fontSize = 16.sp,
-                            color = if (isRunning) Color.White else Color.Black,
-                            letterSpacing = 1.sp
                         )
-                    }
+                        .clip(buttonShape)
+                        .background(buttonBg)
+                        .clickable {
+                            if (isRunning) viewModel.stopBot() else viewModel.startBot()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (isRunning) "STOP BOT" else "START BOT",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = if (isRunning) Color.White else Color.Black,
+                        letterSpacing = 1.sp
+                    )
                 }
             }
         }
@@ -325,7 +359,7 @@ private fun GlassmorphicCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(18.dp)
     Surface(
         modifier = modifier
             .clip(shape)
@@ -374,7 +408,7 @@ private fun AnimatedRadarUnit(isRunning: Boolean) {
     )
 
     Box(
-        modifier = Modifier.size(52.dp),
+        modifier = Modifier.size(48.dp),
         contentAlignment = Alignment.Center
     ) {
         if (isRunning) {
@@ -389,7 +423,7 @@ private fun AnimatedRadarUnit(isRunning: Boolean) {
 
         Box(
             modifier = Modifier
-                .size(44.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(Color(0xFF07170E))
                 .border(1.dp, Emerald.copy(alpha = 0.4f), CircleShape),
@@ -397,13 +431,13 @@ private fun AnimatedRadarUnit(isRunning: Boolean) {
         ) {
             Box(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(20.dp)
                     .clip(CircleShape)
                     .border(1.dp, Emerald.copy(alpha = 0.7f), CircleShape)
             )
             Box(
                 modifier = Modifier
-                    .size(8.dp)
+                    .size(6.dp)
                     .clip(CircleShape)
                     .background(Emerald)
             )
@@ -419,7 +453,7 @@ private fun AnimatedStatusChipsRow(
     interval: String,
     onSettingsClick: () -> Unit
 ) {
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(16.dp)
 
     val infiniteTransition = rememberInfiniteTransition(label = "connectedPulse")
     val dotAlpha by infiniteTransition.animateFloat(
@@ -436,7 +470,7 @@ private fun AnimatedStatusChipsRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(Color(0xFF050805))
+            .background(Black1)
             .border(1.dp, Color(0xFF141A16), shape)
             .padding(horizontal = 14.dp, vertical = 10.dp)
             .clickable(onClick = onSettingsClick)
@@ -444,15 +478,13 @@ private fun AnimatedStatusChipsRow(
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
-                        .offset(y = (-1).dp)
                         .size(8.dp)
                         .clip(CircleShape)
                         .background(
@@ -462,50 +494,47 @@ private fun AnimatedStatusChipsRow(
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = if (connected) "CONNECTED" else "OFFLINE",
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelMedium,
                     color = if (connected) Emerald else Color.Gray,
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
             Text(
-                text = " | ",
+                text = "|",
                 color = Color(0xFF27302A),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(horizontal = 6.dp)
+                fontSize = 12.sp
             )
 
             Text(
                 text = platform.uppercase(Locale.ROOT),
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Medium
             )
 
             Text(
-                text = " | ",
+                text = "|",
                 color = Color(0xFF27302A),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(horizontal = 6.dp)
+                fontSize = 12.sp
             )
 
             Text(
                 text = modeText,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
                 color = Emerald,
                 fontWeight = FontWeight.Medium
             )
 
             Text(
-                text = " | ",
+                text = "|",
                 color = Color(0xFF27302A),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(horizontal = 6.dp)
+                fontSize = 12.sp
             )
 
             Text(
                 text = interval,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
                 color = Color(0xFF9CA3AF),
                 fontWeight = FontWeight.Medium
             )
