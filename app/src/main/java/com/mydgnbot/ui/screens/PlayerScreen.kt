@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -94,26 +95,28 @@ fun PlayerScreen(
     val pollSeconds = settings["poll_interval"] ?: "10"
     val interval = "${pollSeconds}s"
 
-    // 1. MyDGN Lock Timer (Top Header Pill) -> Starts clean at 300s (5 mins)
+    // 1. MyDGN Lock Timer (Handles Unix Timestamps & Relative Second Durations)
     var lockRemainingSeconds by remember(player) {
         val now = System.currentTimeMillis() / 1000
-        val targetLockExpiry = player.lockExpires
-        val secondsLeft = if (targetLockExpiry > now) {
-            targetLockExpiry - now
-        } else {
-            300L // 5-minute default start time
+        val rawLock = player.lockExpires
+        
+        val secondsLeft = when {
+            rawLock > 1_000_000_000L -> rawLock - now // Absolute Epoch Timestamp
+            rawLock > 0L -> rawLock                  // Relative Remaining Seconds (e.g. 300)
+            else -> 300L                             // 5-minute fallback
         }
         mutableLongStateOf(secondsLeft.coerceAtLeast(0L))
     }
 
-    // 2. EA Market Expiry Timer (Can range from seconds up to 3 days)
+    // 2. EA Market Expiry Timer
     var marketRemainingSeconds by remember(player) {
         val now = System.currentTimeMillis() / 1000
-        val targetMarketExpiry = player.marketExpiry
-        val secondsLeft = if (targetMarketExpiry > now) {
-            targetMarketExpiry - now
-        } else {
-            targetMarketExpiry
+        val rawMarket = player.marketExpiry
+        
+        val secondsLeft = when {
+            rawMarket > 1_000_000_000L -> rawMarket - now
+            rawMarket > 0L -> rawMarket
+            else -> 3600L
         }
         mutableLongStateOf(secondsLeft.coerceAtLeast(0L))
     }
@@ -130,7 +133,6 @@ fun PlayerScreen(
     val lockSecs = lockRemainingSeconds % 60
     val formattedLockTimer = String.format(Locale.US, "%02d:%02d", lockMinutes, lockSecs)
 
-    // Flexible market time formatter (3 days, 14 hours, etc.)
     val formattedMarketTime = remember(marketRemainingSeconds) {
         val days = marketRemainingSeconds / 86400
         val hours = (marketRemainingSeconds % 86400) / 3600
@@ -318,7 +320,7 @@ fun PlayerScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // LEFT: Enlarged Player Card Image Frame
+                        // LEFT: Player Card Frame
                         Box(
                             modifier = Modifier
                                 .width(155.dp)
@@ -331,12 +333,12 @@ fun PlayerScreen(
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(top = 16.dp)
+                                    .padding(top = 22.dp)
                             )
 
-                            // CardValue Badge shifted down 3dp inside top of frame
+                            // CardValue Badge - Shifted 12dp down onto card top
                             Surface(
-                                modifier = Modifier.offset(y = 3.dp),
+                                modifier = Modifier.offset(y = 12.dp),
                                 shape = RoundedCornerShape(12.dp),
                                 color = Color(0xFF0C1D13),
                                 border = BorderStroke(1.dp, yellowGold)
@@ -344,13 +346,12 @@ fun PlayerScreen(
                                 Row(
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp)
                                 ) {
-                                    Icon(
+                                    Image(
                                         painter = painterResource(id = R.drawable.valuebadge),
-                                        contentDescription = null,
-                                        tint = yellowGold,
-                                        modifier = Modifier.size(13.dp)
+                                        contentDescription = "Value Badge",
+                                        modifier = Modifier.size(14.dp)
                                     )
                                     Text(
                                         text = formattedCardValue,
@@ -362,7 +363,7 @@ fun PlayerScreen(
                             }
                         }
 
-                        // RIGHT: Metadata Specs Stack
+                        // RIGHT: Specs Stack
                         Column(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -387,7 +388,6 @@ fun PlayerScreen(
                                 valueColor = emerald
                             )
 
-                            // Time Remaining Row
                             DetailRowTile(
                                 label = "Time Remaining",
                                 value = formattedMarketTime,
@@ -396,12 +396,11 @@ fun PlayerScreen(
                         }
                     }
 
-                    // Polished Starting Bid & Buy Now Cards
+                    // Starting Bid & Buy Now Buttons
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        // Starting Bid Tile
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -433,7 +432,6 @@ fun PlayerScreen(
                             }
                         }
 
-                        // Buy Now Tile (Highlighted Gold Theme)
                         Box(
                             modifier = Modifier
                                 .weight(1f)
