@@ -22,9 +22,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,8 +39,6 @@ import com.mydgnbot.ui.theme.Emerald
 import com.mydgnbot.ui.theme.TextPrimary
 import com.mydgnbot.ui.theme.TextSecondary
 import com.mydgnbot.ui.viewmodel.HomeViewModel
-import com.mydgnbot.ui.viewmodel.HistoryFilter
-import com.mydgnbot.ui.viewmodel.HistorySort
 
 @Composable
 fun HistoryScreen(
@@ -52,21 +47,6 @@ fun HistoryScreen(
     onPlayerClick: (Player) -> Unit
 ) {
     val players by viewModel.recentPlayers.collectAsState()
-    val sortState by viewModel.currentHistorySort.collectAsState()
-    val filterState by viewModel.currentHistoryFilter.collectAsState()
-
-    val sortIndex = when (sortState) {
-        HistorySort.NEWEST -> 0
-        HistorySort.RATING -> 1
-        HistorySort.BUY_NOW -> 2
-    }
-
-    val filterIndex = when (filterState) {
-        HistoryFilter.ALL -> 0
-        HistoryFilter.FOUND -> 1
-        HistoryFilter.BOUGHT -> 2
-        HistoryFilter.CANCELLED -> 3
-    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -82,50 +62,10 @@ fun HistoryScreen(
             HistoryTopBar(onBackClick = onBackClick)
 
             Text(
-                text = "Latest fetched players",
+                text = "${players.size} fetched players",
                 color = TextSecondary,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
-            )
-
-            SegmentedRow(
-                title = "Sort",
-                options = listOf("Newest", "Rating", "Buy Now"),
-                selectedIndex = sortIndex,
-                onSelected = { index ->
-                    viewModel.setHistorySort(
-                        when (index) {
-                            1 -> HistorySort.RATING
-                            2 -> HistorySort.BUY_NOW
-                            else -> HistorySort.NEWEST
-                        }
-                    )
-                }
-            )
-
-            SegmentedRow(
-                title = "Filter",
-                options = listOf("All", "Found", "Bought", "Cancelled"),
-                selectedIndex = filterIndex,
-                onSelected = { index ->
-                    viewModel.setHistoryFilter(
-                        when (index) {
-                            1 -> HistoryFilter.FOUND
-                            2 -> HistoryFilter.BOUGHT
-                            3 -> HistoryFilter.CANCELLED
-                            else -> HistoryFilter.ALL
-                        }
-                    )
-                },
-                topPadding = 10.dp,
-                bottomPadding = 12.dp
-            )
-
-            Text(
-                text = "${players.size} players",
-                color = TextSecondary,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(bottom = 12.dp)
             )
 
             if (players.isEmpty()) {
@@ -144,48 +84,6 @@ fun HistoryScreen(
                             onClick = { onPlayerClick(player) }
                         )
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SegmentedRow(
-    title: String,
-    options: List<String>,
-    selectedIndex: Int,
-    onSelected: (Int) -> Unit,
-    topPadding: androidx.compose.ui.unit.Dp = 0.dp,
-    bottomPadding: androidx.compose.ui.unit.Dp = 0.dp
-) {
-    Column(
-        modifier = Modifier.padding(top = topPadding, bottom = bottomPadding),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            text = title,
-            color = TextSecondary,
-            style = MaterialTheme.typography.labelSmall
-        )
-
-        SingleChoiceSegmentedButtonRow {
-            options.forEachIndexed { index, label ->
-                SegmentedButton(
-                    selected = index == selectedIndex,
-                    onClick = { onSelected(index) },
-                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
-                    colors = SegmentedButtonDefaults.colors(
-                        activeContainerColor = Emerald,
-                        activeContentColor = Color.Black,
-                        inactiveContainerColor = Black1,
-                        inactiveContentColor = TextPrimary
-                    )
-                ) {
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelMedium
-                    )
                 }
             }
         }
