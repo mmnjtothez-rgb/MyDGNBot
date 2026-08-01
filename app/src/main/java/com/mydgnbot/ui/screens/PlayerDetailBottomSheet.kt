@@ -81,7 +81,7 @@ fun PlayerDetailBottomSheet(
     }
 
     // Helper function to animate sheet closing cleanly before firing callbacks
-    val closeSheet: (onComplete: () -> Unit) -> Unit = { onComplete ->
+    val hideAndExecute: (onComplete: () -> Unit) -> Unit = { onComplete ->
         scope.launch {
             sheetState.hide()
         }.invokeOnCompletion {
@@ -92,10 +92,13 @@ fun PlayerDetailBottomSheet(
     }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            // Smoothly hide to minimize sheet back to card without screen freeze
+            hideAndExecute(onDismiss)
+        },
         sheetState = sheetState,
         containerColor = Color.Transparent,
-        scrimColor = Color.Black.copy(alpha = 0.5f),
+        scrimColor = Color.Black.copy(alpha = 0.65f),
         dragHandle = null,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
@@ -322,7 +325,7 @@ fun PlayerDetailBottomSheet(
                 ) {
                     // Bought Player
                     Button(
-                        onClick = { closeSheet(onBoughtClick) },
+                        onClick = { hideAndExecute(onBoughtClick) },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
@@ -346,7 +349,7 @@ fun PlayerDetailBottomSheet(
 
                     // Cancel
                     Button(
-                        onClick = { closeSheet(onCancelClick) },
+                        onClick = { hideAndExecute(onCancelClick) },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
