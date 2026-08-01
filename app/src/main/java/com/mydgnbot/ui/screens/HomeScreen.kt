@@ -77,8 +77,6 @@ import com.mydgnbot.ui.theme.EmeraldGlow
 import com.mydgnbot.ui.theme.TextMuted
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 private val CARD_BACKGROUNDS = listOf(
@@ -115,7 +113,7 @@ fun HomeScreen(
     var showPlayerPopup by remember { mutableStateOf(false) }
 
     val currentPlatform = settings["platform"] ?: "CONSOLE"
-    val currentPlayerType = settings["player_type"] ?: "2" // "1" = Safe, "2" = Quick Sell
+    val currentPlayerType = settings["player_type"] ?: "2"
     val modeText = if (currentPlayerType == "1") "Safe" else "Quick Sell"
     val currentPollInterval = settings["poll_interval"] ?: "10"
     val intervalText = "${currentPollInterval}s"
@@ -266,7 +264,6 @@ fun HomeScreen(
                         .height(161.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // LEFT: Auto-Scrollable Activity Log Box
                     val logScrollState = rememberScrollState()
 
                     LaunchedEffect(logs.size) {
@@ -319,7 +316,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // RIGHT: Cycling Player Card Frame with Tap Prompt
                     val isPlayerActive = activePlayer != null
                     val shape = RoundedCornerShape(18.dp)
 
@@ -440,7 +436,7 @@ fun HomeScreen(
                     )
                 }
 
-                // 5. QUICK CONTROLS
+                // 5. QUICK CONTROLS (WITHOUT SCAN INTERVAL)
                 Text(
                     text = "Quick Controls",
                     fontSize = 14.sp,
@@ -545,55 +541,6 @@ fun HomeScreen(
                                     ) {
                                         Text(
                                             text = label,
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = if (isSelected) Color.Black else Color.White
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        // Scan Interval Switcher
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = "Scan Interval",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                                Text(
-                                    text = "Delay between requests",
-                                    fontSize = 11.sp,
-                                    color = TextMuted
-                                )
-                            }
-
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                listOf("10s", "15s", "20s").forEach { opt ->
-                                    val seconds = opt.replace("s", "")
-                                    val isSelected = currentPollInterval == seconds
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(if (isSelected) Emerald else Color(0xFF141A16))
-                                            .border(
-                                                1.dp,
-                                                if (isSelected) Emerald else Color(0xFF27302A),
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                            .clickable {
-                                                viewModel.saveSetting("poll_interval", seconds)
-                                            }
-                                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                                    ) {
-                                        Text(
-                                            text = opt,
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = if (isSelected) Color.Black else Color.White
