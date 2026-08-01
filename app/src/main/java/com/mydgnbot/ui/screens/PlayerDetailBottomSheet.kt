@@ -1,11 +1,5 @@
 package com.mydgnbot.ui.screens
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -31,8 +24,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.mydgnbot.domain.model.Player
 import com.mydgnbot.ui.theme.*
-import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,10 +61,6 @@ fun PlayerDetailBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // 1. TOP HEADER: LOCK EXPIRY TIMER (Formatted mm:ss)
-            val formattedLockExpiry = remember(player.lockExpiry) {
-                formatDurationSeconds(player.lockExpiry)
-            }
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -84,7 +71,7 @@ fun PlayerDetailBottomSheet(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = formattedLockExpiry,
+                    text = formatDurationSeconds(player.lockExpires),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Black,
                     color = Emerald,
@@ -94,7 +81,7 @@ fun PlayerDetailBottomSheet(
 
             // 2. PLAYER NAME
             Text(
-                text = player.playerName ?: "Unknown Player",
+                text = player.playerName.ifBlank { "Unknown Player" },
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -128,7 +115,7 @@ fun PlayerDetailBottomSheet(
                     }
 
                     // INTEGRATED CARD VALUE BADGE (Top Center Pill)
-                    if (player.cardValue != null && player.cardValue > 0) {
+                    if (player.cardValue > 0) {
                         Surface(
                             modifier = Modifier
                                 .align(Alignment.TopCenter)
@@ -175,29 +162,24 @@ fun PlayerDetailBottomSheet(
                     MetricChip(
                         icon = { Icon(Icons.Default.Star, contentDescription = null, tint = Emerald, modifier = Modifier.size(14.dp)) },
                         label = "Chem",
-                        value = player.chem ?: "Basic"
+                        value = player.chemistryStyle.ifBlank { "Basic" }
                     )
 
                     MetricChip(
                         icon = { Icon(Icons.Default.Person, contentDescription = null, tint = Emerald, modifier = Modifier.size(14.dp)) },
                         label = "Owners",
-                        value = "${player.owners ?: 1}"
+                        value = "${player.owners}"
                     )
 
                     MetricChip(
                         label = "You Earn",
-                        value = "$${String.format(Locale.US, "%.3f", player.earnings ?: 0.0)}",
+                        value = "$${String.format(Locale.US, "%.3f", player.payment)}",
                         valueColor = Emerald
                     )
 
-                    // Market Expiry formatting (Fixed timestamp / duration)
-                    val formattedMarketTime = remember(player.timeRemaining) {
-                        formatMarketTimeRemaining(player.timeRemaining)
-                    }
-
                     MetricChip(
                         label = "Time Remaining",
-                        value = formattedMarketTime,
+                        value = formatMarketTimeRemaining(player.marketExpiry),
                         valueColor = Emerald
                     )
                 }
@@ -211,14 +193,14 @@ fun PlayerDetailBottomSheet(
                 PriceTile(
                     modifier = Modifier.weight(1f),
                     title = "STARTING BID",
-                    price = "${player.startingBid ?: 0}",
+                    price = "${player.startPrice}",
                     borderColor = Color(0xFF1E2822)
                 )
 
                 PriceTile(
                     modifier = Modifier.weight(1f),
                     title = "BUY NOW",
-                    price = "${player.buyNow ?: 0}",
+                    price = "${player.buyNowPrice}",
                     borderColor = Color(0xFFF59E0B),
                     priceColor = Color(0xFFF59E0B)
                 )
@@ -338,29 +320,26 @@ private fun PriceTile(
 }
 
 // TIME FORMATTING HELPERS
-private fun formatDurationSeconds(seconds: Long?): String {
-    if (seconds == null || seconds <= 0) return "00:00"
+private fun formatDurationSeconds(seconds: Long): String {
+    if (seconds <= 0) return "00:00"
     val mins = seconds / 60
     val secs = seconds % 60
     return String.format(Locale.US, "%02d:%02d", mins, secs)
 }
 
-private fun formatMarketTimeRemaining(timeValue: Any?): String {
-    if (timeValue == null) return "N/A"
-    
-    val rawString = timeValue.toString()
-    val number = rawString.toLongOrNull() ?: return rawString
+private fun formatMarketTimeRemaining(timeValue: Long): String {
+    if (timeValue <= 0) return "Expired"
 
-    // If it's a huge epoch timestamp in seconds/millis
-    return if (number > 100_000_000) {
-        val diffSeconds = (number - (System.currentTimeMillis() / 1000)).coerceAtLeast(0)
+    // If timestamp in seconds/milliseconds
+    return if (timeValue > 100_000_000) {
+        val nowSecs = System.currentTimeMillis() / 1000
+        val diffSeconds = (timeValue - nowSecs).coerceAtLeast(0)
         val mins = diffSeconds / 60
         val secs = diffSeconds % 60
         String.format(Locale.US, "%02d:%02d", mins, secs)
     } else {
-        // If it's remaining seconds directly
-        val mins = number / 60
-        val secs = number % 60
+        val mins = timeValue / 60
+        val secs = timeValue % 60
         String.format(Locale.US, "%02d:%02d", mins, secs)
     }
 }
