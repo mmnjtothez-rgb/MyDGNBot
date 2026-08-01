@@ -41,10 +41,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RenderEffect
-import androidx.compose.ui.graphics.Shader
+import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -84,7 +84,6 @@ fun PlayerDetailBottomSheet(
         }
     }
 
-    // Safely handles animation hides without creating frozen overlays
     val hideAndExecute: (onComplete: () -> Unit) -> Unit = { onComplete ->
         scope.launch {
             try {
@@ -102,7 +101,7 @@ fun PlayerDetailBottomSheet(
         },
         sheetState = sheetState,
         containerColor = Color.Transparent,
-        scrimColor = Color.Black.copy(alpha = 0.60f),
+        scrimColor = Color.Black.copy(alpha = 0.65f),
         dragHandle = null,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
@@ -113,13 +112,16 @@ fun PlayerDetailBottomSheet(
                 .then(
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         Modifier.graphicsLayer {
-                            renderEffect = RenderEffect.createBlurEffect(
-                                25f, 25f, android.graphics.Shader.TileMode.CLAMP
-                            )
+                            renderEffect = android.graphics.RenderEffect
+                                .createBlurEffect(
+                                    25f, 25f,
+                                    android.graphics.Shader.TileMode.CLAMP
+                                )
+                                .asComposeRenderEffect()
                         }
                     } else Modifier
                 )
-                .background(Color(0xE6050F09)) // 90% opacity deep emerald black layer
+                .background(Color(0xE6050F09))
         ) {
             Column(
                 modifier = Modifier
