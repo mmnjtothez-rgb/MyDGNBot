@@ -1,18 +1,33 @@
 package com.mydgnbot.ui.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,198 +38,194 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.mydgnbot.domain.model.Player
-import com.mydgnbot.ui.theme.*
-import java.util.*
+import com.mydgnbot.ui.theme.Emerald
+import com.mydgnbot.ui.theme.TextMuted
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerDetailBottomSheet(
     player: Player,
     onDismiss: () -> Unit,
-    onBoughtClick: (Player) -> Unit,
-    onCancelClick: (Player) -> Unit
+    onBoughtClick: () -> Unit,
+    onCancelClick: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = DarkBg,
-        scrimColor = Color.Black.copy(alpha = 0.7f),
+        containerColor = Color(0xF007110B),
+        scrimColor = Color.Black.copy(alpha = 0.55f),
         dragHandle = {
-            Box(
+            Surface(
                 modifier = Modifier
                     .padding(vertical = 10.dp)
                     .width(36.dp)
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(Color(0xFF27302A))
-            )
-        }
+                    .height(4.dp),
+                shape = RoundedCornerShape(2.dp),
+                color = Color(0xFF27302A)
+            ) {}
+        },
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 1. TOP HEADER: LOCK EXPIRY TIMER (Formatted mm:ss)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF06140C))
-                    .border(1.dp, Emerald.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = formatDurationSeconds(player.lockExpires),
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Emerald,
-                    letterSpacing = 1.sp
-                )
+            // 1. FORMATTED MYDGN COUNTDOWN TIMER
+            val formattedTimer = remember(player.lockExpires) {
+                formatCountdownTimer(player.lockExpires)
             }
 
-            // 2. PLAYER NAME
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .border(BorderStroke(1.dp, Color(0xFF19221C)), RoundedCornerShape(14.dp)),
+                color = Color(0xFF0A140F)
+            ) {
+                Box(
+                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = formattedTimer,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Emerald,
+                        letterSpacing = 2.sp
+                    )
+                }
+            }
+
+            // PLAYER NAME
             Text(
-                text = player.playerName.ifBlank { "Unknown Player" },
+                text = player.playerName,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
 
-            // 3. MIDDLE SECTION: CARD WITH VALUE BADGE + METRICS
+            // 2. PLAYER CARD IMAGE & DETAILS ROW
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.Top
             ) {
-                // LEFT: Player Card Image + Integrated Value Badge Overlay
-                Box(
+                // Card Box Container (Size kept original)
+                Surface(
                     modifier = Modifier
-                        .weight(1f)
-                        .height(180.dp)
+                        .width(135.dp)
+                        .height(185.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF0F1612))
                         .border(1.dp, Color(0xFF1E2822), RoundedCornerShape(16.dp)),
-                    contentAlignment = Alignment.Center
+                    color = Color(0xFF0D1712)
                 ) {
-                    if (!player.imageUrl.isNullOrEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
                         AsyncImage(
                             model = player.imageUrl,
                             contentDescription = player.playerName,
-                            contentScale = ContentScale.Fit,
+                            contentScale = ContentScale.FillBounds, // Image completely fills box space
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(8.dp)
+                                .padding(2.dp) // Minimal padding for maximum visual card size
                         )
-                    }
-
-                    // INTEGRATED CARD VALUE BADGE (Top Center Pill)
-                    if (player.cardValue > 0) {
-                        Surface(
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .padding(top = 8.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .border(1.dp, Color(0xFFF59E0B), RoundedCornerShape(20.dp)),
-                            color = Color.Black.copy(alpha = 0.85f)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(14.dp)
-                                        .clip(CircleShape)
-                                        .background(Color(0xFFF59E0B)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "FVT",
-                                        fontSize = 5.sp,
-                                        fontWeight = FontWeight.Black,
-                                        color = Color.Black
-                                    )
-                                }
-                                Text(
-                                    text = "${player.cardValue}",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFFF59E0B)
-                                )
-                            }
-                        }
                     }
                 }
 
-                // RIGHT: METRICS (Chem, Owners, You Earn, Market Time Remaining)
+                // Side Stats (Chem, Owners, Earnings, Time Left)
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    MetricChip(
-                        icon = { Icon(Icons.Default.Star, contentDescription = null, tint = Emerald, modifier = Modifier.size(14.dp)) },
-                        label = "Chem",
-                        value = player.chemistryStyle.ifBlank { "Basic" }
-                    )
-
-                    MetricChip(
-                        icon = { Icon(Icons.Default.Person, contentDescription = null, tint = Emerald, modifier = Modifier.size(14.dp)) },
-                        label = "Owners",
-                        value = "${player.owners}"
-                    )
-
-                    MetricChip(
-                        label = "You Earn",
-                        value = "$${String.format(Locale.US, "%.3f", player.payment)}",
-                        valueColor = Emerald
-                    )
-
-                    MetricChip(
-                        label = "Time Remaining",
-                        value = formatMarketTimeRemaining(player.marketExpiry),
+                    DetailTile(label = "Chem", value = player.chemistryStyle.ifEmpty { "Basic" })
+                    DetailTile(label = "Owners", value = player.owners.ifEmpty { "1" })
+                    DetailTile(label = "You Earn", value = "$${player.payment}", valueColor = Emerald)
+                    DetailTile(
+                        label = "Time Left",
+                        value = formatMarketExpiry(player.marketExpiry),
                         valueColor = Emerald
                     )
                 }
             }
 
-            // 4. BIDDING PRICES
+            // 3. STARTING BID & BUY NOW PRICING CARDS
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                PriceTile(
-                    modifier = Modifier.weight(1f),
-                    title = "STARTING BID",
-                    price = "${player.startPrice}",
-                    borderColor = Color(0xFF1E2822)
-                )
+                // Starting Bid
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(14.dp))
+                        .border(1.dp, Color(0xFF1E2822), RoundedCornerShape(14.dp)),
+                    color = Color(0xFF0D1712)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "STARTING BID",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextMuted
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = player.startPrice,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                }
 
-                PriceTile(
-                    modifier = Modifier.weight(1f),
-                    title = "BUY NOW",
-                    price = "${player.buyNowPrice}",
-                    borderColor = Color(0xFFF59E0B),
-                    priceColor = Color(0xFFF59E0B)
-                )
+                // Buy Now
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(14.dp))
+                        .border(1.dp, Color(0xFFFFB800), RoundedCornerShape(14.dp)),
+                    color = Color(0xFF141A12)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "BUY NOW",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFFB800)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = player.buyNowPrice,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFFB800)
+                        )
+                    }
+                }
             }
 
-            // 5. ACTION BUTTONS
+            // 4. ACTION BUTTONS
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp),
+                    .padding(top = 4.dp, bottom = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // Bought Player
                 Button(
-                    onClick = { onBoughtClick(player) },
+                    onClick = onBoughtClick,
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
@@ -222,7 +233,7 @@ fun PlayerDetailBottomSheet(
                     colors = ButtonDefaults.buttonColors(containerColor = Emerald)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Done,
+                        imageVector = Icons.Default.Check,
                         contentDescription = null,
                         tint = Color.Black,
                         modifier = Modifier.size(18.dp)
@@ -230,20 +241,21 @@ fun PlayerDetailBottomSheet(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Bought Player",
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black,
-                        fontSize = 13.sp
+                        color = Color.Black
                     )
                 }
 
-                OutlinedButton(
-                    onClick = { onCancelClick(player) },
+                // Cancel
+                Button(
+                    onClick = onCancelClick,
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color(0xFF27302A)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF141A16)),
+                    border = BorderStroke(1.dp, Color(0xFF27302A))
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
@@ -254,8 +266,9 @@ fun PlayerDetailBottomSheet(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Cancel",
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
+                        color = Color.White
                     )
                 }
             }
@@ -263,12 +276,10 @@ fun PlayerDetailBottomSheet(
     }
 }
 
-// HELPER COMPOSABLES
 @Composable
-private fun MetricChip(
+private fun DetailTile(
     label: String,
     value: String,
-    icon: (@Composable () -> Unit)? = null,
     valueColor: Color = Color.White
 ) {
     Surface(
@@ -276,70 +287,38 @@ private fun MetricChip(
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .border(1.dp, Color(0xFF19221C), RoundedCornerShape(10.dp)),
-        color = Color(0xFF0B120E)
+        color = Color(0xFF0A140F)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                icon?.invoke()
-                Text(text = label, fontSize = 11.sp, color = TextMuted)
-            }
+            Text(text = label, fontSize = 11.sp, color = TextMuted)
             Text(text = value, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = valueColor)
         }
     }
 }
 
-@Composable
-private fun PriceTile(
-    modifier: Modifier = Modifier,
-    title: String,
-    price: String,
-    borderColor: Color,
-    priceColor: Color = Color.White
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFF09120D))
-            .border(1.dp, borderColor, RoundedCornerShape(14.dp))
-            .padding(vertical = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = title, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = TextMuted)
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(text = price, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = priceColor)
-        }
+private fun formatCountdownTimer(raw: String): String {
+    if (raw.isEmpty()) return "00:00"
+    val numeric = raw.toLongOrNull() ?: return raw
+    return try {
+        val totalSeconds = if (numeric > 1000000000L) numeric / 1000 else numeric
+        val minutes = TimeUnit.SECONDS.toMinutes(totalSeconds) % 60
+        val seconds = totalSeconds % 60
+        String.format("%02d:%02d", minutes, seconds)
+    } catch (e: Exception) {
+        raw
     }
 }
 
-// TIME FORMATTING HELPERS
-private fun formatDurationSeconds(seconds: Long): String {
-    if (seconds <= 0) return "00:00"
-    val mins = seconds / 60
-    val secs = seconds % 60
-    return String.format(Locale.US, "%02d:%02d", mins, secs)
-}
-
-private fun formatMarketTimeRemaining(timeValue: Long): String {
-    if (timeValue <= 0) return "Expired"
-
-    // If timestamp in seconds/milliseconds
-    return if (timeValue > 100_000_000) {
-        val nowSecs = System.currentTimeMillis() / 1000
-        val diffSeconds = (timeValue - nowSecs).coerceAtLeast(0)
-        val mins = diffSeconds / 60
-        val secs = diffSeconds % 60
-        String.format(Locale.US, "%02d:%02d", mins, secs)
-    } else {
-        val mins = timeValue / 60
-        val secs = timeValue % 60
-        String.format(Locale.US, "%02d:%02d", mins, secs)
-    }
+private fun formatMarketExpiry(raw: String): String {
+    if (raw.isEmpty()) return "59:00"
+    val numeric = raw.toLongOrNull() ?: return raw
+    val minutes = TimeUnit.SECONDS.toMinutes(numeric)
+    val seconds = numeric % 60
+    return String.format("%02d:%02d", minutes, seconds)
 }
