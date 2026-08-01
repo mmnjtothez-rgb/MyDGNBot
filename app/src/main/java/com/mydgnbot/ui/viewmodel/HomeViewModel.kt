@@ -366,4 +366,11 @@ class HomeViewModel(
         _botStatus.value = BotStatus.WAITING
         _waitSeconds.value = 0
     }
+
+    /**
+     * Resets active player state without generating log entries.
+     */
+    fun clearActivePlayer() {
+        _player.value = null
+    }
 }
