@@ -30,15 +30,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -52,6 +53,7 @@ import com.mydgnbot.domain.model.Player
 import com.mydgnbot.ui.theme.Emerald
 import com.mydgnbot.ui.theme.TextMuted
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
@@ -63,9 +65,14 @@ fun PlayerDetailBottomSheet(
     onBoughtClick: () -> Unit,
     onCancelClick: () -> Unit
 ) {
-    // Dynamic Ticker for counting down lockExpires & marketExpiry live every second
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    val scope = rememberCoroutineScope()
+
+    // Dynamic ticker for live 1-second timer countdowns
     var currentTimeSec by remember { mutableStateOf(System.currentTimeMillis() / 1000L) }
-    
+
     LaunchedEffect(Unit) {
         while (true) {
             delay(1000L)
@@ -73,9 +80,20 @@ fun PlayerDetailBottomSheet(
         }
     }
 
+    // Helper function to animate sheet closing cleanly before firing callbacks
+    val closeSheet: (onComplete: () -> Unit) -> Unit = { onComplete ->
+        scope.launch {
+            sheetState.hide()
+        }.invokeOnCompletion {
+            if (!sheetState.isVisible) {
+                onComplete()
+            }
+        }
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        // Semi-transparent container color allowing blur pass-through from the bottom sheet content
+        sheetState = sheetState,
         containerColor = Color.Transparent,
         scrimColor = Color.Black.copy(alpha = 0.5f),
         dragHandle = null,
@@ -85,8 +103,7 @@ fun PlayerDetailBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                .background(Color(0xD9050F09)) // 85% opacity dark backdrop so main screen shines through blurred
-                .blur(8.dp)
+                .background(Color(0xD9050F09)) // Translucent dark green overlay
         ) {
             Column(
                 modifier = Modifier
@@ -96,7 +113,7 @@ fun PlayerDetailBottomSheet(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // Drag Handle Bar
+                // Drag Handle
                 Surface(
                     modifier = Modifier
                         .padding(top = 4.dp, bottom = 4.dp)
@@ -106,7 +123,7 @@ fun PlayerDetailBottomSheet(
                     color = Color(0xFF27302A)
                 ) {}
 
-                // 1. TOP TIMER (MyDGN lockExpires - Live Countdown)
+                // 1. TOP TIMER (lockExpires)
                 val lockExpiresText = remember(player.lockExpires, currentTimeSec) {
                     formatRemainingTime(player.lockExpires, currentTimeSec)
                 }
@@ -140,13 +157,13 @@ fun PlayerDetailBottomSheet(
                     color = Color.White
                 )
 
-                // 2. ENLARGED PLAYER CARD IMAGE + BADGE & STATS
+                // 2. ENLARGED PLAYER CARD & STATS ROW
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-                    // Larger Player Card Image Slot
+                    // Player Card Container
                     Box(
                         modifier = Modifier
                             .width(135.dp)
@@ -174,11 +191,11 @@ fun PlayerDetailBottomSheet(
                             }
                         }
 
-                        // COIN VALUE BADGE (Pushed down by +3dp)
+                        // COIN VALUE BADGE (+3dp push down)
                         Surface(
                             modifier = Modifier
                                 .align(Alignment.TopCenter)
-                                .offset(y = 3.dp) // Pushed down inside the card area
+                                .offset(y = 3.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .border(1.dp, Color(0xFFFFB800), RoundedCornerShape(12.dp)),
                             color = Color.Black
@@ -203,7 +220,7 @@ fun PlayerDetailBottomSheet(
                         }
                     }
 
-                    // Side Stats (Chem, Owners, You Earn, Time Left)
+                    // Side Stats (Chem, Owners, You Earn, Market Expiry)
                     Column(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -221,8 +238,8 @@ fun PlayerDetailBottomSheet(
                             value = String.format(Locale.US, "$%.3f", player.payment),
                             valueColor = Emerald
                         )
-                        
-                        // BOTTOM RIGHT TIMER (marketExpiry - Live Countdown)
+
+                        // BOTTOM RIGHT TIMER (marketExpiry)
                         val marketExpiryText = remember(player.marketExpiry, currentTimeSec) {
                             formatRemainingTime(player.marketExpiry, currentTimeSec)
                         }
@@ -305,7 +322,7 @@ fun PlayerDetailBottomSheet(
                 ) {
                     // Bought Player
                     Button(
-                        onClick = onBoughtClick,
+                        onClick = { closeSheet(onBoughtClick) },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
@@ -329,7 +346,7 @@ fun PlayerDetailBottomSheet(
 
                     // Cancel
                     Button(
-                        onClick = onCancelClick,
+                        onClick = { closeSheet(onCancelClick) },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
@@ -384,13 +401,11 @@ private fun DetailTile(
 }
 
 /**
- * Robust Timestamp / Duration Parser & Converter
- * Handles both relative duration seconds and absolute Unix Epoch timestamps.
+ * Parses timestamps or raw durations into formatted countdown strings (MM:SS or HH:MM:SS)
  */
 private fun formatRemainingTime(targetTime: Long, currentSec: Long): String {
     if (targetTime <= 0L) return "00:00"
 
-    // Detect if targetTime is a Unix Epoch timestamp (e.g. > 1,000,000,000)
     val remainingSec = if (targetTime > 1_000_000_000L) {
         val epochSeconds = if (targetTime > 1_000_000_000_000L) targetTime / 1000L else targetTime
         (epochSeconds - currentSec).coerceAtLeast(0L)
