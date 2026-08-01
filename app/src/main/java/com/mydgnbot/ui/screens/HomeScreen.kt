@@ -45,6 +45,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -103,13 +104,15 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     onHistoryClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onPlayerClick: (Player) -> Unit
+    onPlayerClick: (Player) -> Unit = {}
 ) {
     val isRunning by viewModel.isRunning.collectAsState()
     val isOnline by viewModel.isOnline.collectAsState()
     val settings by viewModel.settings.collectAsState()
     val logs by viewModel.logs.collectAsState()
     val activePlayer by viewModel.player.collectAsState()
+
+    var showPlayerPopup by remember { mutableStateOf(false) }
 
     val currentPlatform = settings["platform"] ?: "CONSOLE"
     val currentPlayerType = settings["player_type"] ?: "2" // "1" = Safe, "2" = Quick Sell
@@ -297,7 +300,6 @@ fun HomeScreen(
                                     verticalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     logs.forEach { log ->
-                                        // Safe timestamp parsing (handles String millis or raw numbers)
                                         val formattedTime = remember(log.timestamp) {
                                             val millis = log.timestamp.toLongOrNull() ?: System.currentTimeMillis()
                                             SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(millis))
@@ -336,6 +338,7 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clickable(enabled = isPlayerActive) {
+                                    showPlayerPopup = true
                                     activePlayer?.let { onPlayerClick(it) }
                                 }
                                 .then(
@@ -442,7 +445,7 @@ fun HomeScreen(
                     )
                 }
 
-                // 5. FUNCTIONAL QUICK CONTROLS (Directly wired to ViewModel)
+                // 5. QUICK CONTROLS
                 Text(
                     text = "Quick Controls",
                     fontSize = 14.sp,
@@ -460,7 +463,7 @@ fun HomeScreen(
                             .padding(14.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        // A. Platform Switcher (CONSOLE / PC)
+                        // Platform Switcher
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -508,7 +511,7 @@ fun HomeScreen(
                             }
                         }
 
-                        // B. Strategy Mode Switcher (Safe / Quick Sell)
+                        // Strategy Switcher
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -556,7 +559,7 @@ fun HomeScreen(
                             }
                         }
 
-                        // C. Scan Interval Switcher (10s / 15s / 20s)
+                        // Scan Interval Switcher
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -607,6 +610,22 @@ fun HomeScreen(
                     }
                 }
             }
+        }
+
+        // 6. BOTTOM SHEET POPUP FOR ACTIVE PLAYER
+        if (showPlayerPopup && activePlayer != null) {
+            PlayerDetailBottomSheet(
+                player = activePlayer!!,
+                onDismiss = { showPlayerPopup = false },
+                onBoughtClick = { player ->
+                    viewModel.markPlayerBought(player)
+                    showPlayerPopup = false
+                },
+                onCancelClick = { player ->
+                    viewModel.cancelPlayer(player)
+                    showPlayerPopup = false
+                }
+            )
         }
     }
 }
