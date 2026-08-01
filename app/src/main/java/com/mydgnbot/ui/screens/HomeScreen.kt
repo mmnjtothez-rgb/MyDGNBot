@@ -47,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,6 +78,7 @@ import com.mydgnbot.ui.theme.EmeraldGlow
 import com.mydgnbot.ui.theme.TextMuted
 import com.mydgnbot.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 private val CARD_BACKGROUNDS = listOf(
@@ -110,7 +112,6 @@ fun HomeScreen(
     val logs by viewModel.logs.collectAsState()
     val activePlayer by viewModel.player.collectAsState()
 
-    // Controls whether the sheet is open without cancelling the player
     var isSheetOpen by remember { mutableStateOf(false) }
 
     val currentPlatform = settings["platform"] ?: "CONSOLE"
@@ -250,7 +251,7 @@ fun HomeScreen(
                     onSettingsClick = onSettingsClick
                 )
 
-                // 3. LIVE ACTIVITY LOG & CYCLING CARD SLOT
+                // 3. LIVE ACTIVITY LOG & CARD SLOT
                 Text(
                     text = "Live Activity Log",
                     fontSize = 14.sp,
@@ -330,7 +331,6 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clickable(enabled = isPlayerActive) {
-                                    // Open bottom sheet manually on card tap
                                     isSheetOpen = true
                                     activePlayer?.let { onPlayerClick(it) }
                                 }
@@ -456,7 +456,6 @@ fun HomeScreen(
                             .padding(14.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        // Platform Switcher
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -504,7 +503,6 @@ fun HomeScreen(
                             }
                         }
 
-                        // Strategy Switcher
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -556,12 +554,11 @@ fun HomeScreen(
             }
         }
 
-        // 6. BOTTOM SHEET OVERLAY (Shown only when isSheetOpen is true AND activePlayer exists)
+        // 6. BOTTOM SHEET OVERLAY
         if (isSheetOpen && activePlayer != null) {
             PlayerDetailBottomSheet(
                 player = activePlayer!!,
                 onDismiss = {
-                    // MINIMIZE ONLY: Hides popup window, preserves player on card slot
                     isSheetOpen = false
                 },
                 onBoughtClick = {
