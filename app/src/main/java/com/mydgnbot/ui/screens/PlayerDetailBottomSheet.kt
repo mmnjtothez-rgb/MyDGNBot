@@ -40,6 +40,7 @@ import coil.compose.AsyncImage
 import com.mydgnbot.domain.model.Player
 import com.mydgnbot.ui.theme.Emerald
 import com.mydgnbot.ui.theme.TextMuted
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -130,7 +131,7 @@ fun PlayerDetailBottomSheet(
                         AsyncImage(
                             model = player.imageUrl,
                             contentDescription = player.playerName,
-                            contentScale = ContentScale.FillBounds, // Image completely fills box space
+                            contentScale = ContentScale.FillBounds, // Image completely fills container
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(2.dp) // Minimal padding for maximum visual card size
@@ -143,9 +144,19 @@ fun PlayerDetailBottomSheet(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    DetailTile(label = "Chem", value = player.chemistryStyle.ifEmpty { "Basic" })
-                    DetailTile(label = "Owners", value = player.owners.ifEmpty { "1" })
-                    DetailTile(label = "You Earn", value = "$${player.payment}", valueColor = Emerald)
+                    DetailTile(
+                        label = "Chem",
+                        value = player.chemistryStyle.ifEmpty { "Basic" }
+                    )
+                    DetailTile(
+                        label = "Owners",
+                        value = if (player.owners > 0) player.owners.toString() else "1"
+                    )
+                    DetailTile(
+                        label = "You Earn",
+                        value = String.format(Locale.US, "$%.2f", player.payment),
+                        valueColor = Emerald
+                    )
                     DetailTile(
                         label = "Time Left",
                         value = formatMarketExpiry(player.marketExpiry),
@@ -179,7 +190,7 @@ fun PlayerDetailBottomSheet(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = player.startPrice,
+                            text = String.format(Locale.US, "%,d", player.startPrice),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -207,7 +218,7 @@ fun PlayerDetailBottomSheet(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = player.buyNowPrice,
+                            text = String.format(Locale.US, "%,d", player.buyNowPrice),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFFFB800)
@@ -302,23 +313,28 @@ private fun DetailTile(
     }
 }
 
-private fun formatCountdownTimer(raw: String): String {
-    if (raw.isEmpty()) return "00:00"
-    val numeric = raw.toLongOrNull() ?: return raw
-    return try {
-        val totalSeconds = if (numeric > 1000000000L) numeric / 1000 else numeric
-        val minutes = TimeUnit.SECONDS.toMinutes(totalSeconds) % 60
-        val seconds = totalSeconds % 60
-        String.format("%02d:%02d", minutes, seconds)
-    } catch (e: Exception) {
-        raw
-    }
+/**
+ * Converts lockExpires timestamp (in ms or seconds) into clean MM:SS format.
+ */
+private fun formatCountdownTimer(timestamp: Long): String {
+    if (timestamp <= 0L) return "00:00"
+    
+    // Convert milliseconds timestamp to remaining seconds if it's a future Unix epoch
+    val now = System.currentTimeMillis()
+    val diffInMs = if (timestamp > 1000000000000L) timestamp - now else timestamp * 1000L
+    val totalSeconds = (diffInMs / 1000L).coerceAtLeast(0L)
+
+    val minutes = TimeUnit.SECONDS.toMinutes(totalSeconds) % 60
+    val seconds = totalSeconds % 60
+    return String.format(Locale.US, "%02d:%02d", minutes, seconds)
 }
 
-private fun formatMarketExpiry(raw: String): String {
-    if (raw.isEmpty()) return "59:00"
-    val numeric = raw.toLongOrNull() ?: return raw
-    val minutes = TimeUnit.SECONDS.toMinutes(numeric)
-    val seconds = numeric % 60
-    return String.format("%02d:%02d", minutes, seconds)
+/**
+ * Converts marketExpiry duration into MM:SS format.
+ */
+private fun formatMarketExpiry(seconds: Long): String {
+    if (seconds <= 0L) return "59:00"
+    val minutes = TimeUnit.SECONDS.toMinutes(seconds)
+    val secs = seconds % 60
+    return String.format(Locale.US, "%02d:%02d", minutes, secs)
 }
