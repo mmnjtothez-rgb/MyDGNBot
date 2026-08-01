@@ -31,11 +31,15 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -47,6 +51,7 @@ import com.mydgnbot.R
 import com.mydgnbot.domain.model.Player
 import com.mydgnbot.ui.theme.Emerald
 import com.mydgnbot.ui.theme.TextMuted
+import kotlinx.coroutines.delay
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
@@ -58,26 +63,30 @@ fun PlayerDetailBottomSheet(
     onBoughtClick: () -> Unit,
     onCancelClick: () -> Unit
 ) {
+    // Dynamic Ticker for counting down lockExpires & marketExpiry live every second
+    var currentTimeSec by remember { mutableStateOf(System.currentTimeMillis() / 1000L) }
+    
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(1000L)
+            currentTimeSec = System.currentTimeMillis() / 1000L
+        }
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        // Transparent colors so the blurred semi-transparent scrim below reveals the main screen behind it
+        // Semi-transparent container color allowing blur pass-through from the bottom sheet content
         containerColor = Color.Transparent,
-        scrimColor = Color.Black.copy(alpha = 0.45f),
+        scrimColor = Color.Black.copy(alpha = 0.5f),
         dragHandle = null,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xEE07110B), // Translucent dark green background
-                            Color(0xFA040A07)
-                        )
-                    ),
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-                )
+                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .background(Color(0xD9050F09)) // 85% opacity dark backdrop so main screen shines through blurred
+                .blur(8.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -87,19 +96,19 @@ fun PlayerDetailBottomSheet(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // Drag Handle
+                // Drag Handle Bar
                 Surface(
                     modifier = Modifier
-                        .padding(top = 4.dp, bottom = 8.dp)
+                        .padding(top = 4.dp, bottom = 4.dp)
                         .width(36.dp)
                         .height(4.dp),
                     shape = CircleShape,
                     color = Color(0xFF27302A)
                 ) {}
 
-                // 1. TOP MYDGN COUNTDOWN TIMER (lockExpires)
-                val lockExpiresText = remember(player.lockExpires) {
-                    formatLockExpires(player.lockExpires)
+                // 1. TOP TIMER (MyDGN lockExpires - Live Countdown)
+                val lockExpiresText = remember(player.lockExpires, currentTimeSec) {
+                    formatRemainingTime(player.lockExpires, currentTimeSec)
                 }
 
                 Surface(
@@ -131,13 +140,13 @@ fun PlayerDetailBottomSheet(
                     color = Color.White
                 )
 
-                // 2. ENLARGED PLAYER CARD & SIDE STATS ROW
+                // 2. ENLARGED PLAYER CARD IMAGE + BADGE & STATS
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-                    // Larger Player Card Image Slot with Integrated Value Badge
+                    // Larger Player Card Image Slot
                     Box(
                         modifier = Modifier
                             .width(135.dp)
@@ -165,11 +174,11 @@ fun PlayerDetailBottomSheet(
                             }
                         }
 
-                        // COIN VALUE BADGE (Top Center Overlay)
+                        // COIN VALUE BADGE (Pushed down by +3dp)
                         Surface(
                             modifier = Modifier
                                 .align(Alignment.TopCenter)
-                                .offset(y = (-6).dp)
+                                .offset(y = 3.dp) // Pushed down inside the card area
                                 .clip(RoundedCornerShape(12.dp))
                                 .border(1.dp, Color(0xFFFFB800), RoundedCornerShape(12.dp)),
                             color = Color.Black
@@ -212,10 +221,14 @@ fun PlayerDetailBottomSheet(
                             value = String.format(Locale.US, "$%.3f", player.payment),
                             valueColor = Emerald
                         )
-                        // MARKET EXPIRY TIMER (ea_expires_at)
+                        
+                        // BOTTOM RIGHT TIMER (marketExpiry - Live Countdown)
+                        val marketExpiryText = remember(player.marketExpiry, currentTimeSec) {
+                            formatRemainingTime(player.marketExpiry, currentTimeSec)
+                        }
                         DetailTile(
                             label = "Time Left",
-                            value = formatMarketExpiry(player.marketExpiry),
+                            value = marketExpiryText,
                             valueColor = Emerald
                         )
                     }
@@ -370,39 +383,28 @@ private fun DetailTile(
     }
 }
 
-// TIMERS HELPERS
-
 /**
- * Formats lockExpires (seconds or epoch ms) to standard MM:SS format.
+ * Robust Timestamp / Duration Parser & Converter
+ * Handles both relative duration seconds and absolute Unix Epoch timestamps.
  */
-private fun formatLockExpires(raw: Long): String {
-    if (raw <= 0L) return "05:00"
-    
-    val seconds = if (raw > 1000000000000L) {
-        val diff = raw - System.currentTimeMillis()
-        (diff / 1000L).coerceAtLeast(0L)
+private fun formatRemainingTime(targetTime: Long, currentSec: Long): String {
+    if (targetTime <= 0L) return "00:00"
+
+    // Detect if targetTime is a Unix Epoch timestamp (e.g. > 1,000,000,000)
+    val remainingSec = if (targetTime > 1_000_000_000L) {
+        val epochSeconds = if (targetTime > 1_000_000_000_000L) targetTime / 1000L else targetTime
+        (epochSeconds - currentSec).coerceAtLeast(0L)
     } else {
-        raw
+        targetTime
     }
 
-    val minutes = TimeUnit.SECONDS.toMinutes(seconds) % 60
-    val secs = seconds % 60
-    return String.format(Locale.US, "%02d:%02d", minutes, secs)
-}
-
-/**
- * Formats marketExpiry (seconds) to HH:MM:SS or MM:SS format.
- */
-private fun formatMarketExpiry(raw: Long): String {
-    if (raw <= 0L) return "59:00"
-
-    val hours = TimeUnit.SECONDS.toHours(raw)
-    val minutes = TimeUnit.SECONDS.toMinutes(raw) % 60
-    val secs = raw % 60
+    val hours = TimeUnit.SECONDS.toHours(remainingSec)
+    val minutes = TimeUnit.SECONDS.toMinutes(remainingSec) % 60
+    val seconds = remainingSec % 60
 
     return if (hours > 0) {
-        String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, secs)
+        String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
     } else {
-        String.format(Locale.US, "%02d:%02d", minutes, secs)
+        String.format(Locale.US, "%02d:%02d", minutes, seconds)
     }
 }
