@@ -1,5 +1,6 @@
 package com.mydgnbot.ui.screens
 
+import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,6 +43,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RenderEffect
+import androidx.compose.ui.graphics.Shader
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -66,11 +70,11 @@ fun PlayerDetailBottomSheet(
     onCancelClick: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
+        skipPartiallyExpanded = true,
+        confirmValueChange = { true }
     )
     val scope = rememberCoroutineScope()
 
-    // Dynamic ticker for live 1-second timer countdowns
     var currentTimeSec by remember { mutableStateOf(System.currentTimeMillis() / 1000L) }
 
     LaunchedEffect(Unit) {
@@ -80,12 +84,13 @@ fun PlayerDetailBottomSheet(
         }
     }
 
-    // Helper function to animate sheet closing cleanly before firing callbacks
+    // Safely handles animation hides without creating frozen overlays
     val hideAndExecute: (onComplete: () -> Unit) -> Unit = { onComplete ->
         scope.launch {
-            sheetState.hide()
-        }.invokeOnCompletion {
-            if (!sheetState.isVisible) {
+            try {
+                sheetState.hide()
+            } catch (_: Exception) {
+            } finally {
                 onComplete()
             }
         }
@@ -93,12 +98,11 @@ fun PlayerDetailBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = {
-            // Smoothly hide to minimize sheet back to card without screen freeze
             hideAndExecute(onDismiss)
         },
         sheetState = sheetState,
         containerColor = Color.Transparent,
-        scrimColor = Color.Black.copy(alpha = 0.65f),
+        scrimColor = Color.Black.copy(alpha = 0.60f),
         dragHandle = null,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
@@ -106,7 +110,16 @@ fun PlayerDetailBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                .background(Color(0xD9050F09)) // Translucent dark green overlay
+                .then(
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        Modifier.graphicsLayer {
+                            renderEffect = RenderEffect.createBlurEffect(
+                                25f, 25f, android.graphics.Shader.TileMode.CLAMP
+                            )
+                        }
+                    } else Modifier
+                )
+                .background(Color(0xE6050F09)) // 90% opacity deep emerald black layer
         ) {
             Column(
                 modifier = Modifier
@@ -194,7 +207,7 @@ fun PlayerDetailBottomSheet(
                             }
                         }
 
-                        // COIN VALUE BADGE (+3dp push down)
+                        // COIN VALUE BADGE
                         Surface(
                             modifier = Modifier
                                 .align(Alignment.TopCenter)
@@ -223,7 +236,7 @@ fun PlayerDetailBottomSheet(
                         }
                     }
 
-                    // Side Stats (Chem, Owners, You Earn, Market Expiry)
+                    // Side Stats
                     Column(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -403,9 +416,6 @@ private fun DetailTile(
     }
 }
 
-/**
- * Parses timestamps or raw durations into formatted countdown strings (MM:SS or HH:MM:SS)
- */
 private fun formatRemainingTime(targetTime: Long, currentSec: Long): String {
     if (targetTime <= 0L) return "00:00"
 
