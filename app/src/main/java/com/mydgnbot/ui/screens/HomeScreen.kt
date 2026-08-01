@@ -45,6 +45,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -108,6 +109,9 @@ fun HomeScreen(
     val settings by viewModel.settings.collectAsState()
     val logs by viewModel.logs.collectAsState()
     val activePlayer by viewModel.player.collectAsState()
+
+    // Controls whether the sheet is open without cancelling the player
+    var isSheetOpen by remember { mutableStateOf(false) }
 
     val currentPlatform = settings["platform"] ?: "CONSOLE"
     val currentPlayerType = settings["player_type"] ?: "2"
@@ -326,6 +330,8 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clickable(enabled = isPlayerActive) {
+                                    // Open bottom sheet manually on card tap
+                                    isSheetOpen = true
                                     activePlayer?.let { onPlayerClick(it) }
                                 }
                                 .then(
@@ -550,18 +556,20 @@ fun HomeScreen(
             }
         }
 
-        // 6. BOTTOM SHEET POPUP DRIVEN DIRECTLY BY activePlayer STATE
-        activePlayer?.let { player ->
+        // 6. BOTTOM SHEET OVERLAY (Shown only when isSheetOpen is true AND activePlayer exists)
+        if (isSheetOpen && activePlayer != null) {
             PlayerDetailBottomSheet(
-                player = player,
+                player = activePlayer!!,
                 onDismiss = {
-                    // Clears activePlayer in HomeViewModel so sheet destroys cleanly without leaving blank screen
-                    viewModel.cancelPlayer()
+                    // MINIMIZE ONLY: Hides popup window, preserves player on card slot
+                    isSheetOpen = false
                 },
                 onBoughtClick = {
+                    isSheetOpen = false
                     viewModel.markBought()
                 },
                 onCancelClick = {
+                    isSheetOpen = false
                     viewModel.cancelPlayer()
                 }
             )
