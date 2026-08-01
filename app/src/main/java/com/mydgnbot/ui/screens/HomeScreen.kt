@@ -251,7 +251,7 @@ fun HomeScreen(
                     onSettingsClick = onSettingsClick
                 )
 
-                // 3. LIVE ACTIVITY LOG & CYCLING CARD SLOT (161 dp height)
+                // 3. LIVE ACTIVITY LOG & CYCLING CARD SLOT
                 Text(
                     text = "Live Activity Log",
                     fontSize = 14.sp,
@@ -300,14 +300,9 @@ fun HomeScreen(
                                     verticalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     logs.forEach { log ->
-                                        val formattedTime = remember(log.timestamp) {
-                                            val millis = log.timestamp.toLongOrNull() ?: System.currentTimeMillis()
-                                            SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(millis))
-                                        }
-
                                         Row(verticalAlignment = Alignment.Top) {
                                             Text(
-                                                text = "[$formattedTime] ",
+                                                text = "[${log.timestamp}] ",
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Emerald
@@ -617,12 +612,12 @@ fun HomeScreen(
             PlayerDetailBottomSheet(
                 player = activePlayer!!,
                 onDismiss = { showPlayerPopup = false },
-                onBoughtClick = { player ->
-                    viewModel.markPlayerBought(player)
+                onBoughtClick = {
+                    viewModel.markBought()
                     showPlayerPopup = false
                 },
-                onCancelClick = { player ->
-                    viewModel.cancelPlayer(player)
+                onCancelClick = {
+                    viewModel.cancelPlayer()
                     showPlayerPopup = false
                 }
             )
