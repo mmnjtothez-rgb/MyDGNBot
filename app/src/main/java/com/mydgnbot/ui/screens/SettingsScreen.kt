@@ -72,7 +72,7 @@ fun SettingsScreen(
     var secretKey by remember(settingsState) { mutableStateOf(settingsState["secret_key"] ?: "") }
     var eaEmail by remember(settingsState) { mutableStateOf(settingsState["ea_email"] ?: "") }
     var platform by remember(settingsState) { mutableStateOf(settingsState["platform"] ?: "Console") }
-    var playerMethod by remember(settingsState) { mutableStateOf(settingsState["player_type"] ?: "2") } // "1"=Safe, "2"=Quick Sell
+    var playerMethod by remember(settingsState) { mutableStateOf(settingsState["player_type"] ?: "2") }
     var minPrice by remember(settingsState) { mutableStateOf(settingsState["minimum_price"] ?: "1000") }
     var maxPrice by remember(settingsState) { mutableStateOf(settingsState["maximum_price"] ?: "300000") }
     var searchInterval by remember(settingsState) { mutableStateOf(settingsState["poll_interval"] ?: "10") }
@@ -181,7 +181,6 @@ fun SettingsScreen(
 
             // 2. BOT TARGET PLATFORM & STRATEGY CARD
             SettingsCard(title = "BOT CONFIGURATION") {
-                // Platform Segmented Selector
                 Text(
                     text = "Platform",
                     fontSize = 12.sp,
@@ -198,7 +197,6 @@ fun SettingsScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Player Method Segmented Selector
                 Text(
                     text = "Player Strategy Method",
                     fontSize = 12.sp,
@@ -238,7 +236,6 @@ fun SettingsScreen(
                     }
                 }
 
-                // Poll Interval with Quick Presets
                 CustomTextField(
                     value = searchInterval,
                     onValueChange = { searchInterval = it },
@@ -246,14 +243,14 @@ fun SettingsScreen(
                     keyboardType = KeyboardType.Number
                 )
 
-                // Interval Preset Chips
+                // Presets without 5s option
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = "Presets:", fontSize = 11.sp, color = TextMuted)
-                    listOf("5", "10", "15", "30").forEach { sec ->
+                    listOf("10", "15", "30").forEach { sec ->
                         val isSelected = searchInterval == sec
                         Box(
                             modifier = Modifier
