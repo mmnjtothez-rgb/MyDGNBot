@@ -45,7 +45,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -109,8 +108,6 @@ fun HomeScreen(
     val settings by viewModel.settings.collectAsState()
     val logs by viewModel.logs.collectAsState()
     val activePlayer by viewModel.player.collectAsState()
-
-    var showPlayerPopup by remember { mutableStateOf(false) }
 
     val currentPlatform = settings["platform"] ?: "CONSOLE"
     val currentPlayerType = settings["player_type"] ?: "2"
@@ -329,7 +326,6 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clickable(enabled = isPlayerActive) {
-                                    showPlayerPopup = true
                                     activePlayer?.let { onPlayerClick(it) }
                                 }
                                 .then(
@@ -436,7 +432,7 @@ fun HomeScreen(
                     )
                 }
 
-                // 5. QUICK CONTROLS (WITHOUT SCAN INTERVAL)
+                // 5. QUICK CONTROLS
                 Text(
                     text = "Quick Controls",
                     fontSize = 14.sp,
@@ -554,18 +550,19 @@ fun HomeScreen(
             }
         }
 
-        // 6. BOTTOM SHEET POPUP FOR ACTIVE PLAYER
-        if (showPlayerPopup && activePlayer != null) {
+        // 6. BOTTOM SHEET POPUP DRIVEN DIRECTLY BY activePlayer STATE
+        activePlayer?.let { player ->
             PlayerDetailBottomSheet(
-                player = activePlayer!!,
-                onDismiss = { showPlayerPopup = false },
+                player = player,
+                onDismiss = {
+                    // Clears activePlayer in HomeViewModel so sheet destroys cleanly without leaving blank screen
+                    viewModel.cancelPlayer()
+                },
                 onBoughtClick = {
                     viewModel.markBought()
-                    showPlayerPopup = false
                 },
                 onCancelClick = {
                     viewModel.cancelPlayer()
-                    showPlayerPopup = false
                 }
             )
         }
