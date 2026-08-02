@@ -79,7 +79,7 @@ fun PlayerDetailBottomSheet(
         }
     }
 
-    val hideAndExecute: (onComplete: () -> Unit) -> Unit = { onComplete ->
+    val safeDismiss: (onComplete: () -> Unit) -> Unit = { onComplete ->
         scope.launch {
             try {
                 sheetState.hide()
@@ -92,11 +92,12 @@ fun PlayerDetailBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = {
-            hideAndExecute(onDismiss)
+            // Swiping down triggers standard visual dismiss only
+            onDismiss()
         },
         sheetState = sheetState,
         containerColor = Color.Transparent,
-        scrimColor = Color.Black.copy(alpha = 0.75f), // Rich dark backdrop dimming
+        scrimColor = Color.Transparent, // COMPLETELY TRANSPARENT: Reveals main screen clearly behind popup
         dragHandle = null,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
@@ -104,7 +105,11 @@ fun PlayerDetailBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                .background(Color(0xF2050F09)) // Opaque dark glass color scheme
+                .background(Color(0xF508140D)) // Solid Midnight Dark-Green Theme
+                .border(
+                    BorderStroke(1.dp, Emerald.copy(alpha = 0.3f)),
+                    RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                )
         ) {
             Column(
                 modifier = Modifier
@@ -114,7 +119,7 @@ fun PlayerDetailBottomSheet(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // Drag Handle
+                // Drag Handle Bar
                 Surface(
                     modifier = Modifier
                         .padding(top = 4.dp, bottom = 4.dp)
@@ -323,7 +328,7 @@ fun PlayerDetailBottomSheet(
                 ) {
                     // Bought Player
                     Button(
-                        onClick = { hideAndExecute(onBoughtClick) },
+                        onClick = { safeDismiss(onBoughtClick) },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
@@ -345,9 +350,9 @@ fun PlayerDetailBottomSheet(
                         )
                     }
 
-                    // Cancel
+                    // Cancel Player Button (Performs actual Cancellation)
                     Button(
-                        onClick = { hideAndExecute(onCancelClick) },
+                        onClick = { safeDismiss(onCancelClick) },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
@@ -401,18 +406,12 @@ private fun DetailTile(
     }
 }
 
-/**
- * Handles target timestamps, countdown durations, and raw seconds accurately.
- */
 private fun formatRemainingTime(targetTime: Long, currentSec: Long): String {
     if (targetTime <= 0L) return "00:00"
 
     val remainingSec = when {
-        // Unix Timestamp in Milliseconds (e.g., 1722521000000)
         targetTime > 1_000_000_000_000L -> ((targetTime / 1000L) - currentSec).coerceAtLeast(0L)
-        // Unix Timestamp in Seconds (e.g., 1722521000)
         targetTime > 1_000_000_000L -> (targetTime - currentSec).coerceAtLeast(0L)
-        // Direct countdown duration in seconds (e.g., 300 seconds)
         else -> targetTime
     }
 
