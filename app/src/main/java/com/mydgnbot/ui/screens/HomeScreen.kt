@@ -554,11 +554,13 @@ fun HomeScreen(
             }
         }
 
-        // 6. BOTTOM SHEET OVERLAY
-        if (isSheetOpen && activePlayer != null) {
+                // 6. BOTTOM SHEET OVERLAY
+        activePlayer?.let { player ->
             PlayerDetailBottomSheet(
-                player = activePlayer!!,
+                player = player,
+                isVisible = isSheetOpen,
                 onDismiss = {
+                    // Visually minimizes sheet only; player remains in state for re-opening
                     isSheetOpen = false
                 },
                 onBoughtClick = {
@@ -573,6 +575,7 @@ fun HomeScreen(
         }
     }
 }
+
 
 @Composable
 private fun GlassmorphicCard(
