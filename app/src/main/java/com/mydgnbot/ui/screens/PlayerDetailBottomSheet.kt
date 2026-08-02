@@ -93,7 +93,7 @@ fun PlayerDetailBottomSheet(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                // Tapping top transparent background area minimizes sheet without canceling player
+                // Transparent click handler: tapping above sheet dismisses visual sheet only
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -106,7 +106,7 @@ fun PlayerDetailBottomSheet(
                     .offset { IntOffset(0, offsetY.roundToInt().coerceAtLeast(0)) }
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .background(Color(0xF508140D)) // Deep Emerald Black
+                    .background(Color(0xFF08140D)) // Solid midnight background
                     .border(
                         BorderStroke(1.dp, Emerald.copy(alpha = 0.35f)),
                         RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
@@ -114,9 +114,8 @@ fun PlayerDetailBottomSheet(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = {} // Prevents tap events from propagating to overlay
+                        onClick = {} // Prevents clicks on the card from closing it
                     )
-                    // Swipe down gesture handler
                     .draggable(
                         orientation = Orientation.Vertical,
                         state = rememberDraggableState { delta ->
@@ -218,33 +217,32 @@ fun PlayerDetailBottomSheet(
                             }
 
                             // COIN VALUE BADGE
-Surface(
-    modifier = Modifier
-        .align(Alignment.TopCenter)
-        .offset(y = 3.dp)
-        .clip(RoundedCornerShape(12.dp))
-        .border(1.dp, Color(0xFFFFB800), RoundedCornerShape(12.dp)),
-    color = Color.Black
-) {
-    Row(
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.valuebadge),
-            contentDescription = "Card Value",
-            modifier = Modifier.size(13.dp)
-        )
-        Text(
-            text = String.format(Locale.US, "%,d", player.cardValue),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFFFFB800)
-        )
-    }
-}
-
+                            Surface(
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .offset(y = 3.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .border(1.dp, Color(0xFFFFB800), RoundedCornerShape(12.dp)),
+                                color = Color.Black
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.valuebadge),
+                                        contentDescription = "Card Value",
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                    Text(
+                                        text = String.format(Locale.US, "%,d", player.cardValue),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFFFB800)
+                                    )
+                                }
+                            }
                         }
 
                         // Side Stats
@@ -371,7 +369,7 @@ Surface(
                             )
                         }
 
-                        // Cancel Player Button
+                        // Cancel
                         Button(
                             onClick = onCancelClick,
                             modifier = Modifier
