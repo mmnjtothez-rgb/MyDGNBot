@@ -17,9 +17,10 @@ fun PlayerScreen(
     if (player != null) {
         PlayerDetailBottomSheet(
             player = player,
+            isVisible = true,
             onDismiss = onBackClick,
-            onBoughtClick = { onBoughtClick() },
-            onCancelClick = { onCancelClick() }
+            onBoughtClick = onBoughtClick,
+            onCancelClick = onCancelClick
         )
     }
 }
