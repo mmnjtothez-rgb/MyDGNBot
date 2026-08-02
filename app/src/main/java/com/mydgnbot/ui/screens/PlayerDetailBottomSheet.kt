@@ -1,6 +1,5 @@
 package com.mydgnbot.ui.screens
 
-import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,11 +40,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asComposeRenderEffect
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -70,8 +66,7 @@ fun PlayerDetailBottomSheet(
     onCancelClick: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-        confirmValueChange = { true }
+        skipPartiallyExpanded = true
     )
     val scope = rememberCoroutineScope()
 
@@ -101,7 +96,7 @@ fun PlayerDetailBottomSheet(
         },
         sheetState = sheetState,
         containerColor = Color.Transparent,
-        scrimColor = Color.Black.copy(alpha = 0.65f),
+        scrimColor = Color.Black.copy(alpha = 0.75f), // Rich dark backdrop dimming
         dragHandle = null,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
@@ -109,19 +104,7 @@ fun PlayerDetailBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                .then(
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        Modifier.graphicsLayer {
-                            renderEffect = android.graphics.RenderEffect
-                                .createBlurEffect(
-                                    25f, 25f,
-                                    android.graphics.Shader.TileMode.CLAMP
-                                )
-                                .asComposeRenderEffect()
-                        }
-                    } else Modifier
-                )
-                .background(Color(0xE6050F09))
+                .background(Color(0xF2050F09)) // Opaque dark glass color scheme
         ) {
             Column(
                 modifier = Modifier
@@ -418,14 +401,19 @@ private fun DetailTile(
     }
 }
 
+/**
+ * Handles target timestamps, countdown durations, and raw seconds accurately.
+ */
 private fun formatRemainingTime(targetTime: Long, currentSec: Long): String {
     if (targetTime <= 0L) return "00:00"
 
-    val remainingSec = if (targetTime > 1_000_000_000L) {
-        val epochSeconds = if (targetTime > 1_000_000_000_000L) targetTime / 1000L else targetTime
-        (epochSeconds - currentSec).coerceAtLeast(0L)
-    } else {
-        targetTime
+    val remainingSec = when {
+        // Unix Timestamp in Milliseconds (e.g., 1722521000000)
+        targetTime > 1_000_000_000_000L -> ((targetTime / 1000L) - currentSec).coerceAtLeast(0L)
+        // Unix Timestamp in Seconds (e.g., 1722521000)
+        targetTime > 1_000_000_000L -> (targetTime - currentSec).coerceAtLeast(0L)
+        // Direct countdown duration in seconds (e.g., 300 seconds)
+        else -> targetTime
     }
 
     val hours = TimeUnit.SECONDS.toHours(remainingSec)
